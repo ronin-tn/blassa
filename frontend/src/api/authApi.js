@@ -14,10 +14,10 @@ import api from './axios';
 
 /**
  * Register a new user
- * 
+ *
  * Maps to: AuthenticationController.register()
  * DTO: RegisterRequest
- * 
+ *
  * @param {Object} data - Registration data
  * @param {string} data.email - User email
  * @param {string} data.password - User password
@@ -29,28 +29,28 @@ import api from './axios';
  * @returns {Promise<{token: string}>} - JWT token
  */
 export const register = async (data) => {
-    const response = await api.post('/auth/register', data);
-    return response.data;
+  const response = await api.post('/auth/register', data);
+  return response.data;
 };
 
 /**
  * Login with email and password
- * 
+ *
  * Maps to: AuthenticationController.authenticate()
  * DTO: AuthenticationRequest
- * 
+ *
  * @param {Object} data - Login credentials
  * @param {string} data.email - User email
  * @param {string} data.password - User password
  * @returns {Promise<{token: string}>} - JWT token
  */
 export const login = async (data) => {
-    const response = await api.post('/auth/login', data);
-    return response.data;
+  const response = await api.post('/auth/login', data);
+  return response.data;
 };
 
 // Export all auth functions
 export default {
-    register,
-    login,
+  register,
+  login,
 };

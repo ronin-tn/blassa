@@ -13,8 +13,8 @@
  * @returns {string} ISO 8601 formatted string
  */
 export const toISOString = (date) => {
-    if (!date) return null;
-    return date.toISOString();
+  if (!date) return null;
+  return date.toISOString();
 };
 
 /**
@@ -23,8 +23,8 @@ export const toISOString = (date) => {
  * @returns {Date} JavaScript Date object
  */
 export const parseDate = (isoString) => {
-    if (!isoString) return null;
-    return new Date(isoString);
+  if (!isoString) return null;
+  return new Date(isoString);
 };
 
 /**
@@ -33,17 +33,17 @@ export const parseDate = (isoString) => {
  * @returns {string} Formatted like "Dec 6, 2024 at 2:30 PM"
  */
 export const formatDateTime = (date) => {
-    if (!date) return '';
-    const d = typeof date === 'string' ? new Date(date) : date;
+  if (!date) return '';
+  const d = typeof date === 'string' ? new Date(date) : date;
 
-    return new Intl.DateTimeFormat('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true
-    }).format(d);
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  }).format(d);
 };
 
 /**
@@ -52,14 +52,14 @@ export const formatDateTime = (date) => {
  * @returns {string} Formatted like "Dec 6, 2024"
  */
 export const formatDate = (date) => {
-    if (!date) return '';
-    const d = typeof date === 'string' ? new Date(date) : date;
+  if (!date) return '';
+  const d = typeof date === 'string' ? new Date(date) : date;
 
-    return new Intl.DateTimeFormat('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
-    }).format(d);
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  }).format(d);
 };
 
 /**
@@ -68,14 +68,14 @@ export const formatDate = (date) => {
  * @returns {string} Formatted like "2:30 PM"
  */
 export const formatTime = (date) => {
-    if (!date) return '';
-    const d = typeof date === 'string' ? new Date(date) : date;
+  if (!date) return '';
+  const d = typeof date === 'string' ? new Date(date) : date;
 
-    return new Intl.DateTimeFormat('en-US', {
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true
-    }).format(d);
+  return new Intl.DateTimeFormat('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  }).format(d);
 };
 
 /**
@@ -84,19 +84,19 @@ export const formatTime = (date) => {
  * @returns {string} Relative time string
  */
 export const getRelativeTime = (date) => {
-    if (!date) return '';
-    const d = typeof date === 'string' ? new Date(date) : date;
-    const now = new Date();
-    const diffMs = d - now;
-    const diffMins = Math.round(diffMs / 60000);
-    const diffHours = Math.round(diffMs / 3600000);
-    const diffDays = Math.round(diffMs / 86400000);
+  if (!date) return '';
+  const d = typeof date === 'string' ? new Date(date) : date;
+  const now = new Date();
+  const diffMs = d - now;
+  const diffMins = Math.round(diffMs / 60000);
+  const diffHours = Math.round(diffMs / 3600000);
+  const diffDays = Math.round(diffMs / 86400000);
 
-    if (Math.abs(diffMins) < 60) {
-        return diffMins >= 0 ? `in ${diffMins} min` : `${Math.abs(diffMins)} min ago`;
-    }
-    if (Math.abs(diffHours) < 24) {
-        return diffHours >= 0 ? `in ${diffHours}h` : `${Math.abs(diffHours)}h ago`;
-    }
-    return diffDays >= 0 ? `in ${diffDays} days` : `${Math.abs(diffDays)} days ago`;
+  if (Math.abs(diffMins) < 60) {
+    return diffMins >= 0 ? `in ${diffMins} min` : `${Math.abs(diffMins)} min ago`;
+  }
+  if (Math.abs(diffHours) < 24) {
+    return diffHours >= 0 ? `in ${diffHours}h` : `${Math.abs(diffHours)}h ago`;
+  }
+  return diffDays >= 0 ? `in ${diffDays} days` : `${Math.abs(diffDays)} days ago`;
 };

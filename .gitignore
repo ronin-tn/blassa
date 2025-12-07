@@ -1,3 +1,143 @@
-node_modules/
+# ============================================
+# Blassa Project - Root .gitignore
+# ============================================
+# Full-stack: Spring Boot (Java) + React (Vite)
+# ============================================
+
+# ==================== IDE ====================
+# IntelliJ IDEA
 .idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# NetBeans
+nbproject/
+nbbuild/
+dist/
+nbdist/
+
+# ==================== Java / Maven ====================
+# Compiled class files
+*.class
+
+# Build output
 target/
+
+# Maven wrapper (keep mvnw, mvnw.cmd but not .mvn internal)
+.mvn/wrapper/maven-wrapper.jar
+
+# Log files
+*.log
+logs/
+build.log
+build_ascii.log
+
+# Package files
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# ==================== Node.js / Frontend ====================
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build output
+frontend/dist/
+frontend/dist-ssr/
+frontend/.vite/
+
+# Environment variables (CRITICAL - contains secrets!)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+frontend/.env
+frontend/.env.local
+frontend/.env.*.local
+
+# Testing
+coverage/
+frontend/coverage/
+*.lcov
+
+# ==================== OS Generated ====================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+.directory
+
+# ==================== Large Data Files ====================
+# OSM data files (too large for git)
+*.osm
+*.osm.pbf
+*.osm.bz2
+
+# Database files
+*.sql.gz
+*.db
+*.sqlite
+
+# ==================== Temp / Cache ====================
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+
+# Local development
+*.local
+
+# ==================== Miscellaneous ====================
+# Documentation build
+docs/_build/
+
+# Certificates (security)
+*.pem
+*.key
+*.crt
+*.p12
+*.jks
+
+# Backup files
+*.bak
+*.backup
+
+# NPM/Yarn debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ==================== Keep These (negations) ====================
+# Keep example files
+!.env.example
+!frontend/.env.example

@@ -13,11 +13,11 @@ import axios from 'axios';
 
 // Create axios instance with default config
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8088/api/v1',
-    headers: {
-        'Content-Type': 'application/json',
-    },
-    timeout: 10000, // 10 second timeout
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8088/api/v1',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  timeout: 10000, // 10 second timeout
 });
 
 /*
@@ -27,16 +27,16 @@ const api = axios.create({
   If a JWT token exists in localStorage, attach it to the Authorization header.
 */
 api.interceptors.request.use(
-    (config) => {
-        const token = localStorage.getItem('token');
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-    },
-    (error) => {
-        return Promise.reject(error);
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
 );
 
 /*
@@ -47,24 +47,26 @@ api.interceptors.request.use(
   We clear it and redirect to login.
 */
 api.interceptors.response.use(
-    (response) => {
-        // Success - just return the response
-        return response;
-    },
-    (error) => {
-        if (error.response?.status === 401) {
-            // Token expired or invalid
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
+  (response) => {
+    // Success - just return the response
+    return response;
+  },
+  (error) => {
+    if (error.response?.status === 401) {
+      // Token expired or invalid
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
 
-            // Only redirect if not already on login/register page
-            if (!window.location.pathname.includes('/login') &&
-                !window.location.pathname.includes('/register')) {
-                window.location.href = '/login';
-            }
-        }
-        return Promise.reject(error);
+      // Only redirect if not already on login/register page
+      if (
+        !window.location.pathname.includes('/login') &&
+        !window.location.pathname.includes('/register')
+      ) {
+        window.location.href = '/login';
+      }
     }
+    return Promise.reject(error);
+  }
 );
 
 export default api;

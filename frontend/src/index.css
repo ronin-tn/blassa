@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -35,70 +35,70 @@
   --color-ring: var(--ring);
 
   /* Blassa Custom Colors */
-  --color-brand: #0E7490;
-  --color-brand-dark: #164E63;
-  --color-brand-light: #CFFAFE;
-  --color-action: #F59E0B;
-  --color-action-hover: #D97706;
-  --color-gender-female: #F43F5E;
-  --color-gender-male: #3B82F6;
-  --color-gender-any: #64748B;
-  --color-success: #10B981;
-  --color-warning: #F59E0B;
-  --color-error: #EF4444;
+  --color-brand: #0e7490;
+  --color-brand-dark: #164e63;
+  --color-brand-light: #cffafe;
+  --color-action: #f59e0b;
+  --color-action-hover: #d97706;
+  --color-gender-female: #f43f5e;
+  --color-gender-male: #3b82f6;
+  --color-gender-any: #64748b;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
 }
 
 :root {
   --radius: 0.625rem;
 
   /* Blassa Light Theme - Mediterranean Motion */
-  --background: #F8FAFC;
-  --foreground: #1E293B;
-  --card: #FFFFFF;
-  --card-foreground: #1E293B;
-  --popover: #FFFFFF;
-  --popover-foreground: #1E293B;
+  --background: #f8fafc;
+  --foreground: #1e293b;
+  --card: #ffffff;
+  --card-foreground: #1e293b;
+  --popover: #ffffff;
+  --popover-foreground: #1e293b;
 
   /* Primary = Blassa Teal (The Sea) */
-  --primary: #0E7490;
-  --primary-foreground: #FFFFFF;
+  --primary: #0e7490;
+  --primary-foreground: #ffffff;
 
   /* Secondary = Light Teal */
-  --secondary: #CFFAFE;
-  --secondary-foreground: #164E63;
+  --secondary: #cffafe;
+  --secondary-foreground: #164e63;
 
-  --muted: #F1F5F9;
-  --muted-foreground: #64748B;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
 
   /* Accent = Amber (The Sun) */
-  --accent: #FEF3C7;
-  --accent-foreground: #92400E;
+  --accent: #fef3c7;
+  --accent-foreground: #92400e;
 
-  --destructive: #EF4444;
-  --border: #E2E8F0;
-  --input: #E2E8F0;
-  --ring: #0E7490;
+  --destructive: #ef4444;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #0e7490;
 }
 
 .dark {
-  --background: #0F172A;
-  --foreground: #F8FAFC;
-  --card: #1E293B;
-  --card-foreground: #F8FAFC;
-  --popover: #1E293B;
-  --popover-foreground: #F8FAFC;
-  --primary: #22D3EE;
-  --primary-foreground: #0F172A;
+  --background: #0f172a;
+  --foreground: #f8fafc;
+  --card: #1e293b;
+  --card-foreground: #f8fafc;
+  --popover: #1e293b;
+  --popover-foreground: #f8fafc;
+  --primary: #22d3ee;
+  --primary-foreground: #0f172a;
   --secondary: #334155;
-  --secondary-foreground: #F8FAFC;
+  --secondary-foreground: #f8fafc;
   --muted: #334155;
-  --muted-foreground: #94A3B8;
-  --accent: #FCD34D;
-  --accent-foreground: #0F172A;
-  --destructive: #F87171;
+  --muted-foreground: #94a3b8;
+  --accent: #fcd34d;
+  --accent-foreground: #0f172a;
+  --destructive: #f87171;
   --border: #334155;
   --input: #334155;
-  --ring: #22D3EE;
+  --ring: #22d3ee;
 }
 
 @layer base {
@@ -108,8 +108,43 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family:
+      'Inter',
+      system-ui,
+      -apple-system,
+      sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+}
+
+/* Custom Animations */
+@keyframes blob {
+  0% {
+    transform: translate(0px, 0px) scale(1);
+  }
+
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+
+  100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+}
+
+.animate-blob {
+  animation: blob 7s infinite;
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+  animation-delay: 4s;
 }

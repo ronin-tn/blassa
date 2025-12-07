@@ -5,68 +5,66 @@
   - / (landing) - Public landing page
   - /login - Login page
   - /register - Register page
+  - /search - Search results page
   - /dashboard - Protected dashboard (after login)
+  - * - 404 Not Found
+  
+  Performance:
+  - Lazy loading for route components
+  - Suspense with loading fallback
 */
 
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from '@/context/AuthContext';
 import ProtectedRoute from '@/components/layout/ProtectedRoute';
+import ErrorBoundary from '@/components/ErrorBoundary';
+import { Spinner } from '@/components/common';
 
-// Public pages
-import Landing from '@/pages/Landing';
-import Login from '@/pages/auth/Login';
-import Register from '@/pages/auth/Register';
-import Search from '@/pages/Search';
+// Lazy load pages for better initial bundle size
+const Landing = lazy(() => import('@/pages/Landing'));
+const Login = lazy(() => import('@/pages/auth/Login'));
+const Register = lazy(() => import('@/pages/auth/Register'));
+const Search = lazy(() => import('@/pages/Search'));
+const NotFound = lazy(() => import('@/pages/NotFound'));
+const Dashboard = lazy(() => import('@/pages/Dashboard'));
 
-// Placeholder for dashboard (we'll build this next)
-const Dashboard = () => (
-  <div className="min-h-screen bg-background p-8">
-    <div className="max-w-2xl mx-auto">
-      <h1 className="text-3xl font-bold text-primary mb-4">🚗 Tableau de bord</h1>
-      <p className="text-muted-foreground mb-8">
-        Bienvenue ! Vous êtes connecté.
-      </p>
-      <div className="space-y-2">
-        <p>• Rechercher des trajets</p>
-        <p>• Publier un trajet</p>
-        <p>• Voir mes réservations</p>
-      </div>
-      <button
-        onClick={() => {
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          window.location.href = '/';
-        }}
-        className="mt-8 text-primary hover:underline"
-      >
-        Se déconnecter
-      </button>
+// Loading fallback component
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center bg-background">
+    <div className="text-center space-y-4">
+      <Spinner size="lg" className="text-primary mx-auto" />
+      <p className="text-muted-foreground">Chargement...</p>
     </div>
   </div>
 );
 
 function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <Routes>
-          {/* Public routes */}
-          <Route path="/" element={<Landing />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/search" element={<Search />} />
+    <ErrorBoundary>
+      <BrowserRouter>
+        <AuthProvider>
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              {/* Public routes */}
+              <Route path="/" element={<Landing />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/search" element={<Search />} />
 
-          {/* Protected routes */}
-          <Route element={<ProtectedRoute />}>
-            <Route path="/dashboard" element={<Dashboard />} />
-            {/* More protected routes will be added here */}
-          </Route>
+              {/* Protected routes */}
+              <Route element={<ProtectedRoute />}>
+                <Route path="/dashboard" element={<Dashboard />} />
+                {/* More protected routes will be added here */}
+              </Route>
 
-          {/* Fallback - redirect to home */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </AuthProvider>
-    </BrowserRouter>
+              {/* 404 - Catch all unmatched routes */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
+        </AuthProvider>
+      </BrowserRouter>
+    </ErrorBoundary>
   );
 }
 

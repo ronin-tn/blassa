@@ -1,0 +1,29 @@
+{
+    "name": "Blassa - Covoiturage Tunisie",
+    "short_name": "Blassa",
+    "description": "La plateforme de covoiturage nouvelle génération en Tunisie",
+    "start_url": "/",
+    "display": "standalone",
+    "orientation": "portrait-primary",
+    "theme_color": "#0E7490",
+    "background_color": "#F8FAFC",
+    "categories": [
+        "travel",
+        "transportation"
+    ],
+    "lang": "fr",
+    "icons": [
+        {
+            "src": "/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}
