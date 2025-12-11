@@ -4,6 +4,10 @@
 # Full-stack: Spring Boot (Java) + Next.js
 # ============================================
 
+# ==================== Agent / AI ====================
+.agent/
+compile_output.txt
+
 # ==================== IDE ====================
 # IntelliJ IDEA
 .idea/
