@@ -29,4 +29,8 @@ public interface ReviewRepository extends JpaRepository<Review, UUID> {
     // Count total reviews for a user
     @Query("SELECT COUNT(r) FROM Review r WHERE r.reviewee.id = :userId")
     Long countReviewsForUser(@Param("userId") UUID userId);
+
+    // Get reviews where user is the reviewer (sent reviews)
+    @EntityGraph(attributePaths = { "reviewee", "booking" })
+    Page<Review> findByReviewerId(UUID reviewerId, Pageable pageable);
 }

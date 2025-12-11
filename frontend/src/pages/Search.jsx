@@ -23,6 +23,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { searchRides } from '@/api/rideApi';
+import { getMyBookedRideIds } from '@/api/bookingApi';
+import { useAuth } from '@/hooks/useAuth';
 
 // Format date for display
 const formatSearchDate = (dateStr) => {
@@ -68,12 +70,14 @@ const RideCardSkeleton = () => (
 const Search = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
 
   // State
   const [rides, setRides] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [totalResults, setTotalResults] = useState(0);
+  const [bookedRideIds, setBookedRideIds] = useState(new Set());
 
   // Extract search params
   const origin = searchParams.get('origin') || '';
@@ -132,10 +136,28 @@ const Search = () => {
     fetchRides();
   }, [originLat, originLon, destLat, destLon, date, passengers]);
 
+  // Fetch user's booked ride IDs if authenticated
+  useEffect(() => {
+    const fetchBookedRideIds = async () => {
+      if (!isAuthenticated) {
+        setBookedRideIds(new Set());
+        return;
+      }
+      try {
+        const ids = await getMyBookedRideIds();
+        setBookedRideIds(new Set(ids));
+      } catch (err) {
+        console.error('Failed to fetch booked ride IDs:', err);
+        // Don't block search results on this error
+      }
+    };
+    fetchBookedRideIds();
+  }, [isAuthenticated]);
+
   // Handle booking (callback from RideCard)
   const handleBook = (ride) => {
-    // Navigate to booking page with ride ID
-    navigate(`/rides/${ride.id}/book`);
+    // Navigate to ride details page
+    navigate(`/ride/${ride.id}`);
   };
 
   return (
@@ -232,7 +254,12 @@ const Search = () => {
           {!loading && !error && rides.length > 0 && (
             <div className="space-y-4">
               {rides.map((ride) => (
-                <RideCard key={ride.id} ride={ride} onBook={handleBook} />
+                <RideCard
+                  key={ride.id}
+                  ride={ride}
+                  onBook={handleBook}
+                  isAlreadyBooked={bookedRideIds.has(ride.id)}
+                />
               ))}
             </div>
           )}

@@ -4,11 +4,11 @@ import com.blassa.dto.RideRequest;
 import com.blassa.dto.RideResponse;
 import com.blassa.dto.RideStatusResponse;
 import com.blassa.dto.RideUpdateStatusRequest;
+import com.blassa.model.entity.Booking;
 import com.blassa.model.entity.Ride;
 import com.blassa.model.entity.User;
-import com.blassa.model.enums.Gender;
-import com.blassa.model.enums.RideGenderPreference;
-import com.blassa.model.enums.RideStatus;
+import com.blassa.model.enums.*;
+import com.blassa.repository.BookingRepository;
 import com.blassa.repository.RideRepository;
 import com.blassa.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +30,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import static com.blassa.model.enums.BookingStatus.CONFIRMED;
 import static com.blassa.model.enums.RideStatus.COMPLETED;
 
 @Service
@@ -39,6 +40,8 @@ public class RideService {
 
     private final RideRepository rideRepository;
     private final UserRepository userRepository;
+    private final BookingRepository bookingRepository;
+    private final NotificationService notificationService;
 
     private final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
 
@@ -74,7 +77,11 @@ public class RideService {
         return new RideResponse(
                 ride.getId(),
                 ride.getDriver().getFirstName() + " " + ride.getDriver().getLastName(),
+                ride.getDriver().getEmail(),
                 0.0, // Placeholder for rating calculation
+                ride.getDriver().getFacebookUrl(),
+                ride.getDriver().getInstagramUrl(),
+                ride.getDriver().getPhoneNumber(),
                 ride.getOriginName(),
                 ride.getOriginPoint().getY(), // Latitude
                 ride.getOriginPoint().getX(), // Longitude
@@ -82,6 +89,7 @@ public class RideService {
                 ride.getDestinationPoint().getY(),
                 ride.getDestinationPoint().getX(),
                 ride.getDepartureTime(),
+                ride.getTotalSeats(),
                 ride.getAvailableSeats(),
                 ride.getPricePerSeat(),
                 ride.getAllowsSmoking(),
@@ -92,22 +100,23 @@ public class RideService {
     /**
      * Public search endpoint - works for both authenticated and anonymous users.
      * 
-     * For anonymous users: Shows rides with "ANY" gender preference only.
+     * For anonymous users: Shows ALL rides by default, or filtered if genderFilter
+     * is provided.
      * For authenticated users: Shows rides matching their gender preference.
      * 
-     * @param genderFilter Optional gender filter for anonymous users ("MALE" or
-     *                     "FEMALE")
+     * @param genderFilter Optional gender filter (\"FEMALE_ONLY\" to show
+     *                     women-only rides)
      */
     public Page<RideResponse> searchRides(
             Double originLat, Double originLon,
             Double destLat, Double destLon,
             OffsetDateTime departureTime,
             Integer seats,
-            String genderFilter, // NEW: Optional gender for anonymous users
+            String genderFilter, // Optional gender filter
             Double radiusKm,
             int page,
             int size) {
-        // Determine allowed preferences based on auth status
+        // Determine allowed preferences based on auth status and filter
         List<String> allowedPreferences;
 
         User currentUser = getCurrentUserOrNull();
@@ -116,14 +125,18 @@ public class RideService {
             allowedPreferences = (currentUser.getGender() == Gender.MALE)
                     ? List.of("ANY", "MALE_ONLY")
                     : List.of("ANY", "FEMALE_ONLY");
-        } else if (genderFilter != null && !genderFilter.isEmpty()) {
-            // Anonymous with gender filter: Show ANY + matching gender-specific
-            allowedPreferences = genderFilter.equalsIgnoreCase("MALE")
-                    ? List.of("ANY", "MALE_ONLY")
-                    : List.of("ANY", "FEMALE_ONLY");
+        } else if (genderFilter != null && !genderFilter.isEmpty() && !genderFilter.equals("ANY")) {
+            // Anonymous with gender filter: Show ANY + matching gender-specific rides
+            if (genderFilter.equals("FEMALE_ONLY")) {
+                allowedPreferences = List.of("ANY", "FEMALE_ONLY");
+            } else if (genderFilter.equals("MALE_ONLY")) {
+                allowedPreferences = List.of("ANY", "MALE_ONLY");
+            } else {
+                allowedPreferences = List.of("ANY", "MALE_ONLY", "FEMALE_ONLY");
+            }
         } else {
-            // Anonymous without filter: Show only "ANY" rides (safest default)
-            allowedPreferences = List.of("ANY");
+            // Anonymous without filter: Show ALL rides
+            allowedPreferences = List.of("ANY", "MALE_ONLY", "FEMALE_ONLY");
         }
 
         // 2. Geometry
@@ -230,9 +243,29 @@ public class RideService {
             throw new RuntimeException("Cannot cancel a ride that is already completed or cancelled");
         }
 
-        // Perform Cancellation
+        // Cancel all bookings associated with this ride
+        List<Booking> bookings = bookingRepository.findByRideId(rideId);
+        for (Booking booking : bookings) {
+            if (booking.getStatus() != BookingStatus.CANCELLED) {
+                booking.setStatus(BookingStatus.CANCELLED);
+            }
+        }
+        bookingRepository.saveAll(bookings);
         ride.setStatus(RideStatus.CANCELLED);
-        return mapToResponse(rideRepository.save(ride));
+        Ride saved = rideRepository.save(ride);
+
+        // Notify all passengers that ride was cancelled
+        for (Booking booking : bookings) {
+            notificationService.sendNotification(
+                    booking.getPassenger().getId(),
+                    NotificationType.RIDE_CANCELLED,
+                    "Trajet annulé",
+                    "Le trajet " + ride.getOriginName() + " → " + ride.getDestinationName()
+                            + " a été annulé par le conducteur",
+                    null);
+        }
+
+        return mapToResponse(saved);
     }
 
     @Transactional
@@ -290,8 +323,21 @@ public class RideService {
             throw new IllegalArgumentException("Can only start a scheduled or full ride");
         }
 
+        // Note: Driver can start a ride even without confirmed passengers
+        // (e.g., departure time arrived, passengers may join later, or solo trip)
+
         ride.setStatus(RideStatus.IN_PROGRESS);
         Ride saved = rideRepository.save(ride);
+
+        List<Booking> confirmedBookings = bookingRepository.findByRideIdAndStatus(rideId, CONFIRMED);
+        for (Booking booking : confirmedBookings) {
+            notificationService.sendNotification(
+                    booking.getPassenger().getId(),
+                    NotificationType.RIDE_STARTED,
+                    "Trajet démarré",
+                    "Le trajet " + saved.getOriginName() + " → " + saved.getDestinationName() + " a commencé",
+                    "/rides/" + rideId);
+        }
 
         return new RideStatusResponse(saved.getId(), saved.getStatus());
     }
@@ -315,6 +361,17 @@ public class RideService {
 
         ride.setStatus(COMPLETED);
         Ride saved = rideRepository.save(ride);
+        // Notify all confirmed passengers that ride is completed
+        List<Booking> confirmedBookings = bookingRepository.findByRideIdAndStatus(rideId, CONFIRMED);
+        for (Booking booking : confirmedBookings) {
+            notificationService.sendNotification(
+                    booking.getPassenger().getId(),
+                    NotificationType.RIDE_COMPLETED,
+                    "Trajet terminé",
+                    "Le trajet " + saved.getOriginName() + " → " + saved.getDestinationName()
+                            + " est terminé. N'oubliez pas de laisser un avis !",
+                    "/rides/" + rideId + "/review");
+        }
 
         // After completion, all bookings for this ride become eligible for reviews
         // (ReviewService already checks ride.status == COMPLETED before allowing
@@ -338,6 +395,13 @@ public class RideService {
         // Logic Check
         if (ride.getStatus() != RideStatus.SCHEDULED) {
             throw new RuntimeException("Only scheduled rides can be edited");
+        }
+
+        // Check for existing bookings - prevent update if passengers are booked
+        boolean hasBookings = !bookingRepository.findByRideIdAndStatus(rideId, CONFIRMED).isEmpty();
+        if (hasBookings) {
+            throw new RuntimeException(
+                    "Cannot modify a ride that already has passengers booked. Please cancel the ride instead.");
         }
 
         // Update Fields (Only allow updating fields that don't break strict logic)

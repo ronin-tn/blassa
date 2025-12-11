@@ -41,4 +41,24 @@ public class ReviewController {
                 "averageRating", Math.round(avgRating * 10.0) / 10.0, // Round to 1 decimal
                 "totalReviews", count));
     }
+
+    /**
+     * Get reviews received by the current user.
+     */
+    @GetMapping("/mine/received")
+    public ResponseEntity<Page<ReviewResponse>> getMyReceivedReviews(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(reviewService.getMyReceivedReviews(page, size));
+    }
+
+    /**
+     * Get reviews sent by the current user.
+     */
+    @GetMapping("/mine/sent")
+    public ResponseEntity<Page<ReviewResponse>> getMySentReviews(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(reviewService.getMySentReviews(page, size));
+    }
 }

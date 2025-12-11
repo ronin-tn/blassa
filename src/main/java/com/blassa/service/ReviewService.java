@@ -29,6 +29,7 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     @Transactional
     public ReviewResponse createReview(ReviewRequest request) {
@@ -58,12 +59,45 @@ public class ReviewService {
         review.setComment(request.comment());
 
         Review saved = reviewRepository.save(review);
+
+        // Send notification to reviewee
+        String reviewerName = reviewer.getFirstName() + " " + reviewer.getLastName();
+        notificationService.sendNotification(
+                reviewee.getId(),
+                com.blassa.model.enums.NotificationType.NEW_REVIEW,
+                "Nouvel avis reçu",
+                reviewerName + " vous a donné " + request.rating() + " étoile" + (request.rating() > 1 ? "s" : ""),
+                "/dashboard/reviews");
+
         return mapToResponse(saved);
     }
+
     @Transactional
     public Page<ReviewResponse> getReviewsForUser(UUID userId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         return reviewRepository.findByRevieweeId(userId, pageable)
+                .map(this::mapToResponse);
+    }
+
+    /**
+     * Get reviews received by the current user.
+     */
+    @Transactional(readOnly = true)
+    public Page<ReviewResponse> getMyReceivedReviews(int page, int size) {
+        User currentUser = getCurrentUser();
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        return reviewRepository.findByRevieweeId(currentUser.getId(), pageable)
+                .map(this::mapToResponse);
+    }
+
+    /**
+     * Get reviews sent by the current user.
+     */
+    @Transactional(readOnly = true)
+    public Page<ReviewResponse> getMySentReviews(int page, int size) {
+        User currentUser = getCurrentUser();
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        return reviewRepository.findByReviewerId(currentUser.getId(), pageable)
                 .map(this::mapToResponse);
     }
 

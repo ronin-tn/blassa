@@ -22,7 +22,7 @@
 
 import { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Clock, Users, Star, Cigarette, CigaretteOff, User, Heart } from 'lucide-react';
+import { Clock, Users, Star, Cigarette, CigaretteOff, User, Heart, CheckCircle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -47,7 +47,7 @@ const formatDate = (isoString) => {
   });
 };
 
-const RideCard = memo(({ ride, onBook }) => {
+const RideCard = memo(({ ride, onBook, isAlreadyBooked = false }) => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -143,10 +143,17 @@ const RideCard = memo(({ ride, onBook }) => {
               </span>
             </div>
 
-            {/* Book button */}
-            <Button variant="action" size="sm" onClick={handleBook} className="w-full sm:w-auto">
-              Réserver
-            </Button>
+            {/* Book button or Already Booked badge */}
+            {isAlreadyBooked ? (
+              <Badge variant="outline" className="flex items-center gap-1 px-3 py-2 text-green-600 border-green-400 bg-green-50">
+                <CheckCircle className="h-4 w-4" />
+                Déjà réservé
+              </Badge>
+            ) : (
+              <Button variant="action" size="sm" onClick={handleBook} className="w-full sm:w-auto">
+                Réserver
+              </Button>
+            )}
           </div>
         </div>
 

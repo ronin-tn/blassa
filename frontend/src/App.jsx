@@ -28,6 +28,12 @@ const Register = lazy(() => import('@/pages/auth/Register'));
 const Search = lazy(() => import('@/pages/Search'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
 const Dashboard = lazy(() => import('@/pages/Dashboard'));
+const Profile = lazy(() => import('@/pages/profile/Profile'));
+const RideDetails = lazy(() => import('@/pages/ride/RideDetails'));
+const CreateRide = lazy(() => import('@/pages/ride/CreateRide'));
+const EditRide = lazy(() => import('@/pages/ride/EditRide'));
+const MyRides = lazy(() => import('@/pages/driver/MyRides'));
+const MyBookings = lazy(() => import('@/pages/passenger/MyBookings'));
 
 // Loading fallback component
 const PageLoader = () => (
@@ -51,10 +57,17 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/search" element={<Search />} />
+              <Route path="/ride/:id" element={<RideDetails />} />
 
               {/* Protected routes */}
               <Route element={<ProtectedRoute />}>
                 <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/publish" element={<CreateRide />} />
+                <Route path="/rides/create" element={<CreateRide />} /> {/* Alias for Search Empty State */}
+                <Route path="/ride/:id/edit" element={<EditRide />} />
+                <Route path="/my-rides" element={<MyRides />} />
+                <Route path="/my-bookings" element={<MyBookings />} />
                 {/* More protected routes will be added here */}
               </Route>
 

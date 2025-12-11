@@ -4,13 +4,14 @@
   React Context for managing authentication across the entire app.
   
   This provides:
-  - user: The current user object (decoded from JWT or stored)
+  - user: The current user object (from profile API)
   - token: The JWT token
   - isAuthenticated: Boolean for quick checks
   - loading: True while checking initial auth state
   - login(): Function to log in
   - register(): Function to register
   - logout(): Function to log out
+  - refreshProfile(): Function to refresh user profile from API
   
   Usage in components:
   const { user, isAuthenticated, login, logout } = useAuth();
@@ -18,6 +19,7 @@
 
 import { createContext, useState, useEffect, useCallback } from 'react';
 import { login as loginApi, register as registerApi } from '@/api/authApi';
+import { getMyProfile } from '@/api/userApi';
 
 // Create the context
 export const AuthContext = createContext(null);
@@ -53,32 +55,39 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Fetch user profile from API
+  const fetchProfile = useCallback(async () => {
+    try {
+      const profile = await getMyProfile();
+      setUser(profile);
+      localStorage.setItem('user', JSON.stringify(profile));
+      return profile;
+    } catch (error) {
+      console.error('Failed to fetch profile:', error);
+      return null;
+    }
+  }, []);
+
   // Check for existing token on mount
   useEffect(() => {
-    const storedToken = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
+    const initAuth = async () => {
+      const storedToken = localStorage.getItem('token');
 
-    if (storedToken && !isTokenExpired(storedToken)) {
-      setToken(storedToken);
-      if (storedUser) {
-        try {
-          setUser(JSON.parse(storedUser));
-        } catch {
-          // If user parse fails, decode from token
-          const decoded = decodeToken(storedToken);
-          if (decoded) {
-            setUser({ email: decoded.sub });
-          }
-        }
+      if (storedToken && !isTokenExpired(storedToken)) {
+        setToken(storedToken);
+        // Fetch fresh profile from API
+        await fetchProfile();
+      } else {
+        // Clear expired token
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
       }
-    } else {
-      // Clear expired token
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-    }
 
-    setLoading(false);
-  }, []);
+      setLoading(false);
+    };
+
+    initAuth();
+  }, [fetchProfile]);
 
   // Login function
   const login = useCallback(async (credentials) => {
@@ -89,14 +98,11 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('token', newToken);
     setToken(newToken);
 
-    // Decode user from token
-    const decoded = decodeToken(newToken);
-    const userData = { email: decoded?.sub };
-    localStorage.setItem('user', JSON.stringify(userData));
-    setUser(userData);
+    // Fetch full profile from API
+    await fetchProfile();
 
     return response;
-  }, []);
+  }, [fetchProfile]);
 
   // Register function
   const register = useCallback(async (data) => {
@@ -108,14 +114,12 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('token', newToken);
       setToken(newToken);
 
-      const decoded = decodeToken(newToken);
-      const userData = { email: decoded?.sub };
-      localStorage.setItem('user', JSON.stringify(userData));
-      setUser(userData);
+      // Fetch full profile from API
+      await fetchProfile();
     }
 
     return response;
-  }, []);
+  }, [fetchProfile]);
 
   // Logout function
   const logout = useCallback(() => {
@@ -124,6 +128,14 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
     setUser(null);
   }, []);
+
+  // Refresh profile (can be called after profile update)
+  const refreshProfile = useCallback(async () => {
+    if (token) {
+      return await fetchProfile();
+    }
+    return null;
+  }, [token, fetchProfile]);
 
   // Context value
   const value = {
@@ -134,6 +146,7 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
+    refreshProfile,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

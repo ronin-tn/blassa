@@ -1,7 +1,7 @@
 # ============================================
 # Blassa Project - Root .gitignore
 # ============================================
-# Full-stack: Spring Boot (Java) + React (Vite)
+# Full-stack: Spring Boot (Java) + Next.js
 # ============================================
 
 # ==================== IDE ====================
@@ -27,7 +27,7 @@ nbbuild/
 dist/
 nbdist/
 
-# ==================== Java / Maven ====================
+# ==================== Java / Spring Boot / Maven ====================
 # Compiled class files
 *.class
 
@@ -52,16 +52,26 @@ build_ascii.log
 *.tar.gz
 *.rar
 
-# ==================== Node.js / Frontend ====================
+# Spring Boot
+spring-boot*.properties
+application-local.properties
+application-local.yml
+
+# ==================== Next.js Frontend (front/) ====================
 # Dependencies
+front/node_modules/
 node_modules/
 .pnp
 .pnp.js
+.yarn/install-state.gz
 
-# Build output
-frontend/dist/
-frontend/dist-ssr/
-frontend/.vite/
+# Next.js build output
+front/.next/
+front/out/
+.next/
+
+# Production build
+front/build/
 
 # Environment variables (CRITICAL - contains secrets!)
 .env
@@ -69,14 +79,33 @@ frontend/.vite/
 .env.development.local
 .env.test.local
 .env.production.local
-frontend/.env
-frontend/.env.local
-frontend/.env.*.local
+.env*.local
+front/.env
+front/.env.local
+front/.env.development.local
+front/.env.test.local
+front/.env.production.local
+front/.env*.local
+
+# Vercel
+front/.vercel/
+.vercel/
+
+# TypeScript
+*.tsbuildinfo
+front/next-env.d.ts
 
 # Testing
 coverage/
-frontend/coverage/
+front/coverage/
 *.lcov
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
 # ==================== OS Generated ====================
 # macOS
@@ -115,29 +144,40 @@ Desktop.ini
 # Local development
 *.local
 
-# ==================== Miscellaneous ====================
-# Documentation build
-docs/_build/
-
-# Certificates (security)
+# ==================== Security / Secrets ====================
+# Certificates
 *.pem
 *.key
 *.crt
 *.p12
 *.jks
 
+# JWT secrets
+jwt-secret.txt
+secrets/
+
+# ==================== Miscellaneous ====================
+# Documentation build
+docs/_build/
+
 # Backup files
 *.bak
 *.backup
 
-# NPM/Yarn debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+# Storybook
+front/storybook-static/
+
+# PWA files
+front/public/sw.js
+front/public/workbox-*.js
+
+# Sentry
+.sentryclirc
 
 # ==================== Keep These (negations) ====================
 # Keep example files
 !.env.example
-!frontend/.env.example
+!front/.env.example
+!application.properties.example
+!application.yml.example
+

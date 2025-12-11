@@ -1,6 +1,7 @@
 package com.blassa.repository;
 
 import com.blassa.model.entity.Ride;
+import com.blassa.model.enums.RideStatus;
 import org.locationtech.jts.geom.Point;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -51,4 +52,5 @@ public interface RideRepository extends JpaRepository<Ride, UUID> {
     @EntityGraph(attributePaths = { "driver" })
     Page<Ride> findByDriverId(UUID id, Pageable pageable);
 
+    List<Ride> findByIdAndStatus(UUID id, RideStatus status);
 }

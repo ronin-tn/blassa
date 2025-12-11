@@ -10,7 +10,11 @@ import java.util.UUID;
 public record RideResponse(
         UUID id,
         String driverName, // mithel "Amine B."
+        String driverEmail,
         Double driverRating,
+        String driverFacebookUrl,
+        String driverInstagramUrl,
+        String driverPhoneNumber,
 
         String originName,
         Double originLat,
@@ -21,11 +25,11 @@ public record RideResponse(
         Double destinationLon,
 
         OffsetDateTime departureTime,
+        Integer totalSeats,
         Integer availableSeats,
         BigDecimal pricePerSeat,
 
         Boolean allowsSmoking,
         RideGenderPreference genderPreference,
-        RideStatus status
-) {
+        RideStatus status) {
 }

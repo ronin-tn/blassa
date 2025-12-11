@@ -106,7 +106,15 @@ public class User {
 
     private String verificationToken;
     private boolean isVerified;
-    @Column(name="reset_token")
+    @Column(name = "reset_token")
     private String resetToken;
+
+    @Size(max = 255)
+    @Column(name = "facebook_url")
+    private String facebookUrl;
+
+    @Size(max = 255)
+    @Column(name = "instagram_url")
+    private String instagramUrl;
 
 }

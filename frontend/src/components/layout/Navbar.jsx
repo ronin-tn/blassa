@@ -94,6 +94,13 @@ const Navbar = () => {
                             <p className="text-xs text-slate-500 truncate">{user?.email}</p>
                           </div>
                           <Link
+                            to="/my-rides"
+                            className="block px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-amber-600 transition-colors"
+                            onClick={() => setIsProfileOpen(false)}
+                          >
+                            Mes trajets
+                          </Link>
+                          <Link
                             to="/my-bookings"
                             className="block px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-amber-600 transition-colors"
                             onClick={() => setIsProfileOpen(false)}
@@ -186,6 +193,13 @@ const Navbar = () => {
 
               {isAuthenticated ? (
                 <>
+                  <Link
+                    to="/my-rides"
+                    className="block p-3 rounded-2xl hover:bg-slate-50 text-slate-700 font-medium"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Mes trajets
+                  </Link>
                   <Link
                     to="/my-bookings"
                     className="block p-3 rounded-2xl hover:bg-slate-50 text-slate-700 font-medium"
