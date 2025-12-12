@@ -3,7 +3,7 @@ app:
   base-url: http://localhost:8088
   frontend-url: http://localhost:3000
 server:
-  port: 8088
+  port: ${PORT:8088}
 spring:
   application:
     name: blassa-backend
