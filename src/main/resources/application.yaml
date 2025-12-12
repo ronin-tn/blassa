@@ -77,3 +77,15 @@ sentry:
   # Set traces-sample-rate to 1.0 to capture 100% of transactions for tracing
   # We recommend adjusting this value in production (e.g., 0.1 for 10%)
   traces-sample-rate: 1.0
+
+# 5. ACTUATOR & MONITORING
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true

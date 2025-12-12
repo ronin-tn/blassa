@@ -35,6 +35,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/rides/search").permitAll() // Public search for lazy registration
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
                         .requestMatchers("/ws/**").permitAll()
+                        .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .requestMatchers("/verify/email/**", "/reset/email", "/forgot").permitAll()
                         .anyRequest().authenticated())
