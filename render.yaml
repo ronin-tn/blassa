@@ -31,6 +31,8 @@ services:
       - key: SENTRY_AUTH_TOKEN
         sync: false
     healthCheckPath: /actuator/health
+    # Give Spring Boot 3 minutes to start before health checks begin
+    initialDelaySeconds: 180
 
   # Frontend Service (Next.js)
   - type: web
@@ -41,6 +43,7 @@ services:
     startCommand: cd front && npm start
     plan: free
     region: frankfurt
+    healthCheckPath: /
     envVars:
       - key: NEXT_PUBLIC_API_HOST
         fromService:
