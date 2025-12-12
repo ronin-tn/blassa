@@ -7,5 +7,6 @@ echo "Unsetting Render-injected SPRING_DATASOURCE_URL and DATABASE_URL..."
 unset SPRING_DATASOURCE_URL
 unset DATABASE_URL
 
-echo "Starting application..."
-exec java -jar app.jar
+echo "Starting application with forced JDBC URL..."
+exec java -jar app.jar \
+  --spring.datasource.url=jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}?stringtype=unspecified
