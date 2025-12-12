@@ -13,7 +13,6 @@ import com.blassa.repository.RideRepository;
 import com.blassa.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import com.blassa.dto.RidePassengerResponse;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -90,7 +89,10 @@ public class BookingService {
                 "Demande de réservation",
                 "Nouvelle demande de réservation de " + passenger.getFirstName() + " " + passenger.getLastName(),
                 "/rides/" + ride.getId());
-        emailService.sendNewPassengerEmail(ride.getDriver().getEmail(), passenger.getEmail());
+        emailService.sendNewPassengerEmail(
+                ride.getDriver().getEmail(),
+                passenger.getFirstName() + " " + passenger.getLastName(),
+                ride.getOriginName() + " → " + ride.getDestinationName());
         return mapToResponse(savedBooking);
     }
 
@@ -115,7 +117,6 @@ public class BookingService {
         booking.setStatus(BookingStatus.CONFIRMED);
         Booking saved = bookingRepository.save(booking);
 
-        // TODO: Notify passenger that booking was accepted
         notificationService.sendNotification(
                 booking.getPassenger().getId(),
                 NotificationType.BOOKING_ACCEPTED,
@@ -175,6 +176,7 @@ public class BookingService {
                 booking.getSeatsBooked(),
                 booking.getPriceTotal(),
                 booking.getStatus(),
+                booking.getRide().getStatus(),
                 booking.getCreatedAt());
     }
 
@@ -254,8 +256,13 @@ public class BookingService {
             throw new IllegalArgumentException("ALREADY_CANCELLED");
         }
 
-        // number t3 blays lezm yarj3o kif makeno 9bal booking
+        // Cannot cancel if ride is already in progress or completed
         Ride ride = booking.getRide();
+        if (ride.getStatus() == RideStatus.IN_PROGRESS || ride.getStatus() == RideStatus.COMPLETED) {
+            throw new IllegalArgumentException("CANNOT_CANCEL_ACTIVE_RIDE");
+        }
+
+        // number t3 blays lezm yarj3o kif makeno 9bal booking
         ride.setAvailableSeats(ride.getAvailableSeats() + booking.getSeatsBooked());
         // raj3ha l scheduled ken kent m3abya
         // If ride was FULL, set back to SCHEDULED

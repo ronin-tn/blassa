@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/layout/Navbar";
 import { cn } from "@/lib/utils";
+import { parseApiError } from "@/lib/api-utils";
 
 interface BookingInfo {
     id: string;
@@ -161,14 +162,8 @@ export default function ReviewPage() {
             );
 
             if (!response.ok) {
-                const errorData = await response.json().catch(() => null);
-                if (errorData?.message === "ALREADY_REVIEWED") {
-                    throw new Error("Vous avez déjà laissé un avis pour ce trajet");
-                }
-                if (errorData?.message === "RIDE_NOT_COMPLETED") {
-                    throw new Error("Le trajet doit être terminé pour laisser un avis");
-                }
-                throw new Error("Erreur lors de l'envoi de l'avis");
+                const errorMessage = await parseApiError(response, "Erreur lors de l'envoi de l'avis");
+                throw new Error(errorMessage);
             }
 
             setIsSuccess(true);

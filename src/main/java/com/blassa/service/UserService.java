@@ -1,5 +1,6 @@
 package com.blassa.service;
 
+import com.blassa.dto.ChangePasswordRequest;
 import com.blassa.dto.Profile;
 import com.blassa.dto.ProfileUpdateRequest;
 import com.blassa.model.entity.User;
@@ -8,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +19,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public Profile getProfile() {
         User user = getCurrentUser();
@@ -36,6 +39,32 @@ public class UserService {
 
         User savedUser = userRepository.save(user);
         return mapToProfile(savedUser);
+    }
+
+    @Transactional
+    public void changePassword(ChangePasswordRequest request) {
+        User user = getCurrentUser();
+
+        // Validate current password
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPasswordHash())) {
+            throw new IllegalArgumentException("Le mot de passe actuel est incorrect");
+        }
+
+        // Validate new password matches confirmation
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            throw new IllegalArgumentException("Les mots de passe ne correspondent pas");
+        }
+
+        // Update password
+        user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+    }
+
+    @Transactional
+    public void deleteAccount() {
+        User user = getCurrentUser();
+        // Hard delete - remove user from database
+        userRepository.delete(user);
     }
 
     private Profile mapToProfile(User user) {

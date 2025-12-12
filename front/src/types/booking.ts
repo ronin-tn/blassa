@@ -8,6 +8,7 @@ export interface Booking {
     seatsBooked: number;
     priceTotal: number;
     status: BookingStatus;
+    rideStatus: "SCHEDULED" | "FULL" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
     createdAt: string;
 }
 

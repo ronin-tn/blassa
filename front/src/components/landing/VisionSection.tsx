@@ -12,7 +12,7 @@ export default function VisionSection() {
                         <div className="absolute bottom-0 right-0 w-40 h-40 bg-blue-100 rounded-full mix-blend-multiply filter blur-2xl opacity-50"></div>
 
                         <Image
-                            src="https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&q=80&w=2070"
+                            src="/images/upscalemedia-transformed.png"
                             alt="Covoiturage Tunisie"
                             width={600}
                             height={400}

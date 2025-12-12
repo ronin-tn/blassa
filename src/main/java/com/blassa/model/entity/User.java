@@ -106,6 +106,10 @@ public class User {
 
     private String verificationToken;
     private boolean isVerified;
+
+    @Column(name = "verification_sent_at")
+    private java.time.LocalDateTime verificationSentAt;
+
     @Column(name = "reset_token")
     private String resetToken;
 

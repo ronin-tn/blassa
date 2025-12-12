@@ -118,9 +118,7 @@ export default function Footer() {
 
                 <div className="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500">
                     <p>© 2025 Blassa. Tous droits réservés.</p>
-                    <div className="flex gap-6">
-                        <span>Fait avec ❤️ en Tunisie</span>
-                    </div>
+
                 </div>
             </div>
         </footer>

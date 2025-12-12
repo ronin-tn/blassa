@@ -241,27 +241,12 @@ export default function HeroSection({ onTabChange }: HeroSectionProps) {
                     <div className="absolute top-10 right-0 w-4/5 h-full bg-orange-50 rounded-[3rem] -rotate-3 z-0"></div>
                     <div className="absolute top-0 right-10 w-4/5 h-full rounded-[3rem] overflow-hidden shadow-2xl rotate-3 transition-transform duration-700 hover:rotate-2 z-10">
                         <Image
-                            src="/images/hero-lifestyle.png"
+                            src="/images/hero.png"
                             alt="Voyageurs heureux"
                             fill
                             className="object-cover transform hover:scale-105 transition duration-700"
                             priority
                         />
-                        <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black/60 to-transparent text-white">
-                            <div className="flex items-center space-x-2 mb-2">
-                                <div className="flex -space-x-2">
-                                    {[1, 2, 3].map((i) => (
-                                        <div
-                                            key={i}
-                                            className="w-8 h-8 rounded-full border-2 border-white bg-slate-200"
-                                        ></div>
-                                    ))}
-                                </div>
-                                <span className="text-sm font-medium">
-                                    +2.5k voyageurs aujourd&apos;hui
-                                </span>
-                            </div>
-                        </div>
                     </div>
 
                     {/* Floating Card: Economy */}

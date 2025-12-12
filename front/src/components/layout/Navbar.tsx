@@ -251,7 +251,7 @@ export default function Navbar() {
                                                         Mes avis
                                                     </Link>
                                                     <Link
-                                                        href="/settings"
+                                                        href="/dashboard/settings"
                                                         onClick={() => setIsProfileOpen(false)}
                                                         className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
                                                     >
@@ -425,7 +425,7 @@ export default function Navbar() {
                                             Mes avis
                                         </Link>
                                         <Link
-                                            href="/settings"
+                                            href="/dashboard/settings"
                                             onClick={() => setIsMenuOpen(false)}
                                             className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 rounded-lg"
                                         >

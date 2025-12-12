@@ -16,8 +16,12 @@ import {
     Lock,
     Mail,
     Smartphone,
+    Eye,
+    EyeOff,
+    X,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { parseApiError } from "@/lib/api-utils";
 
 interface SettingToggle {
     id: string;
@@ -54,6 +58,21 @@ export default function SettingsPage() {
 
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [deleteError, setDeleteError] = useState<string | null>(null);
+
+    // Password change modal state
+    const [showPasswordModal, setShowPasswordModal] = useState(false);
+    const [isChangingPassword, setIsChangingPassword] = useState(false);
+    const [passwordError, setPasswordError] = useState<string | null>(null);
+    const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null);
+    const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [passwordForm, setPasswordForm] = useState({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+    });
 
     // Redirect if not authenticated
     useEffect(() => {
@@ -74,15 +93,111 @@ export default function SettingsPage() {
         router.replace("/");
     };
 
+    const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setPasswordForm((prev) => ({ ...prev, [name]: value }));
+        setPasswordError(null);
+    };
+
+    const handleChangePassword = async () => {
+        setPasswordError(null);
+        setPasswordSuccess(null);
+
+        // Client-side validation
+        if (!passwordForm.currentPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
+            setPasswordError("Tous les champs sont requis");
+            return;
+        }
+
+        if (passwordForm.newPassword.length < 8) {
+            setPasswordError("Le nouveau mot de passe doit contenir au moins 8 caractères");
+            return;
+        }
+
+        if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+            setPasswordError("Les mots de passe ne correspondent pas");
+            return;
+        }
+
+        setIsChangingPassword(true);
+
+        try {
+            const token = localStorage.getItem("blassa_token");
+            if (!token) {
+                throw new Error("Non authentifié");
+            }
+
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL}/user/me/password`,
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify(passwordForm),
+                }
+            );
+
+            if (!response.ok) {
+                const errorMessage = await parseApiError(response, "Erreur lors du changement de mot de passe");
+                throw new Error(errorMessage);
+            }
+
+            setPasswordSuccess("Mot de passe modifié avec succès");
+            setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+
+            // Close modal after 2 seconds
+            setTimeout(() => {
+                setShowPasswordModal(false);
+                setPasswordSuccess(null);
+            }, 2000);
+        } catch (err) {
+            setPasswordError(err instanceof Error ? err.message : "Erreur inconnue");
+        } finally {
+            setIsChangingPassword(false);
+        }
+    };
+
     const handleDeleteAccount = async () => {
         setIsDeleting(true);
-        // TODO: Implement account deletion when backend endpoint is available
-        // For now, just simulate and show message
-        setTimeout(() => {
+        setDeleteError(null);
+
+        try {
+            const token = localStorage.getItem("blassa_token");
+            if (!token) {
+                throw new Error("Non authentifié");
+            }
+
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL}/user/me`,
+                {
+                    method: "DELETE",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            if (!response.ok) {
+                const errorMessage = await parseApiError(response, "Erreur lors de la suppression du compte");
+                throw new Error(errorMessage);
+            }
+
+            // Logout and redirect
+            logout();
+            router.replace("/");
+        } catch (err) {
+            setDeleteError(err instanceof Error ? err.message : "Erreur inconnue");
             setIsDeleting(false);
-            setShowDeleteModal(false);
-            alert("Cette fonctionnalité sera bientôt disponible.");
-        }, 1000);
+        }
+    };
+
+    const resetPasswordModal = () => {
+        setShowPasswordModal(false);
+        setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+        setPasswordError(null);
+        setPasswordSuccess(null);
     };
 
     // Loading state
@@ -159,9 +274,9 @@ export default function SettingsPage() {
                             </h2>
                         </div>
                         <div className="divide-y divide-gray-100">
-                            <Link
-                                href="/forgot-password"
-                                className="flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors"
+                            <button
+                                onClick={() => setShowPasswordModal(true)}
+                                className="w-full flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors text-left"
                             >
                                 <div className="flex items-center gap-3">
                                     <Lock className="w-5 h-5 text-gray-400" />
@@ -175,7 +290,7 @@ export default function SettingsPage() {
                                     </div>
                                 </div>
                                 <ChevronRight className="w-5 h-5 text-gray-400" />
-                            </Link>
+                            </button>
 
                             <div className="flex items-center justify-between px-6 py-4">
                                 <div className="flex items-center gap-3">
@@ -278,10 +393,140 @@ export default function SettingsPage() {
                     {/* App Info */}
                     <div className="text-center text-sm text-gray-400 py-4">
                         <p>Blassa v1.0.0</p>
-                        <p className="mt-1">© 2024 Blassa. Tous droits réservés.</p>
+                        <p className="mt-1">© 2025 Blassa. Tous droits réservés.</p>
                     </div>
                 </div>
             </div>
+
+            {/* Change Password Modal */}
+            {showPasswordModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl">
+                        <div className="flex items-center justify-between mb-6">
+                            <h3 className="text-xl font-bold text-gray-900">
+                                Changer le mot de passe
+                            </h3>
+                            <button
+                                onClick={resetPasswordModal}
+                                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                            >
+                                <X className="w-5 h-5 text-gray-500" />
+                            </button>
+                        </div>
+
+                        {passwordError && (
+                            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+                                {passwordError}
+                            </div>
+                        )}
+
+                        {passwordSuccess && (
+                            <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-lg text-sm">
+                                {passwordSuccess}
+                            </div>
+                        )}
+
+                        <div className="space-y-4">
+                            {/* Current Password */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Mot de passe actuel
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        type={showCurrentPassword ? "text" : "password"}
+                                        name="currentPassword"
+                                        value={passwordForm.currentPassword}
+                                        onChange={handlePasswordChange}
+                                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0A8F8F]/20 focus:border-[#0A8F8F] pr-12"
+                                        placeholder="••••••••"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                    >
+                                        {showCurrentPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* New Password */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Nouveau mot de passe
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        type={showNewPassword ? "text" : "password"}
+                                        name="newPassword"
+                                        value={passwordForm.newPassword}
+                                        onChange={handlePasswordChange}
+                                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0A8F8F]/20 focus:border-[#0A8F8F] pr-12"
+                                        placeholder="••••••••"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowNewPassword(!showNewPassword)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                    >
+                                        {showNewPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                    </button>
+                                </div>
+                                <p className="text-xs text-gray-500 mt-1">Minimum 8 caractères</p>
+                            </div>
+
+                            {/* Confirm Password */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Confirmer le mot de passe
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        type={showConfirmPassword ? "text" : "password"}
+                                        name="confirmPassword"
+                                        value={passwordForm.confirmPassword}
+                                        onChange={handlePasswordChange}
+                                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0A8F8F]/20 focus:border-[#0A8F8F] pr-12"
+                                        placeholder="••••••••"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                    >
+                                        {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex gap-3 mt-6">
+                            <button
+                                onClick={resetPasswordModal}
+                                disabled={isChangingPassword}
+                                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-colors disabled:opacity-50"
+                            >
+                                Annuler
+                            </button>
+                            <button
+                                onClick={handleChangePassword}
+                                disabled={isChangingPassword}
+                                className="flex-1 px-4 py-3 bg-[#0A8F8F] text-white font-medium rounded-xl hover:bg-[#0A8F8F]/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                            >
+                                {isChangingPassword ? (
+                                    <>
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                        Modification...
+                                    </>
+                                ) : (
+                                    "Modifier"
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Delete Account Modal */}
             {showDeleteModal && (
@@ -300,9 +545,18 @@ export default function SettingsPage() {
                             </p>
                         </div>
 
+                        {deleteError && (
+                            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+                                {deleteError}
+                            </div>
+                        )}
+
                         <div className="flex gap-3">
                             <button
-                                onClick={() => setShowDeleteModal(false)}
+                                onClick={() => {
+                                    setShowDeleteModal(false);
+                                    setDeleteError(null);
+                                }}
                                 disabled={isDeleting}
                                 className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-colors disabled:opacity-50"
                             >

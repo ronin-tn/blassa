@@ -28,6 +28,7 @@ import {
     BookingStatusColors,
 } from "@/types/booking";
 import { PagedResponse } from "@/types/ride";
+import { parseApiError } from "@/lib/api-utils";
 
 export default function MyBookingsPage() {
     const router = useRouter();
@@ -101,7 +102,8 @@ export default function MyBookingsPage() {
             );
 
             if (!response.ok) {
-                throw new Error("Erreur lors de l'annulation");
+                const errorMessage = await parseApiError(response, "Erreur lors de l'annulation");
+                throw new Error(errorMessage);
             }
 
             // Refresh bookings
@@ -311,7 +313,9 @@ export default function MyBookingsPage() {
                                                 </Button>
                                             </Link>
                                             {(booking.status === "PENDING" ||
-                                                booking.status === "CONFIRMED") && (
+                                                booking.status === "CONFIRMED") &&
+                                                booking.rideStatus !== "IN_PROGRESS" &&
+                                                booking.rideStatus !== "COMPLETED" && (
                                                     <Button
                                                         variant="ghost"
                                                         size="sm"

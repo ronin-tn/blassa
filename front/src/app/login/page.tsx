@@ -132,7 +132,18 @@ function LoginForm() {
             // Parse token from response
             const data = await response.json();
 
-            // Check if we got a token (successful login) or a message (email verification needed)
+            // Check if email verification is needed
+            if (data.token === "EMAIL_NOT_VERIFIED") {
+                // Redirect to verification page with email
+                const params = new URLSearchParams({
+                    email: data.email,
+                    ...(data.verificationSentAt && { sentAt: data.verificationSentAt }),
+                });
+                router.push(`/verify-email?${params.toString()}`);
+                return;
+            }
+
+            // Check if we got a valid token
             if (data.token && !data.token.includes("verification")) {
                 // Store token and fetch user profile
                 await login(data.token);
@@ -142,7 +153,7 @@ function LoginForm() {
 
                 router.push("/dashboard");
             } else {
-                // Email verification required
+                // Fallback for any other message
                 setApiError(data.token || "Veuillez vérifier votre email.");
             }
         } catch (error) {
@@ -165,7 +176,7 @@ function LoginForm() {
             {showSuccessMessage && (
                 <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm flex items-center gap-3">
                     <CheckCircle2 className="w-5 h-5 shrink-0" />
-                    <span>Inscription réussie ! Vous pouvez maintenant vous connecter.</span>
+                    <span>Inscription réussie ! Un email de vérification a été envoyé à votre adresse. Veuillez vérifier votre boîte de réception.</span>
                 </div>
             )}
 

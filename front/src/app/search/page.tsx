@@ -20,6 +20,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { Ride, PagedResponse, RideGenderPreference } from "@/types/ride";
 import { TUNISIA_CITIES } from "@/data/cities";
+import { parseApiError } from "@/lib/api-utils";
 
 function SearchPageContent() {
     const searchParams = useSearchParams();
@@ -155,8 +156,8 @@ function SearchPageContent() {
             });
 
             if (!response.ok) {
-                const errorData = await response.json().catch(() => null);
-                throw new Error(errorData?.message || "Erreur lors de la réservation");
+                const errorMessage = await parseApiError(response, "Erreur lors de la réservation");
+                throw new Error(errorMessage);
             }
 
             setBookingSuccess("Réservation effectuée avec succès !");

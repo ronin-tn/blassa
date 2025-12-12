@@ -161,7 +161,6 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
         client.onConnect = () => {
             setIsConnected(true);
-            console.log("WebSocket connected");
 
             // Subscribe to user-specific notification queue
             client.subscribe("/user/queue/notification", handleNotification);
@@ -169,7 +168,6 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
         client.onDisconnect = () => {
             setIsConnected(false);
-            console.log("WebSocket disconnected");
         };
 
         client.onStompError = (frame) => {

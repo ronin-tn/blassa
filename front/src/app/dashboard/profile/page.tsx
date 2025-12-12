@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { UserProfile } from "@/types/auth";
+import { parseApiError } from "@/lib/api-utils";
 
 interface ProfileFormData {
     firstName: string;
@@ -112,10 +113,8 @@ export default function ProfilePage() {
             );
 
             if (!response.ok) {
-                const errorData = await response.json().catch(() => null);
-                throw new Error(
-                    errorData?.message || "Erreur lors de la mise à jour du profil"
-                );
+                const errorMessage = await parseApiError(response, "Erreur lors de la mise à jour du profil");
+                throw new Error(errorMessage);
             }
 
             // Refresh user data in context

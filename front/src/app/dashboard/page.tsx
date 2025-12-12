@@ -132,7 +132,8 @@ export default function DashboardPage() {
 
             if (ridesResponse.ok) {
                 const ridesData: PagedResponse<Ride> = await ridesResponse.json();
-                publishedRidesCount = ridesData.totalElements;
+                // Use totalElements if available, otherwise fallback to content.length
+                publishedRidesCount = ridesData.totalElements ?? ridesData.content?.length ?? 0;
 
                 // Map driver rides - filter for upcoming (SCHEDULED, FULL, IN_PROGRESS)
                 driverRides = ridesData.content
@@ -153,6 +154,8 @@ export default function DashboardPage() {
                 const completedDriverRides = ridesData.content.filter(
                     (r) => r.status === "COMPLETED"
                 );
+                // Count completed driver rides as trips
+                completedTripsCount += completedDriverRides.length;
                 completedDriverRides.forEach((r) => {
                     totalEarnings += (r.totalSeats - r.availableSeats) * r.pricePerSeat;
                 });
@@ -162,7 +165,7 @@ export default function DashboardPage() {
                 const bookingsData: PagedResponse<Booking> = await bookingsResponse.json();
 
                 // Count confirmed/completed bookings as "trips effectués"
-                completedTripsCount = bookingsData.content.filter(
+                completedTripsCount += bookingsData.content.filter(
                     (b) => b.status === "CONFIRMED"
                 ).length;
 

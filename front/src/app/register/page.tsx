@@ -186,6 +186,9 @@ export default function RegisterPage() {
                 }
                 throw new Error(errorMessage);
             }
+            // Parse response to get email and sentAt BEFORE clearing form
+            const data = await response.json();
+            const registeredEmail = data.email || formData.email;
 
             // Clear sensitive data from state
             setFormData({
@@ -199,7 +202,12 @@ export default function RegisterPage() {
                 birthDate: "",
             });
 
-            router.push("/login?registered=true");
+            // Redirect to verification page
+            const params = new URLSearchParams({
+                email: registeredEmail,
+                ...(data.verificationSentAt && { sentAt: data.verificationSentAt }),
+            });
+            router.push(`/verify-email?${params.toString()}`);
         } catch (error) {
             // Handle network errors specifically
             if (error instanceof TypeError && error.message.includes("fetch")) {

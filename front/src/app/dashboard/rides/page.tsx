@@ -32,6 +32,7 @@ import {
     RideStatusColors,
     PagedResponse,
 } from "@/types/ride";
+import { parseApiError } from "@/lib/api-utils";
 
 export default function MyRidesPage() {
     const router = useRouter();
@@ -106,7 +107,8 @@ export default function MyRidesPage() {
             );
 
             if (!response.ok) {
-                throw new Error("Erreur lors de l'annulation");
+                const errorMessage = await parseApiError(response, "Erreur lors de l'annulation");
+                throw new Error(errorMessage);
             }
 
             // Refresh rides
@@ -130,11 +132,8 @@ export default function MyRidesPage() {
             );
 
             if (!response.ok) {
-                const errorData = await response.json().catch(() => null);
-                if (errorData?.message === "NO_CONFIRMED_PASSENGERS") {
-                    throw new Error("Vous devez avoir au moins 1 passager confirmé pour démarrer le trajet");
-                }
-                throw new Error("Erreur lors du démarrage");
+                const errorMessage = await parseApiError(response, "Erreur lors du démarrage");
+                throw new Error(errorMessage);
             }
 
             fetchRides();
@@ -157,7 +156,8 @@ export default function MyRidesPage() {
             );
 
             if (!response.ok) {
-                throw new Error("Erreur lors de la complétion");
+                const errorMessage = await parseApiError(response, "Erreur lors de la complétion");
+                throw new Error(errorMessage);
             }
 
             fetchRides();
