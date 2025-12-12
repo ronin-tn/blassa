@@ -9,6 +9,7 @@ import {
     ReactNode,
 } from "react";
 import { UserProfile } from "@/types/auth";
+import { API_URL } from "@/lib/config";
 
 interface AuthContextType {
     user: UserProfile | null;
@@ -32,7 +33,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const fetchUserProfile = useCallback(async (authToken: string) => {
         try {
             const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/user/me`,
+                `${API_URL}/user/me`,
                 {
                     headers: {
                         Authorization: `Bearer ${authToken}`,

@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { TUNISIA_CITIES, City } from "@/data/cities";
+import { API_URL } from "@/lib/config";
 
 type GenderPreference = "MALE_ONLY" | "FEMALE_ONLY" | "ANY";
 
@@ -153,7 +154,7 @@ export default function PublishRidePage() {
             };
 
             const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/rides`,
+                `${API_URL}/rides`,
                 {
                     method: "POST",
                     headers: {
@@ -453,8 +454,8 @@ export default function PublishRidePage() {
                                                 }))
                                             }
                                             className={`py-3 px-4 rounded-xl border text-sm font-medium transition-colors ${formData.genderPreference === option.value
-                                                    ? "border-[#0A8F8F] bg-[#0A8F8F]/10 text-[#0A8F8F]"
-                                                    : "border-gray-200 text-gray-700 hover:bg-gray-50"
+                                                ? "border-[#0A8F8F] bg-[#0A8F8F]/10 text-[#0A8F8F]"
+                                                : "border-gray-200 text-gray-700 hover:bg-gray-50"
                                                 }`}
                                         >
                                             {option.label}

@@ -19,6 +19,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/layout/Navbar";
+import { API_URL } from "@/lib/config";
 
 interface Ride {
     id: string;
@@ -92,7 +93,7 @@ export default function DashboardPage() {
         try {
             // Fetch driver's rides
             const ridesResponse = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/rides/mine?page=0&size=50`,
+                `${API_URL}/rides/mine?page=0&size=50`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -103,7 +104,7 @@ export default function DashboardPage() {
 
             // Fetch passenger's bookings
             const bookingsResponse = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/bookings/mine?page=0&size=50`,
+                `${API_URL}/bookings/mine?page=0&size=50`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -114,7 +115,7 @@ export default function DashboardPage() {
 
             // Fetch rating stats
             const reviewsResponse = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/reviews/mine/received?page=0&size=100`,
+                `${API_URL}/reviews/mine/received?page=0&size=100`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 export default function VisionSection() {
@@ -35,12 +36,14 @@ export default function VisionSection() {
                             l&apos;accessibilité financière, facilitant ainsi les trajets pour
                             tous. Rejoignez notre communauté dès aujourd&apos;hui !
                         </p>
-                        <Button
-                            variant="outline"
-                            className="mt-4 border-orange-500 text-orange-600 hover:bg-orange-50 px-8 py-6 rounded-full uppercase tracking-wider font-bold"
-                        >
-                            Pour en savoir plus
-                        </Button>
+                        <Link href="#services">
+                            <Button
+                                variant="outline"
+                                className="mt-4 border-orange-500 text-orange-600 hover:bg-orange-50 px-8 py-6 rounded-full uppercase tracking-wider font-bold"
+                            >
+                                Pour en savoir plus
+                            </Button>
+                        </Link>
                     </div>
                 </div>
             </div>

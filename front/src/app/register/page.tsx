@@ -15,6 +15,7 @@ import {
 import { Gender, GenderLabels } from "@/lib/constants";
 import { useAuth } from "@/contexts/AuthContext";
 import { Mail, Eye, EyeOff, Loader2, User, Phone, Calendar, Lock } from "lucide-react";
+import { API_URL } from "@/lib/config";
 
 interface FormData {
     email: string;
@@ -156,7 +157,7 @@ export default function RegisterPage() {
             const { confirmPassword: _confirmPassword, ...registerData } = formData;
 
             const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/auth/register`,
+                `${API_URL}/auth/register`,
                 {
                     method: "POST",
                     headers: {

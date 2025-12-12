@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { Mail, Eye, EyeOff, Loader2, CheckCircle2, Lock } from "lucide-react";
+import { API_URL } from "@/lib/config";
 
 interface FormData {
     email: string;
@@ -102,7 +103,7 @@ function LoginForm() {
 
         try {
             const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/auth/login`,
+                `${API_URL}/auth/login`,
                 {
                     method: "POST",
                     headers: {
