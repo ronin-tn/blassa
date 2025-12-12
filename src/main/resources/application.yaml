@@ -8,7 +8,7 @@ spring:
   application:
     name: blassa-backend
   datasource:
-    url: jdbc:postgresql://localhost:5432/blassa_db?stringtype=unspecified
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:blassa_db}?stringtype=unspecified
     username: postgres
     password: ronintn
     driver-class-name: org.postgresql.Driver
