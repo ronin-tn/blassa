@@ -241,7 +241,7 @@ export default function HeroSection({ onTabChange }: HeroSectionProps) {
                     <div className="absolute top-10 right-0 w-4/5 h-full bg-orange-50 rounded-[3rem] -rotate-3 z-0"></div>
                     <div className="absolute top-0 right-10 w-4/5 h-full rounded-[3rem] overflow-hidden shadow-2xl rotate-3 transition-transform duration-700 hover:rotate-2 z-10">
                         <Image
-                            src="/images/upscalemedia-transformed.png"
+                            src="/images/hero.png"
                             alt="Voyageurs heureux"
                             fill
                             className="object-cover transform hover:scale-105 transition duration-700"
