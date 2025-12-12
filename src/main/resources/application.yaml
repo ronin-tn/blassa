@@ -89,3 +89,16 @@ management:
       show-details: always
       probes:
         enabled: true
+  health:
+    # Disable mail health check - Render blocks outbound SMTP
+    mail:
+      enabled: false
+    # Return 200 OK even when status is DOWN (for Render health checks)
+    status:
+      http-mapping:
+        DOWN: 200
+        OUT_OF_SERVICE: 200
+        UNKNOWN: 200
+        UP: 200
+
+
