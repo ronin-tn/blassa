@@ -1,0 +1,48 @@
+services:
+  # Backend Service (Spring Boot)
+  - type: web
+    name: blassa-backend
+    runtime: docker
+    plan: free
+    region: frankfurt # Optional: Choose a region close to you
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: SPRING_DATASOURCE_URL
+        fromDatabase:
+          name: blassa-db
+          property: connectionString
+      - key: SPRING_DATASOURCE_USERNAME
+        fromDatabase:
+          name: blassa-db
+          property: user
+      - key: SPRING_DATASOURCE_PASSWORD
+        fromDatabase:
+          name: blassa-db
+          property: password
+      - key: SENTRY_AUTH_TOKEN
+        sync: false
+    healthCheckPath: /actuator/health
+
+  # Frontend Service (Next.js)
+  - type: web
+    name: blassa-frontend
+    runtime: node
+    buildCommand: cd front && npm install && npm run build
+    startCommand: cd front && npm start
+    plan: free
+    region: frankfurt
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        fromService:
+          type: web
+          name: blassa-backend
+          property: url
+
+databases:
+  - name: blassa-db
+    databaseName: blassa
+    user: blassa
+    plan: free
+    region: frankfurt
+    ipAllowList: [] # Warning: wide open for ease of access, restrict in production
