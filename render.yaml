@@ -28,16 +28,17 @@ services:
   - type: web
     name: blassa-frontend
     runtime: node
-    buildCommand: cd front && npm install && npm run build
+    # Construct the full API URL from the host provided by Render
+    buildCommand: cd front && npm install && NEXT_PUBLIC_API_URL=https://$NEXT_PUBLIC_API_HOST/api/v1 npm run build
     startCommand: cd front && npm start
     plan: free
     region: frankfurt
     envVars:
-      - key: NEXT_PUBLIC_API_URL
+      - key: NEXT_PUBLIC_API_HOST
         fromService:
           type: web
           name: blassa-backend
-          property: url
+          property: host
 
 databases:
   - name: blassa-db
