@@ -37,6 +37,14 @@ public class UserService {
         user.setFacebookUrl(request.getFacebookUrl());
         user.setInstagramUrl(request.getInstagramUrl());
 
+        // Update dob and gender if provided (for OAuth users completing profile)
+        if (request.getDob() != null) {
+            user.setDateOfBirth(request.getDob());
+        }
+        if (request.getGender() != null) {
+            user.setGender(request.getGender());
+        }
+
         User savedUser = userRepository.save(user);
         return mapToProfile(savedUser);
     }

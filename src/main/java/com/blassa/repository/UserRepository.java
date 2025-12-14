@@ -18,4 +18,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     Optional<User> findByVerificationToken(String token);
 
     Optional<User> findByResetToken(String token);
+
+    Optional<User> findByOauthProviderAndOauthId(String oauthProvider, String oauthId);
 }

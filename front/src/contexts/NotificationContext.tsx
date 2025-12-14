@@ -13,11 +13,13 @@ import { Client, IMessage } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Notification, NotificationContextType } from "@/types/notification";
-import { API_URL, WS_URL } from "@/lib/config";
 
 const NotificationContext = createContext<NotificationContextType | undefined>(
     undefined
 );
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8088/api/v1";
+const WS_URL = process.env.NEXT_PUBLIC_WS_URL || "http://localhost:8088/ws";
 
 export function NotificationProvider({ children }: { children: ReactNode }) {
     const { token, isAuthenticated, user } = useAuth();

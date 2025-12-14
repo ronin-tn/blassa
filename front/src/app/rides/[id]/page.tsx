@@ -32,6 +32,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/layout/Navbar";
+import ProfileGuard from "@/components/ProfileGuard";
 import {
     Ride,
     RideStatusLabels,
@@ -51,7 +52,7 @@ interface Passenger {
     status: BookingStatus;
 }
 
-export default function RideDetailsPage() {
+function RideDetailsContent() {
     const params = useParams();
     const router = useRouter();
     const { token, user } = useAuth();
@@ -662,5 +663,14 @@ export default function RideDetailsPage() {
                 </div>
             </main>
         </div>
+    );
+}
+
+// Wrap with ProfileGuard to block OAuth users with incomplete profiles
+export default function RideDetailsPage() {
+    return (
+        <ProfileGuard>
+            <RideDetailsContent />
+        </ProfileGuard>
     );
 }

@@ -3,13 +3,14 @@ export interface UserProfile {
     firstName: string;
     lastName: string;
     email: string;
-    dob: string;
-    gender: "MALE" | "FEMALE";
-    phoneNumber: string;
+    dob: string | null;
+    gender: "MALE" | "FEMALE" | null;
+    phoneNumber: string | null;
     bio: string | null;
     profilePictureUrl: string | null;
     facebookUrl: string | null;
     instagramUrl: string | null;
+    oauthProvider?: string | null; // For OAuth users
 }
 
 // Auth state

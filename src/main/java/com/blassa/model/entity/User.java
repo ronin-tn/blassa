@@ -34,13 +34,11 @@ public class User {
     private String email;
 
     @Size(max = 255)
-    @NotNull
-    @Column(name = "password_hash", nullable = false)
+    @Column(name = "password_hash")
     private String passwordHash;
 
     @Size(max = 20)
-    @NotNull
-    @Column(name = "phone_number", nullable = false, length = 20)
+    @Column(name = "phone_number", length = 20)
     private String phoneNumber;
 
     @Size(max = 100)
@@ -53,8 +51,7 @@ public class User {
     @Column(name = "last_name", nullable = false, length = 100)
     private String lastName;
 
-    @NotNull
-    @Column(name = "date_of_birth", nullable = false)
+    @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
 
     @Column(name = "bio", length = Integer.MAX_VALUE)
@@ -95,9 +92,8 @@ public class User {
     @OneToMany(mappedBy = "owner")
     private Set<Vehicle> vehicles = new LinkedHashSet<>();
 
-    @NotNull
     @Enumerated(EnumType.STRING)
-    @Column(name = "gender", nullable = false)
+    @Column(name = "gender")
     private Gender gender;
 
     @Enumerated(EnumType.STRING)
@@ -120,5 +116,13 @@ public class User {
     @Size(max = 255)
     @Column(name = "instagram_url")
     private String instagramUrl;
+
+    @Size(max = 50)
+    @Column(name = "oauth_provider")
+    private String oauthProvider;
+
+    @Size(max = 255)
+    @Column(name = "oauth_id")
+    private String oauthId;
 
 }

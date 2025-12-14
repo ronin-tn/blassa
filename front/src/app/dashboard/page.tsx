@@ -19,7 +19,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/layout/Navbar";
-import { API_URL } from "@/lib/config";
+import ProfileGuard from "@/components/ProfileGuard";
 
 interface Ride {
     id: string;
@@ -64,7 +64,7 @@ interface DashboardRide {
     status: string;
 }
 
-export default function DashboardPage() {
+function DashboardContent() {
     const router = useRouter();
     const { token, isAuthenticated, isLoading: authLoading } = useAuth();
 
@@ -93,7 +93,7 @@ export default function DashboardPage() {
         try {
             // Fetch driver's rides
             const ridesResponse = await fetch(
-                `${API_URL}/rides/mine?page=0&size=50`,
+                `${process.env.NEXT_PUBLIC_API_URL}/rides/mine?page=0&size=50`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -104,7 +104,7 @@ export default function DashboardPage() {
 
             // Fetch passenger's bookings
             const bookingsResponse = await fetch(
-                `${API_URL}/bookings/mine?page=0&size=50`,
+                `${process.env.NEXT_PUBLIC_API_URL}/bookings/mine?page=0&size=50`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -115,7 +115,7 @@ export default function DashboardPage() {
 
             // Fetch rating stats
             const reviewsResponse = await fetch(
-                `${API_URL}/reviews/mine/received?page=0&size=100`,
+                `${process.env.NEXT_PUBLIC_API_URL}/reviews/mine/received?page=0&size=100`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -532,5 +532,14 @@ export default function DashboardPage() {
                 </div>
             </main>
         </div>
+    );
+}
+
+// Wrap with ProfileGuard to block OAuth users with incomplete profiles
+export default function DashboardPage() {
+    return (
+        <ProfileGuard>
+            <DashboardContent />
+        </ProfileGuard>
     );
 }

@@ -3,14 +3,25 @@ app:
   base-url: http://localhost:8088
   frontend-url: http://localhost:3000
 server:
-  port: ${PORT:8088}
+  port: 8088
 spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 484738135148-ojm214hd016n0u91nuo6n72v5i5mf4en.apps.googleusercontent.com
+            client-secret: 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
+            scope:
+              - email
+              - profile
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
   application:
     name: blassa-backend
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:blassa_db}?stringtype=unspecified
-    username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:ronintn}
+    url: jdbc:postgresql://localhost:5432/blassa_db?stringtype=unspecified
+    username: postgres
+    password: ronintn
     driver-class-name: org.postgresql.Driver
 
     hikari:
@@ -77,28 +88,3 @@ sentry:
   # Set traces-sample-rate to 1.0 to capture 100% of transactions for tracing
   # We recommend adjusting this value in production (e.g., 0.1 for 10%)
   traces-sample-rate: 1.0
-
-# 5. ACTUATOR & MONITORING
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health, info, metrics
-  endpoint:
-    health:
-      show-details: always
-      probes:
-        enabled: true
-  health:
-    # Disable mail health check - Render blocks outbound SMTP
-    mail:
-      enabled: false
-    # Return 200 OK even when status is DOWN (for Render health checks)
-    status:
-      http-mapping:
-        DOWN: 200
-        OUT_OF_SERVICE: 200
-        UNKNOWN: 200
-        UP: 200
-
-

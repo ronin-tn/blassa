@@ -7,15 +7,17 @@ import {
     useEffect,
     useCallback,
     ReactNode,
+    useMemo,
 } from "react";
 import { UserProfile } from "@/types/auth";
-import { API_URL } from "@/lib/config";
 
 interface AuthContextType {
     user: UserProfile | null;
     token: string | null;
     isAuthenticated: boolean;
     isLoading: boolean;
+    isProfileComplete: boolean;
+    needsProfileCompletion: boolean;
     login: (token: string) => Promise<void>;
     logout: () => void;
     refreshUser: () => Promise<void>;
@@ -25,6 +27,12 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const TOKEN_KEY = "blassa_token";
 
+// Helper function to check if profile is complete
+function checkProfileComplete(user: UserProfile | null): boolean {
+    if (!user) return false;
+    return !!(user.phoneNumber && user.dob && user.gender);
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<UserProfile | null>(null);
     const [token, setToken] = useState<string | null>(null);
@@ -33,7 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const fetchUserProfile = useCallback(async (authToken: string) => {
         try {
             const response = await fetch(
-                `${API_URL}/user/me`,
+                `${process.env.NEXT_PUBLIC_API_URL}/user/me`,
                 {
                     headers: {
                         Authorization: `Bearer ${authToken}`,
@@ -94,11 +102,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     }, [token, fetchUserProfile]);
 
+    // Computed properties for profile completion status
+    const isProfileComplete = useMemo(() => checkProfileComplete(user), [user]);
+    const needsProfileCompletion = useMemo(
+        () => !!user && !!token && !isProfileComplete,
+        [user, token, isProfileComplete]
+    );
+
     const value: AuthContextType = {
         user,
         token,
         isAuthenticated: !!user && !!token,
         isLoading,
+        isProfileComplete,
+        needsProfileCompletion,
         login,
         logout,
         refreshUser,

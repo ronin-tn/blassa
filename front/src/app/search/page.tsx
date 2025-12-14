@@ -21,7 +21,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Ride, PagedResponse, RideGenderPreference } from "@/types/ride";
 import { TUNISIA_CITIES } from "@/data/cities";
 import { parseApiError } from "@/lib/api-utils";
-import { API_URL } from "@/lib/config";
 
 function SearchPageContent() {
     const searchParams = useSearchParams();
@@ -66,7 +65,7 @@ function SearchPageContent() {
                 const token = localStorage.getItem("blassa_token");
                 if (!token) return;
                 const response = await fetch(
-                    `${API_URL}/bookings/mine/ride-ids`,
+                    `${process.env.NEXT_PUBLIC_API_URL}/bookings/mine/ride-ids`,
                     { headers: { Authorization: `Bearer ${token}` } }
                 );
                 if (response.ok) {
@@ -110,7 +109,7 @@ function SearchPageContent() {
                 if (token) headers["Authorization"] = `Bearer ${token}`;
 
                 const response = await fetch(
-                    `${API_URL}/rides/search?${params.toString()}`,
+                    `${process.env.NEXT_PUBLIC_API_URL}/rides/search?${params.toString()}`,
                     { headers }
                 );
 
@@ -147,7 +146,7 @@ function SearchPageContent() {
             const token = localStorage.getItem("blassa_token");
             if (!token) throw new Error("Non authentifié");
 
-            const response = await fetch(`${API_URL}/bookings`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/bookings`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

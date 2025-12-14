@@ -1,9 +1,12 @@
 package com.blassa.dto;
 
+import com.blassa.model.enums.Gender;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+
+import java.time.LocalDate;
 
 @Data
 public class ProfileUpdateRequest {
@@ -28,4 +31,9 @@ public class ProfileUpdateRequest {
 
     @Size(max = 255, message = "L'URL Instagram ne doit pas dépasser 255 caractères")
     private String instagramUrl;
+
+    // For OAuth users to complete their profile
+    private LocalDate dob;
+
+    private Gender gender;
 }

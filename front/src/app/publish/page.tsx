@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { TUNISIA_CITIES, City } from "@/data/cities";
-import { API_URL } from "@/lib/config";
+import ProfileGuard from "@/components/ProfileGuard";
 
 type GenderPreference = "MALE_ONLY" | "FEMALE_ONLY" | "ANY";
 
@@ -33,7 +33,7 @@ interface RideFormData {
     genderPreference: GenderPreference;
 }
 
-export default function PublishRidePage() {
+function PublishRideContent() {
     const router = useRouter();
     const { isAuthenticated, isLoading: authLoading } = useAuth();
 
@@ -154,7 +154,7 @@ export default function PublishRidePage() {
             };
 
             const response = await fetch(
-                `${API_URL}/rides`,
+                `${process.env.NEXT_PUBLIC_API_URL}/rides`,
                 {
                     method: "POST",
                     headers: {
@@ -484,5 +484,14 @@ export default function PublishRidePage() {
                 </form>
             </div>
         </div>
+    );
+}
+
+// Wrap with ProfileGuard to block OAuth users with incomplete profiles
+export default function PublishRidePage() {
+    return (
+        <ProfileGuard>
+            <PublishRideContent />
+        </ProfileGuard>
     );
 }
