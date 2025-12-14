@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Blassa</string>
+    
+    <!-- Onboarding -->
+    <string name="onboarding_title_1">Trouvez votre trajet</string>
+    <string name="onboarding_subtitle_1">Recherchez parmi des milliers de trajets vers votre destination.</string>
+    <string name="onboarding_title_2">Proposez un trajet</string>
+    <string name="onboarding_subtitle_2">Partagez vos frais et réduisez votre empreinte carbone.</string>
+    <string name="onboarding_title_3">Voyagez en toute sécurité</string>
+    <string name="onboarding_subtitle_3">Profils vérifiés et options pour les femmes.</string>
+    <string name="skip">Passer</string>
+    <string name="next">Suivant</string>
+    <string name="get_started">Commencer</string>
+    
+    <!-- Auth -->
+    <string name="login">Connexion</string>
+    <string name="register">Inscription</string>
+    <string name="email">Email</string>
+    <string name="password">Mot de passe</string>
+    <string name="confirm_password">Confirmer le mot de passe</string>
+    <string name="login_button">Se connecter</string>
+    <string name="register_button">S\'inscrire</string>
+    <string name="or">OU</string>
+    <string name="continue_with_google">Continuer avec Google</string>
+    <string name="forgot_password">Mot de passe oublié?</string>
+    <string name="already_have_account">Déjà un compte? Se connecter</string>
+    <string name="create_account">Créer un compte</string>
+    <string name="first_name">Prénom</string>
+    <string name="last_name">Nom</string>
+    <string name="phone_number">Numéro de téléphone</string>
+    <string name="date_of_birth">Date de naissance</string>
+    <string name="gender">Genre</string>
+    <string name="male">Homme</string>
+    <string name="female">Femme</string>
+    <string name="accept_terms">J\'accepte les conditions d\'utilisation</string>
+    
+    <!-- Email Verification -->
+    <string name="verify_email">Vérifiez votre email</string>
+    <string name="verify_email_message">Nous avons envoyé un lien de vérification à %1$s. Veuillez vérifier votre boîte de réception.</string>
+    <string name="resend_email">Renvoyer l\'email</string>
+    <string name="change_email">Changer d\'adresse email</string>
+    <string name="email_verified">Email vérifié !</string>
+    <string name="email_verified_message">Votre compte est maintenant actif. Vous pouvez commencer à utiliser Blassa.</string>
+    <string name="continue_to_app">Continuer vers l\'application</string>
+    
+    <!-- Home -->
+    <string name="hello_user">Bonjour, %1$s!</string>
+    <string name="search_ride">Rechercher un trajet</string>
+    <string name="publish_ride">Publier un trajet</string>
+    <string name="upcoming_rides">Vos prochains trajets</string>
+    <string name="my_bookings">Mes réservations</string>
+    <string name="see_all">Voir tout</string>
+    
+    <!-- Navigation -->
+    <string name="nav_home">Accueil</string>
+    <string name="nav_search">Rechercher</string>
+    <string name="nav_publish">Publier</string>
+    <string name="nav_rides">Trajets</string>
+    <string name="nav_profile">Profil</string>
+    
+    <!-- Common -->
+    <string name="loading">Chargement…</string>
+    <string name="error_occurred">Une erreur s\'est produite</string>
+    <string name="retry">Réessayer</string>
+    <string name="no_connection">Pas de connexion</string>
+    <string name="no_results">Aucun résultat</string>
+    <string name="cancel">Annuler</string>
+    <string name="save">Enregistrer</string>
+</resources>

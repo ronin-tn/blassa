@@ -1,0 +1,14 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Background circle (will be transparent for adaptive icon) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,54m-40,0a40,40 0,1 1,80 0a40,40 0,1 1,-80 0"/>
+    <!-- Letter B for Blassa -->
+    <path
+        android:fillColor="#0E7490"
+        android:pathData="M38,32h12c5,0 9,1.5 11.5,4.5s3.5,6.5 3.5,10.5c0,3 -0.8,5.5 -2.3,7.5c-1.5,2 -3.7,3.3 -6.5,4c3.5,0.5 6.2,2 8.2,4.5s3,5.5 3,9c0,5 -1.5,9 -4.5,12s-7.5,4.5 -13.5,4.5h-11.4v-56.5zM48,50c2.5,0 4.5,-0.7 6,-2s2,-3.3 2,-6s-0.7,-4.7 -2,-6s-3.5,-2 -6,-2h-2v16h2zM48.5,80c2.8,0 5,-0.8 6.5,-2.5s2.5,-4 2.5,-7s-0.8,-5.3 -2.5,-7s-3.7,-2.5 -6.5,-2.5h-2.5v19h2.5z"/>
+</vector>
