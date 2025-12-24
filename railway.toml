@@ -1,0 +1,4 @@
+# Flyway maven plugin config (use env vars in production)
+flyway.url=${DATABASE_URL}
+flyway.user=${DATABASE_USER}
+flyway.password=${DATABASE_PASSWORD}
