@@ -22,9 +22,9 @@ spring:
   application:
     name: blassa-backend
   datasource:
-    url: jdbc:postgresql://ep-rough-meadow-agoq0blw-pooler.c-2.eu-central-1.aws.neon.tech:5432/neondb?sslmode=require&autosave=conservative
-    username: neondb_owner
-    password: npg_uH9OUp1zrXVo
+    url: jdbc:postgresql://localhost:5432/blassa_db?stringtype=unspecified
+    username: postgres
+    password: ronintn
     driver-class-name: org.postgresql.Driver
 
     hikari:
@@ -67,8 +67,6 @@ spring:
     enabled: true
     # If you have existing tables, this lets Flyway start managing them without crashing
     baseline-on-migrate: true
-    # Baseline at version 9 (latest) since neon_complete_migration.sql was already run
-    baseline-version: 9
 
   # 4. FILE UPLOADS (For Profile Pictures & ID Cards)
   servlet:
