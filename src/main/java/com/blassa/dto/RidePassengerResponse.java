@@ -8,12 +8,14 @@ import java.util.UUID;
  * Includes contact and social media info, and booking status.
  */
 public record RidePassengerResponse(
-                UUID bookingId,
-                String passengerName,
-                String passengerEmail,
-                String passengerPhone,
-                String facebookUrl,
-                String instagramUrl,
-                Integer seatsBooked,
-                BookingStatus status) {
+        UUID bookingId,
+        UUID passengerId,
+        String passengerName,
+        String passengerEmail,
+        String passengerPhone,
+        String passengerProfilePictureUrl,
+        String facebookUrl,
+        String instagramUrl,
+        Integer seatsBooked,
+        BookingStatus status) {
 }

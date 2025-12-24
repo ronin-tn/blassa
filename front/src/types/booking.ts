@@ -1,20 +1,27 @@
-// Booking types matching backend BookingResponse
-export interface Booking {
-    id: string;
-    rideID: string;
-    rideSummary: string;
-    driverName: string;
-    departureTime: string;
-    seatsBooked: number;
-    priceTotal: number;
-    status: BookingStatus;
-    rideStatus: "SCHEDULED" | "FULL" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
+/**
+ * Booking types with UI helpers
+ * Core types are imported from models.ts
+ */
+
+import {
+    Booking as BaseBooking,
+    BookingStatus,
+    PassengerInfo,
+    CreateBookingRequest,
+    RideStatus,
+} from "./models";
+
+// Extended Booking with additional fields used in the bookings page
+export interface Booking extends BaseBooking {
+    rideID: string; // Alias for rideId (backend uses camelCase, but some components use this)
+    rideStatus: RideStatus;
     createdAt: string;
 }
 
-export type BookingStatus = "PENDING" | "CONFIRMED" | "REJECTED" | "CANCELLED";
+// Re-export types
+export type { BookingStatus, PassengerInfo, CreateBookingRequest };
 
-// Status labels and colors
+// UI Helper Constants
 export const BookingStatusLabels: Record<BookingStatus, string> = {
     PENDING: "En attente",
     CONFIRMED: "Confirmée",

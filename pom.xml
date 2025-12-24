@@ -53,6 +53,7 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-flyway</artifactId>
 		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
@@ -170,6 +171,12 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-oauth2-client</artifactId>
 		</dependency>
+		<!-- Cloudinary SDK for image uploads -->
+		<dependency>
+			<groupId>com.cloudinary</groupId>
+			<artifactId>cloudinary-http45</artifactId>
+			<version>1.39.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -184,6 +191,16 @@
 							<artifactId>lombok</artifactId>
 						</path>
 					</annotationProcessorPaths>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.flywaydb</groupId>
+				<artifactId>flyway-maven-plugin</artifactId>
+				<version>11.14.1</version>
+				<configuration>
+					<url>jdbc:postgresql://ep-ancient-recipe-agbvqxdn-pooler.c-2.eu-central-1.aws.neon.tech:5432/neondb?sslmode=require</url>
+					<user>neondb_owner</user>
+					<password>npg_uH9OUp1zrXVo</password>
 				</configuration>
 			</plugin>
 			<plugin>

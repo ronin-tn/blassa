@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import {
     Search,
     Wallet,
@@ -14,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import CitySelect from "@/components/ui/city-select";
 import { City } from "@/data/cities";
+import { useRecentSearches } from "@/hooks/useRecentSearches";
 
 const popularRoutes = [
     { from: "Tunis", to: "Sousse" },
@@ -27,6 +29,9 @@ interface HeroSectionProps {
 }
 
 export default function HeroSection({ onTabChange }: HeroSectionProps) {
+    const router = useRouter();
+    const { addSearch } = useRecentSearches();
+
     const [departure, setDeparture] = useState<City | null>(null);
     const [destination, setDestination] = useState<City | null>(null);
     const [date, setDate] = useState("");
@@ -45,6 +50,15 @@ export default function HeroSection({ onTabChange }: HeroSectionProps) {
             alert("Veuillez sélectionner un point de départ et une destination.");
             return;
         }
+
+        // Save to recent searches
+        addSearch({
+            from: departure.name,
+            to: destination.name,
+            date: date || undefined,
+            passengers: parseInt(passengers),
+        });
+
         // Build clean, user-friendly URL
         const params = new URLSearchParams();
         params.set("from", departure.name);
@@ -53,7 +67,7 @@ export default function HeroSection({ onTabChange }: HeroSectionProps) {
         if (passengers !== "1") params.set("p", passengers);
         if (ladiesOnly) params.set("g", "FEMALE_ONLY");
 
-        window.location.href = `/search?${params.toString()}`;
+        router.push(`/search?${params.toString()}`);
     };
 
     return (
@@ -163,14 +177,25 @@ export default function HeroSection({ onTabChange }: HeroSectionProps) {
 
                                             {/* Ladies Only Toggle */}
                                             <div
-                                                className="flex items-center space-x-2 bg-pink-50 p-3 rounded-xl border border-pink-100 cursor-pointer"
+                                                role="checkbox"
+                                                aria-checked={ladiesOnly}
+                                                aria-label="Trajets entre femmes uniquement"
+                                                tabIndex={0}
+                                                className="flex items-center space-x-2 bg-pink-50 p-3 rounded-xl border border-pink-100 cursor-pointer focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2"
                                                 onClick={() => setLadiesOnly(!ladiesOnly)}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === " " || e.key === "Enter") {
+                                                        e.preventDefault();
+                                                        setLadiesOnly(!ladiesOnly);
+                                                    }
+                                                }}
                                             >
                                                 <div
                                                     className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${ladiesOnly
                                                         ? "bg-pink-500 border-pink-500"
                                                         : "bg-white border-slate-300"
                                                         }`}
+                                                    aria-hidden="true"
                                                 >
                                                     {ladiesOnly && (
                                                         <CheckCircle2 className="w-3.5 h-3.5 text-white" />
@@ -244,6 +269,7 @@ export default function HeroSection({ onTabChange }: HeroSectionProps) {
                             src="/images/hero.png"
                             alt="Voyageurs heureux"
                             fill
+                            sizes="(max-width: 1024px) 0vw, 50vw"
                             className="object-cover transform hover:scale-105 transition duration-700"
                             priority
                         />

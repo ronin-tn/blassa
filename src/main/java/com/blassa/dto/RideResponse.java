@@ -8,28 +8,33 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 public record RideResponse(
-        UUID id,
-        String driverName, // mithel "Amine B."
-        String driverEmail,
-        Double driverRating,
-        String driverFacebookUrl,
-        String driverInstagramUrl,
-        String driverPhoneNumber,
+                UUID id,
+                UUID driverId,
+                String driverName, // mithel "Amine B."
+                String driverProfilePictureUrl,
+                String driverEmail,
+                Double driverRating,
+                String driverFacebookUrl,
+                String driverInstagramUrl,
+                String driverPhoneNumber,
 
-        String originName,
-        Double originLat,
-        Double originLon,
+                String originName,
+                Double originLat,
+                Double originLon,
 
-        String destinationName,
-        Double destinationLat,
-        Double destinationLon,
+                String destinationName,
+                Double destinationLat,
+                Double destinationLon,
 
-        OffsetDateTime departureTime,
-        Integer totalSeats,
-        Integer availableSeats,
-        BigDecimal pricePerSeat,
+                OffsetDateTime departureTime,
+                Integer totalSeats,
+                Integer availableSeats,
+                BigDecimal pricePerSeat,
 
-        Boolean allowsSmoking,
-        RideGenderPreference genderPreference,
-        RideStatus status) {
+                Boolean allowsSmoking,
+                RideGenderPreference genderPreference,
+                RideStatus status,
+                String carMake,
+                String carModel,
+                String carColor) {
 }

@@ -17,7 +17,6 @@ import {
     ArrowLeft,
     MoreVertical,
     Edit,
-    Trash2,
     Play,
     CheckCircle,
     Ban,
@@ -36,7 +35,7 @@ import { parseApiError } from "@/lib/api-utils";
 
 export default function MyRidesPage() {
     const router = useRouter();
-    const { token, isAuthenticated, isLoading: authLoading } = useAuth();
+    const { isAuthenticated, isLoading: authLoading } = useAuth();
 
     const [rides, setRides] = useState<Ride[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -54,7 +53,7 @@ export default function MyRidesPage() {
     }, [authLoading, isAuthenticated, router]);
 
     const fetchRides = useCallback(async () => {
-        if (!token) return;
+        if (!isAuthenticated) return;
 
         setIsLoading(true);
         setError("");
@@ -63,8 +62,8 @@ export default function MyRidesPage() {
             const response = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/rides/mine?page=${currentPage}&size=10`,
                 {
+                    credentials: "include",
                     headers: {
-                        Authorization: `Bearer ${token}`,
                         "Content-Type": "application/json",
                     },
                 }
@@ -84,13 +83,13 @@ export default function MyRidesPage() {
         } finally {
             setIsLoading(false);
         }
-    }, [token, currentPage]);
+    }, [isAuthenticated, currentPage]);
 
     useEffect(() => {
-        if (token) {
+        if (isAuthenticated) {
             fetchRides();
         }
-    }, [token, fetchRides]);
+    }, [isAuthenticated, fetchRides]);
 
     const handleCancelRide = async (rideId: string) => {
         if (!confirm("Êtes-vous sûr de vouloir annuler ce trajet ?")) return;
@@ -100,9 +99,7 @@ export default function MyRidesPage() {
                 `${process.env.NEXT_PUBLIC_API_URL}/rides/${rideId}`,
                 {
                     method: "DELETE",
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
+                    credentials: "include",
                 }
             );
 
@@ -125,9 +122,7 @@ export default function MyRidesPage() {
                 `${process.env.NEXT_PUBLIC_API_URL}/rides/${rideId}/start`,
                 {
                     method: "PUT",
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
+                    credentials: "include",
                 }
             );
 
@@ -149,9 +144,7 @@ export default function MyRidesPage() {
                 `${process.env.NEXT_PUBLIC_API_URL}/rides/${rideId}/complete`,
                 {
                     method: "PUT",
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
+                    credentials: "include",
                 }
             );
 
@@ -203,7 +196,7 @@ export default function MyRidesPage() {
     }
 
     return (
-        <div className="min-h-screen bg-[#F8FAFC]">
+        <div className="min-h-screen bg-[#F8FAFC] pb-24 lg:pb-0">
             <Navbar />
             <div className="h-16"></div>
 

@@ -17,6 +17,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.http.HttpStatus;
 
 import java.util.List;
 
@@ -43,8 +45,12 @@ public class SecurityConfig {
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers("/api/v1/auth/**").permitAll()
                                                 .requestMatchers("/api/v1/rides/search").permitAll() // Public search
-                                                                                                     // for lazy
-                                                                                                     // registration
+                                                .requestMatchers(org.springframework.http.HttpMethod.GET,
+                                                                "/api/v1/rides/*")
+                                                .permitAll() // Public ride details
+                                                .requestMatchers("/api/v1/user/*/public").permitAll() // Public profile
+                                                                                                      // for lazy
+                                                                                                      // registration
                                                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
                                                 .requestMatchers("/ws/**").permitAll()
                                                 .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
@@ -60,6 +66,10 @@ public class SecurityConfig {
                                                         response.sendRedirect(
                                                                         frontendUrl + "/login?error=oauth_failed");
                                                 }))
+                                .exceptionHandling(exception -> exception
+                                                .defaultAuthenticationEntryPointFor(
+                                                                new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
+                                                                request -> request.getRequestURI().startsWith("/api/")))
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .authenticationProvider(authenticationProvider)

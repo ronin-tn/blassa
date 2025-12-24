@@ -13,16 +13,14 @@ import { Client, IMessage } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Notification, NotificationContextType } from "@/types/notification";
+import { API_URL, WS_URL } from "@/lib/config";
 
 const NotificationContext = createContext<NotificationContextType | undefined>(
     undefined
 );
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8088/api/v1";
-const WS_URL = process.env.NEXT_PUBLIC_WS_URL || "http://localhost:8088/ws";
-
 export function NotificationProvider({ children }: { children: ReactNode }) {
-    const { token, isAuthenticated, user } = useAuth();
+    const { isAuthenticated, user } = useAuth();
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [isConnected, setIsConnected] = useState(false);
@@ -30,12 +28,12 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
     // Fetch all notifications from API (both read and unread)
     const fetchNotifications = useCallback(async () => {
-        if (!token) return;
+        if (!isAuthenticated) return;
 
         try {
             const response = await fetch(`${API_URL}/notifications`, {
+                credentials: "include",
                 headers: {
-                    Authorization: `Bearer ${token}`,
                     "Content-Type": "application/json",
                 },
             });
@@ -49,39 +47,20 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         } catch (error) {
             console.error("Failed to fetch notifications:", error);
         }
-    }, [token]);
+    }, [isAuthenticated]);
 
-    // Fetch unread count
-    const fetchUnreadCount = useCallback(async () => {
-        if (!token) return;
 
-        try {
-            const response = await fetch(`${API_URL}/notifications/unread/count`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": "application/json",
-                },
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                setUnreadCount(data.count);
-            }
-        } catch (error) {
-            console.error("Failed to fetch unread count:", error);
-        }
-    }, [token]);
 
     // Mark single notification as read
     const markAsRead = useCallback(
         async (id: string) => {
-            if (!token) return;
+            if (!isAuthenticated) return;
 
             try {
                 await fetch(`${API_URL}/notifications/${id}/read`, {
                     method: "POST",
+                    credentials: "include",
                     headers: {
-                        Authorization: `Bearer ${token}`,
                         "Content-Type": "application/json",
                     },
                 });
@@ -94,18 +73,18 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
                 console.error("Failed to mark notification as read:", error);
             }
         },
-        [token]
+        [isAuthenticated]
     );
 
     // Mark all notifications as read
     const markAllAsRead = useCallback(async () => {
-        if (!token) return;
+        if (!isAuthenticated) return;
 
         try {
             await fetch(`${API_URL}/notifications/read-all`, {
                 method: "POST",
+                credentials: "include",
                 headers: {
-                    Authorization: `Bearer ${token}`,
                     "Content-Type": "application/json",
                 },
             });
@@ -115,7 +94,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         } catch (error) {
             console.error("Failed to mark all notifications as read:", error);
         }
-    }, [token]);
+    }, [isAuthenticated]);
 
     // Handle incoming WebSocket notification
     const handleNotification = useCallback((message: IMessage) => {
@@ -128,27 +107,23 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         }
     }, []);
 
+    // Fetch initial notifications when authenticated
+    useEffect(() => {
+        if (isAuthenticated) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            fetchNotifications();
+        }
+    }, [isAuthenticated, fetchNotifications]);
+
     // Setup WebSocket connection
     useEffect(() => {
-        if (!isAuthenticated || !token || !user) {
-            // Disconnect if not authenticated
-            if (stompClientRef.current) {
-                stompClientRef.current.deactivate();
-                stompClientRef.current = null;
-                setIsConnected(false);
-            }
+        if (!isAuthenticated || !user) {
             return;
         }
-
-        // Fetch initial notifications
-        fetchNotifications();
 
         // Create STOMP client
         const client = new Client({
             webSocketFactory: () => new SockJS(WS_URL),
-            connectHeaders: {
-                Authorization: `Bearer ${token}`,
-            },
             debug: (str) => {
                 if (process.env.NODE_ENV === "development") {
                     console.log("[STOMP]", str);
@@ -182,9 +157,10 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
             if (stompClientRef.current) {
                 stompClientRef.current.deactivate();
                 stompClientRef.current = null;
+                setIsConnected(false);
             }
         };
-    }, [isAuthenticated, token, user, fetchNotifications, handleNotification]);
+    }, [isAuthenticated, user, handleNotification]);
 
     const value: NotificationContextType = {
         notifications,

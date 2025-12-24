@@ -4,8 +4,11 @@ import com.blassa.dto.AuthenticationRequest;
 import com.blassa.dto.AuthenticationResponse;
 import com.blassa.dto.RegisterRequest;
 import com.blassa.service.AuthenticationService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,6 +20,14 @@ import java.util.Map;
 public class AuthenticationController {
     private final AuthenticationService authenticationService;
 
+    @Value("${app.cookie.secure:true}")
+    private boolean secureCookie;
+
+    @Value("${app.cookie.max-age:604800}") // 7 days in seconds
+    private int cookieMaxAge;
+
+    private static final String COOKIE_NAME = "blassa_token";
+
     @PostMapping("/register")
     public ResponseEntity<AuthenticationResponse> register(
             @RequestBody @Valid RegisterRequest request) {
@@ -24,9 +35,50 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthenticationResponse> authenticate(
-            @RequestBody @Valid AuthenticationRequest request) {
-        return ResponseEntity.ok(authenticationService.authenticate(request));
+    public ResponseEntity<Map<String, Object>> authenticate(
+            @RequestBody @Valid AuthenticationRequest request,
+            HttpServletResponse response) {
+        AuthenticationResponse authResponse = authenticationService.authenticate(request);
+
+        // Check if this is a special response (email not verified, etc.)
+        String token = authResponse.getToken();
+        if (token.equals("EMAIL_NOT_VERIFIED")) {
+            // Don't set cookie for unverified users
+            return ResponseEntity.ok(Map.of(
+                    "status", "EMAIL_NOT_VERIFIED",
+                    "email", authResponse.getEmail(),
+                    "verificationSentAt", authResponse.getVerificationSentAt() != null
+                            ? authResponse.getVerificationSentAt().toString()
+                            : ""));
+        }
+
+        // Set httpOnly cookie with JWT token
+        Cookie cookie = new Cookie(COOKIE_NAME, token);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(secureCookie);
+        cookie.setPath("/");
+        cookie.setMaxAge(cookieMaxAge);
+        cookie.setAttribute("SameSite", "Lax");
+        response.addCookie(cookie);
+
+        // Return success without exposing token
+        return ResponseEntity.ok(Map.of(
+                "status", "SUCCESS",
+                "email", authResponse.getEmail() != null ? authResponse.getEmail() : ""));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Map<String, String>> logout(HttpServletResponse response) {
+        // Clear the cookie by setting maxAge to 0
+        Cookie cookie = new Cookie(COOKIE_NAME, null);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(secureCookie);
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+        cookie.setAttribute("SameSite", "Lax");
+        response.addCookie(cookie);
+
+        return ResponseEntity.ok(Map.of("status", "LOGGED_OUT"));
     }
 
     @PostMapping("/resend-verification")

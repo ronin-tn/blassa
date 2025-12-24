@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,7 +13,7 @@ import {
 } from "@/components/ui/select";
 import { Gender, GenderLabels } from "@/lib/constants";
 import { useAuth } from "@/contexts/AuthContext";
-import { Mail, Eye, EyeOff, Loader2, User, Phone, Calendar, Lock } from "lucide-react";
+import { Mail, Eye, EyeOff, Loader2, User, Phone, Lock } from "lucide-react";
 
 interface FormData {
     email: string;
@@ -154,7 +153,15 @@ export default function RegisterPage() {
         setApiError("");
 
         try {
-            const { confirmPassword: _confirmPassword, ...registerData } = formData;
+            const registerData = {
+                email: formData.email,
+                password: formData.password,
+                firstName: formData.firstName,
+                lastName: formData.lastName,
+                phoneNumber: formData.phoneNumber,
+                gender: formData.gender,
+                birthDate: formData.birthDate,
+            };
 
             const response = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/auth/register`,
@@ -233,16 +240,14 @@ export default function RegisterPage() {
 
             {/* Register Card */}
             <div className="relative w-full max-w-[440px] bg-white rounded-[20px] p-8 shadow-[0_8px_20px_rgba(0,0,0,0.06)]">
-                {/* Logo */}
                 <div className="flex justify-center mb-6">
-                    <Link href="/">
-                        <Image
-                            src="/LOGO.png"
-                            alt="Blassa"
-                            width={72}
-                            height={72}
-                            className="w-[72px] h-[72px]"
-                        />
+                    <Link href="/" className="flex items-center gap-2 mb-8 md:mb-12">
+                        <div className="w-10 h-10 bg-[var(--color-blassa-teal)] rounded-xl flex items-center justify-center text-white font-bold text-xl">
+                            B
+                        </div>
+                        <span className="text-2xl font-bold text-slate-900 font-[family-name:var(--font-poppins)]">
+                            Blassa
+                        </span>
                     </Link>
                 </div>
 
@@ -320,7 +325,7 @@ export default function RegisterPage() {
                                     placeholder="Ahmed"
                                     value={formData.firstName}
                                     onChange={handleChange}
-                                    className={`w-full h-12 pl-12 pr-4 bg-slate-50 border rounded-xl text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#006B8F] focus:border-transparent transition-all ${errors.firstName ? "border-red-400" : "border-slate-200"
+                                    className={`w-full h-12 pl-12 pr-4 bg-slate-50 border rounded-xl text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[var(--color-blassa-teal)] focus:border-transparent transition-all ${errors.firstName ? "border-red-400" : "border-slate-200"
                                         }`}
                                 />
                             </div>
@@ -341,7 +346,7 @@ export default function RegisterPage() {
                                     placeholder="Ben Ali"
                                     value={formData.lastName}
                                     onChange={handleChange}
-                                    className={`w-full h-12 pl-12 pr-4 bg-slate-50 border rounded-xl text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#006B8F] focus:border-transparent transition-all ${errors.lastName ? "border-red-400" : "border-slate-200"
+                                    className={`w-full h-12 pl-12 pr-4 bg-slate-50 border rounded-xl text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[var(--color-blassa-teal)] focus:border-transparent transition-all ${errors.lastName ? "border-red-400" : "border-slate-200"
                                         }`}
                                 />
                             </div>
@@ -367,7 +372,7 @@ export default function RegisterPage() {
                                 value={formData.email}
                                 onChange={handleChange}
                                 autoComplete="email"
-                                className={`w-full h-12 pl-12 pr-4 bg-slate-50 border rounded-xl text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#006B8F] focus:border-transparent transition-all ${errors.email ? "border-red-400" : "border-slate-200"
+                                className={`w-full h-12 pl-12 pr-4 bg-slate-50 border rounded-xl text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[var(--color-blassa-teal)] focus:border-transparent transition-all ${errors.email ? "border-red-400" : "border-slate-200"
                                     }`}
                             />
                         </div>
@@ -391,7 +396,7 @@ export default function RegisterPage() {
                                 placeholder="+21612345678"
                                 value={formData.phoneNumber}
                                 onChange={handleChange}
-                                className={`w-full h-12 pl-12 pr-4 bg-slate-50 border rounded-xl text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#006B8F] focus:border-transparent transition-all ${errors.phoneNumber ? "border-red-400" : "border-slate-200"
+                                className={`w-full h-12 pl-12 pr-4 bg-slate-50 border rounded-xl text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[var(--color-blassa-teal)] focus:border-transparent transition-all ${errors.phoneNumber ? "border-red-400" : "border-slate-200"
                                     }`}
                             />
                         </div>
@@ -408,7 +413,7 @@ export default function RegisterPage() {
                             </label>
                             <Select value={formData.gender} onValueChange={handleGenderChange}>
                                 <SelectTrigger
-                                    className={`h-12 bg-slate-50 border rounded-xl text-sm focus:ring-2 focus:ring-[#006B8F] ${errors.gender ? "border-red-400" : "border-slate-200"
+                                    className={`h-12 bg-slate-50 border rounded-xl text-sm focus:ring-2 focus:ring-[var(--color-blassa-teal)] ${errors.gender ? "border-red-400" : "border-slate-200"
                                         }`}
                                 >
                                     <SelectValue placeholder="Sélectionnez" />
@@ -444,7 +449,7 @@ export default function RegisterPage() {
                                             .toISOString()
                                             .split("T")[0]
                                     }
-                                    className={`w-full h-12 px-4 bg-slate-50 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#006B8F] focus:border-transparent transition-all ${errors.birthDate ? "border-red-400" : "border-slate-200"
+                                    className={`w-full h-12 px-4 bg-slate-50 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-blassa-teal)] focus:border-transparent transition-all ${errors.birthDate ? "border-red-400" : "border-slate-200"
                                         }`}
                                 />
                             </div>
@@ -470,7 +475,7 @@ export default function RegisterPage() {
                                 value={formData.password}
                                 onChange={handleChange}
                                 autoComplete="new-password"
-                                className={`w-full h-12 pl-12 pr-12 bg-slate-50 border rounded-xl text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#006B8F] focus:border-transparent transition-all ${errors.password ? "border-red-400" : "border-slate-200"
+                                className={`w-full h-12 pl-12 pr-12 bg-slate-50 border rounded-xl text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[var(--color-blassa-teal)] focus:border-transparent transition-all ${errors.password ? "border-red-400" : "border-slate-200"
                                     }`}
                             />
                             <button
@@ -506,7 +511,7 @@ export default function RegisterPage() {
                                 value={formData.confirmPassword}
                                 onChange={handleChange}
                                 autoComplete="new-password"
-                                className={`w-full h-12 pl-12 pr-12 bg-slate-50 border rounded-xl text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#006B8F] focus:border-transparent transition-all ${errors.confirmPassword ? "border-red-400" : "border-slate-200"
+                                className={`w-full h-12 pl-12 pr-12 bg-slate-50 border rounded-xl text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[var(--color-blassa-teal)] focus:border-transparent transition-all ${errors.confirmPassword ? "border-red-400" : "border-slate-200"
                                     }`}
                             />
                             <button
@@ -529,7 +534,7 @@ export default function RegisterPage() {
                     {/* Submit Button */}
                     <Button
                         type="submit"
-                        className="w-full h-12 text-[15px] font-medium bg-[#006B8F] hover:bg-[#005673] text-white rounded-xl transition-all duration-200 shadow-sm"
+                        className="w-full h-12 text-[15px] font-medium bg-[var(--color-blassa-teal)] hover:bg-[var(--color-blassa-teal-dark)] text-white rounded-xl transition-all duration-200 shadow-sm"
                         disabled={isLoading || isGoogleLoading}
                     >
                         {isLoading ? (

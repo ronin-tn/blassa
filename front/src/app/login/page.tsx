@@ -135,11 +135,11 @@ function LoginForm() {
                 throw new Error(errorMessage);
             }
 
-            // Parse token from response
+            // Parse response - new format: {status, email, verificationSentAt?}
             const data = await response.json();
 
             // Check if email verification is needed
-            if (data.token === "EMAIL_NOT_VERIFIED") {
+            if (data.status === "EMAIL_NOT_VERIFIED") {
                 // Redirect to verification page with email
                 const params = new URLSearchParams({
                     email: data.email,
@@ -149,18 +149,18 @@ function LoginForm() {
                 return;
             }
 
-            // Check if we got a valid token
-            if (data.token && !data.token.includes("verification")) {
-                // Store token and fetch user profile
-                await login(data.token);
+            // Check if login was successful
+            if (data.status === "SUCCESS") {
+                // Cookie is set by backend, fetch user profile
+                await login();
 
                 // Clear sensitive data from state
                 setFormData({ email: "", password: "" });
 
                 router.push("/dashboard");
             } else {
-                // Fallback for any other message
-                setApiError(data.token || "Veuillez vérifier votre email.");
+                // Fallback for any other status
+                setApiError("Une erreur est survenue. Veuillez réessayer.");
             }
         } catch (error) {
             // Handle network errors specifically
@@ -233,7 +233,7 @@ function LoginForm() {
                     </label>
                     <Link
                         href="/forgot-password"
-                        className="text-sm font-medium text-[#FF9A3E] hover:text-[#E88A35] transition-colors"
+                        className="text-sm font-medium text-[var(--color-blassa-orange)] hover:text-[var(--color-blassa-orange-dark)] transition-colors"
                     >
                         Mot de passe oublié ?
                     </Link>
@@ -273,7 +273,7 @@ function LoginForm() {
             {/* Submit Button */}
             <Button
                 type="submit"
-                className="w-full h-12 text-[15px] font-medium bg-[#006B8F] hover:bg-[#005673] text-white rounded-xl transition-all duration-200 shadow-sm"
+                className="w-full h-12 text-[15px] font-medium bg-[var(--color-blassa-teal)] hover:bg-[var(--color-blassa-teal-dark)] text-white rounded-xl transition-all duration-200 shadow-sm"
                 disabled={isLoading || isGoogleLoading}
             >
                 {isLoading ? (

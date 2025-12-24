@@ -43,6 +43,8 @@ public class RideService {
     private final BookingRepository bookingRepository;
     private final NotificationService notificationService;
 
+    private final com.blassa.service.VehicleService vehicleService; // Inject VehicleService
+
     private final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
 
     @Transactional
@@ -52,12 +54,22 @@ public class RideService {
         // Validate gender preference consistency (Fix #6)
         validateGenderPreference(driver, rideRequest.genderPreference());
 
+        // Validate and fetch vehicle
+        if (rideRequest.vehicleId() == null) {
+            throw new IllegalArgumentException("A vehicle must be selected for the ride");
+        }
+        com.blassa.model.entity.Vehicle vehicle = vehicleService.getVehicleEntity(rideRequest.vehicleId());
+        if (!vehicle.getOwner().getId().equals(driver.getId())) {
+            throw new IllegalArgumentException("You can only use your own vehicles");
+        }
+
         Point origin = geometryFactory.createPoint(new Coordinate(rideRequest.originLon(), rideRequest.originLat()));
         Point destination = geometryFactory
                 .createPoint(new Coordinate(rideRequest.destinationLon(), rideRequest.destinationLat()));
 
         Ride ride = new Ride();
         ride.setDriver(driver);
+        ride.setVehicle(vehicle); // Set vehicle
         ride.setOriginName(rideRequest.originName());
         ride.setOriginPoint(origin);
         ride.setDestinationName(rideRequest.destinationName());
@@ -74,9 +86,15 @@ public class RideService {
     }
 
     private RideResponse mapToResponse(Ride ride) {
+        String carMake = ride.getVehicle() != null ? ride.getVehicle().getMake() : null;
+        String carModel = ride.getVehicle() != null ? ride.getVehicle().getModel() : null;
+        String carColor = ride.getVehicle() != null ? ride.getVehicle().getColor() : null;
+
         return new RideResponse(
                 ride.getId(),
+                ride.getDriver().getId(),
                 ride.getDriver().getFirstName() + " " + ride.getDriver().getLastName(),
+                ride.getDriver().getProfilePictureUrl(),
                 ride.getDriver().getEmail(),
                 0.0, // Placeholder for rating calculation
                 ride.getDriver().getFacebookUrl(),
@@ -94,7 +112,10 @@ public class RideService {
                 ride.getPricePerSeat(),
                 ride.getAllowsSmoking(),
                 ride.getGenderPreference(),
-                ride.getStatus());
+                ride.getStatus(),
+                carMake,
+                carModel,
+                carColor);
     }
 
     /**
@@ -205,10 +226,10 @@ public class RideService {
             return; // Default to ANY is fine
 
         if (driver.getGender() == Gender.MALE && preference == RideGenderPreference.FEMALE_ONLY) {
-            throw new IllegalArgumentException("Male drivers cannot create FEMALE_ONLY rides");
+            throw new IllegalArgumentException("Vous ne pouvez pas créer un trajet réservé aux femmes");
         }
         if (driver.getGender() == Gender.FEMALE && preference == RideGenderPreference.MALE_ONLY) {
-            throw new IllegalArgumentException("Female drivers cannot create MALE_ONLY rides");
+            throw new IllegalArgumentException("Vous ne pouvez pas créer un trajet réservé aux hommes");
         }
     }
 
@@ -370,7 +391,7 @@ public class RideService {
                     "Trajet terminé",
                     "Le trajet " + saved.getOriginName() + " → " + saved.getDestinationName()
                             + " est terminé. N'oubliez pas de laisser un avis !",
-                    "/rides/" + rideId + "/review");
+                    "/rides/" + rideId);
         }
 
         // After completion, all bookings for this ride become eligible for reviews

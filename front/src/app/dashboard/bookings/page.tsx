@@ -29,10 +29,11 @@ import {
 } from "@/types/booking";
 import { PagedResponse } from "@/types/ride";
 import { parseApiError } from "@/lib/api-utils";
+import ConfirmationModal from "@/components/ui/confirmation-modal";
 
 export default function MyBookingsPage() {
     const router = useRouter();
-    const { token, isAuthenticated, isLoading: authLoading } = useAuth();
+    const { isAuthenticated, isLoading: authLoading } = useAuth();
 
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -40,6 +41,10 @@ export default function MyBookingsPage() {
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
     const [statusFilter, setStatusFilter] = useState<BookingStatus | "ALL">("ALL");
+
+    // Cancellation Modal State
+    const [bookingToCancel, setBookingToCancel] = useState<string | null>(null);
+    const [isCancelling, setIsCancelling] = useState(false);
 
     // Redirect if not authenticated
     useEffect(() => {
@@ -49,7 +54,7 @@ export default function MyBookingsPage() {
     }, [authLoading, isAuthenticated, router]);
 
     const fetchBookings = useCallback(async () => {
-        if (!token) return;
+        if (!isAuthenticated) return;
 
         setIsLoading(true);
         setError("");
@@ -58,8 +63,8 @@ export default function MyBookingsPage() {
             const response = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/bookings/mine?page=${currentPage}&size=10`,
                 {
+                    credentials: "include",
                     headers: {
-                        Authorization: `Bearer ${token}`,
                         "Content-Type": "application/json",
                     },
                 }
@@ -79,25 +84,28 @@ export default function MyBookingsPage() {
         } finally {
             setIsLoading(false);
         }
-    }, [token, currentPage]);
+    }, [isAuthenticated, currentPage]);
 
     useEffect(() => {
-        if (token) {
+        if (isAuthenticated) {
             fetchBookings();
         }
-    }, [token, fetchBookings]);
+    }, [isAuthenticated, fetchBookings]);
 
-    const handleCancelBooking = async (bookingId: string) => {
-        if (!confirm("Êtes-vous sûr de vouloir annuler cette réservation ?")) return;
+    const handleCancelBooking = (bookingId: string) => {
+        setBookingToCancel(bookingId);
+    };
 
+    const confirmCancel = async () => {
+        if (!bookingToCancel) return;
+
+        setIsCancelling(true);
         try {
             const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/bookings/${bookingId}`,
+                `${process.env.NEXT_PUBLIC_API_URL}/bookings/${bookingToCancel}`,
                 {
                     method: "DELETE",
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
+                    credentials: "include",
                 }
             );
 
@@ -108,8 +116,11 @@ export default function MyBookingsPage() {
 
             // Refresh bookings
             fetchBookings();
+            setBookingToCancel(null);
         } catch (err) {
             alert(err instanceof Error ? err.message : "Erreur lors de l'annulation");
+        } finally {
+            setIsCancelling(false);
         }
     };
 
@@ -122,7 +133,7 @@ export default function MyBookingsPage() {
     };
 
     const sortedAndFilteredBookings = (() => {
-        let result = statusFilter === "ALL"
+        const result = statusFilter === "ALL"
             ? [...bookings]
             : bookings.filter((booking) => booking.status === statusFilter);
 
@@ -176,7 +187,7 @@ export default function MyBookingsPage() {
     }
 
     return (
-        <div className="min-h-screen bg-[#F8FAFC] pb-20 lg:pb-8">
+        <div className="min-h-screen bg-[#F8FAFC] pb-24 lg:pb-8">
             <Navbar />
             <div className="h-16"></div>
 
@@ -384,6 +395,18 @@ export default function MyBookingsPage() {
                     </div>
                 )}
             </main>
+
+            <ConfirmationModal
+                isOpen={!!bookingToCancel}
+                onClose={() => !isCancelling && setBookingToCancel(null)}
+                onConfirm={confirmCancel}
+                title="Annuler la réservation"
+                message="Êtes-vous sûr de vouloir annuler cette réservation ? Cette action est irréversible."
+                confirmLabel="Oui, annuler"
+                cancelLabel="Non, garder"
+                isDestructive={true}
+                isLoading={isCancelling}
+            />
         </div>
     );
 }

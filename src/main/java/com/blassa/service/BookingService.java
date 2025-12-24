@@ -41,6 +41,7 @@ public class BookingService {
     private final RideRepository rideRepository;
     private final EmailService emailService;
     private final NotificationService notificationService;
+    private final VehicleService vehicleService;
 
     @Transactional
     public BookingResponse createBooking(BookingRequest bookingRequest) {
@@ -167,6 +168,31 @@ public class BookingService {
 
     // Map l response, kont najm nhotha fi DTO dossier ama mch lezm
     private BookingResponse mapToResponse(Booking booking) {
+        String carLicensePlate = null;
+        String carDescription = null;
+
+        if (booking.getRide().getVehicle() != null) {
+            com.blassa.model.entity.Vehicle v = booking.getRide().getVehicle();
+            carDescription = v.getMake() + " " + v.getModel() + " (" + v.getColor() + ")";
+
+            boolean showFullPlate = false;
+            // Rule 1: Ride is active/completed
+            if (booking.getRide().getStatus() == RideStatus.IN_PROGRESS
+                    || booking.getRide().getStatus() == RideStatus.COMPLETED) {
+                showFullPlate = true;
+            }
+            // Rule 2: T-60 Minutes
+            else if (booking.getRide().getDepartureTime().minusMinutes(60).isBefore(java.time.OffsetDateTime.now())) {
+                showFullPlate = true;
+            }
+
+            if (showFullPlate) {
+                carLicensePlate = v.getLicensePlate();
+            } else if (booking.getStatus() == BookingStatus.CONFIRMED) {
+                carLicensePlate = vehicleService.getMaskedPlate(v.getLicensePlate());
+            }
+        }
+
         return new BookingResponse(
                 booking.getId(),
                 booking.getRide().getId(),
@@ -177,7 +203,9 @@ public class BookingService {
                 booking.getPriceTotal(),
                 booking.getStatus(),
                 booking.getRide().getStatus(),
-                booking.getCreatedAt());
+                booking.getCreatedAt(),
+                carLicensePlate,
+                carDescription);
     }
 
     @Transactional
@@ -231,9 +259,11 @@ public class BookingService {
                 .filter(b -> b.getStatus() == BookingStatus.PENDING || b.getStatus() == BookingStatus.CONFIRMED)
                 .map(b -> new com.blassa.dto.RidePassengerResponse(
                         b.getId(),
+                        b.getPassenger().getId(),
                         b.getPassenger().getFirstName() + " " + b.getPassenger().getLastName(),
                         b.getPassenger().getEmail(),
                         b.getPassenger().getPhoneNumber(),
+                        b.getPassenger().getProfilePictureUrl(),
                         b.getPassenger().getFacebookUrl(),
                         b.getPassenger().getInstagramUrl(),
                         b.getSeatsBooked(),
@@ -283,7 +313,7 @@ public class BookingService {
                 "Réservation annulée",
                 currentUser.getFirstName() + " " + currentUser.getLastName() + " a annulé sa réservation pour "
                         + ride.getOriginName() + " → " + ride.getDestinationName(),
-                "/dashboard/rides/" + ride.getId());
+                "/rides/" + ride.getId());
     }
 
     /**
@@ -321,7 +351,7 @@ public class BookingService {
                 "Réservation annulée",
                 currentUser.getFirstName() + " " + currentUser.getLastName() + " a annulé sa réservation pour "
                         + ride.getOriginName() + " → " + ride.getDestinationName(),
-                "/dashboard/rides/" + ride.getId());
+                "/rides/" + ride.getId());
     }
 
     private void validateBookingRules(Ride ride, User passenger, Integer requestedSeats,

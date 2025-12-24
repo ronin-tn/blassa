@@ -42,7 +42,7 @@ interface RideInfo {
 export default function ReviewPage() {
     const params = useParams();
     const router = useRouter();
-    const { token, user, isAuthenticated, isLoading: authLoading } = useAuth();
+    const { user, isAuthenticated, isLoading: authLoading } = useAuth();
 
     const [ride, setRide] = useState<RideInfo | null>(null);
     const [booking, setBooking] = useState<BookingInfo | null>(null);
@@ -64,7 +64,7 @@ export default function ReviewPage() {
     }, [authLoading, isAuthenticated, router]);
 
     const fetchData = useCallback(async () => {
-        if (!rideId || !token) return;
+        if (!rideId || !isAuthenticated) return;
 
         setIsLoading(true);
         setError("");
@@ -74,8 +74,8 @@ export default function ReviewPage() {
             const rideResponse = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/rides/${rideId}`,
                 {
+                    credentials: "include",
                     headers: {
-                        Authorization: `Bearer ${token}`,
                         "Content-Type": "application/json",
                     },
                 }
@@ -93,8 +93,8 @@ export default function ReviewPage() {
             const bookingResponse = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/bookings/ride/${rideId}/mine`,
                 {
+                    credentials: "include",
                     headers: {
-                        Authorization: `Bearer ${token}`,
                         "Content-Type": "application/json",
                     },
                 }
@@ -124,13 +124,13 @@ export default function ReviewPage() {
         } finally {
             setIsLoading(false);
         }
-    }, [rideId, token]);
+    }, [rideId, isAuthenticated]);
 
     useEffect(() => {
-        if (token) {
+        if (isAuthenticated) {
             fetchData();
         }
-    }, [token, fetchData]);
+    }, [isAuthenticated, fetchData]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -149,8 +149,8 @@ export default function ReviewPage() {
                 `${process.env.NEXT_PUBLIC_API_URL}/reviews`,
                 {
                     method: "POST",
+                    credentials: "include",
                     headers: {
-                        Authorization: `Bearer ${token}`,
                         "Content-Type": "application/json",
                     },
                     body: JSON.stringify({
@@ -217,7 +217,7 @@ export default function ReviewPage() {
                             </Link>
                             <Link href="/">
                                 <Button variant="outline" className="w-full rounded-xl">
-                                    Retour à l'accueil
+                                    Retour à l&apos;accueil
                                 </Button>
                             </Link>
                         </div>
@@ -239,7 +239,7 @@ export default function ReviewPage() {
                     </div>
                     <h1 className="text-xl font-bold text-slate-900 mb-2">{error}</h1>
                     <p className="text-slate-500 mb-6">
-                        Impossible de charger la page d'avis.
+                        Impossible de charger la page d&apos;avis.
                     </p>
                     <Button onClick={() => router.back()} variant="outline" className="rounded-xl">
                         <ArrowLeft className="w-4 h-4 mr-2" />
@@ -276,7 +276,7 @@ export default function ReviewPage() {
                                     Laisser un avis
                                 </h1>
                                 <p className="text-slate-500 text-sm">
-                                    Comment s'est passé votre trajet ?
+                                    Comment s&apos;est passé votre trajet ?
                                 </p>
                             </div>
                         </div>

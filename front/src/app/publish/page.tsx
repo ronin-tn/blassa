@@ -15,10 +15,13 @@ import {
     Loader2,
     CheckCircle,
     AlertCircle,
+    Car,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { TUNISIA_CITIES, City } from "@/data/cities";
 import ProfileGuard from "@/components/ProfileGuard";
+import { VehicleSelector } from "@/components/rides/driver/VehicleSelector";
+import Navbar from "@/components/layout/Navbar";
 
 type GenderPreference = "MALE_ONLY" | "FEMALE_ONLY" | "ANY";
 
@@ -31,6 +34,7 @@ interface RideFormData {
     pricePerSeat: string;
     allowsSmoking: boolean;
     genderPreference: GenderPreference;
+    vehicleId: string;
 }
 
 function PublishRideContent() {
@@ -51,6 +55,7 @@ function PublishRideContent() {
         pricePerSeat: "",
         allowsSmoking: false,
         genderPreference: "ANY",
+        vehicleId: "",
     });
 
     // Redirect if not authenticated
@@ -98,6 +103,7 @@ function PublishRideContent() {
         }
         if (!formData.departureDate) return "Veuillez sélectionner une date de départ";
         if (!formData.departureTime) return "Veuillez sélectionner une heure de départ";
+        if (!formData.vehicleId) return "Veuillez sélectionner un véhicule";
         if (!formData.pricePerSeat || parseFloat(formData.pricePerSeat) <= 0) {
             return "Veuillez entrer un prix valide";
         }
@@ -124,11 +130,6 @@ function PublishRideContent() {
         setIsSubmitting(true);
 
         try {
-            const token = localStorage.getItem("blassa_token");
-            if (!token) {
-                throw new Error("Non authentifié");
-            }
-
             const origin = getCityByCode(formData.originCode);
             const destination = getCityByCode(formData.destinationCode);
 
@@ -151,15 +152,16 @@ function PublishRideContent() {
                 pricePerSeat: parseFloat(formData.pricePerSeat),
                 allowsSmoking: formData.allowsSmoking,
                 genderPreference: formData.genderPreference,
+                vehicleId: formData.vehicleId,
             };
 
             const response = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/rides`,
                 {
                     method: "POST",
+                    credentials: "include",
                     headers: {
                         "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`,
                     },
                     body: JSON.stringify(requestBody),
                 }
@@ -185,305 +187,326 @@ function PublishRideContent() {
     // Loading state
     if (authLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                <div className="flex flex-col items-center gap-4">
-                    <Loader2 className="w-10 h-10 text-[#0A8F8F] animate-spin" />
-                    <span className="text-gray-600">Chargement...</span>
+            <>
+                <Navbar />
+                <div className="min-h-screen flex items-center justify-center bg-gray-50 pt-16">
+                    <div className="flex flex-col items-center gap-4">
+                        <Loader2 className="w-10 h-10 text-[#0A8F8F] animate-spin" />
+                        <span className="text-gray-600">Chargement...</span>
+                    </div>
                 </div>
-            </div>
+            </>
         );
     }
 
     // Success state
     if (success) {
         return (
-            <div className="min-h-screen bg-gray-50 py-8 px-4">
-                <div className="max-w-md mx-auto">
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center">
-                        <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-green-100 flex items-center justify-center">
-                            <CheckCircle className="w-10 h-10 text-green-600" />
-                        </div>
-                        <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                            Trajet publié !
-                        </h1>
-                        <p className="text-gray-600 mb-8">
-                            Votre trajet a été publié avec succès. Les passagers peuvent
-                            maintenant le réserver.
-                        </p>
-                        <div className="space-y-3">
-                            <Link
-                                href={`/rides/${createdRideId}`}
-                                className="block w-full py-3 bg-[#0A8F8F] text-white font-medium rounded-xl hover:bg-[#0A8F8F]/90 transition-colors"
-                            >
-                                Voir mon trajet
-                            </Link>
-                            <Link
-                                href="/dashboard/rides"
-                                className="block w-full py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-colors"
-                            >
-                                Mes trajets
-                            </Link>
+            <>
+                <Navbar />
+                <div className="min-h-screen bg-gray-50 py-8 px-4 pt-20">
+                    <div className="max-w-md mx-auto">
+                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center">
+                            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-green-100 flex items-center justify-center">
+                                <CheckCircle className="w-10 h-10 text-green-600" />
+                            </div>
+                            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                                Trajet publié !
+                            </h1>
+                            <p className="text-gray-600 mb-8">
+                                Votre trajet a été publié avec succès. Les passagers peuvent
+                                maintenant le réserver.
+                            </p>
+                            <div className="space-y-3">
+                                <Link
+                                    href={`/rides/${createdRideId}`}
+                                    className="block w-full py-3 bg-[#0A8F8F] text-white font-medium rounded-xl hover:bg-[#0A8F8F]/90 transition-colors"
+                                >
+                                    Voir mon trajet
+                                </Link>
+                                <Link
+                                    href="/dashboard/rides"
+                                    className="block w-full py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-colors"
+                                >
+                                    Mes trajets
+                                </Link>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 py-8 px-4 pb-24">
-            <div className="max-w-2xl mx-auto">
-                {/* Header */}
-                <div className="flex items-center gap-4 mb-6">
-                    <Link
-                        href="/dashboard"
-                        className="flex items-center gap-2 text-gray-600 hover:text-[#0A8F8F] transition-colors"
-                    >
-                        <ArrowLeft className="w-5 h-5" />
-                        <span>Retour</span>
-                    </Link>
-                    <h1 className="text-2xl font-bold text-gray-900">Publier un trajet</h1>
-                </div>
-
-                {/* Error Message */}
-                {error && (
-                    <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
-                        <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-                        <p className="text-red-700">{error}</p>
+        <>
+            <Navbar />
+            <div className="min-h-screen bg-gray-50 py-8 px-4 pb-24 pt-20">
+                <div className="max-w-2xl mx-auto">
+                    {/* Header */}
+                    <div className="flex items-center gap-4 mb-6">
+                        <Link
+                            href="/dashboard"
+                            className="flex items-center gap-2 text-gray-600 hover:text-[#0A8F8F] transition-colors"
+                        >
+                            <ArrowLeft className="w-5 h-5" />
+                            <span>Retour</span>
+                        </Link>
+                        <h1 className="text-2xl font-bold text-gray-900">Publier un trajet</h1>
                     </div>
-                )}
 
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    {/* Route Section */}
-                    <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                        <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-900 mb-4">
-                            <MapPin className="w-5 h-5 text-[#0A8F8F]" />
-                            Itinéraire
-                        </h2>
-
-                        <div className="space-y-4">
-                            {/* Origin */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Ville de départ
-                                </label>
-                                <select
-                                    name="originCode"
-                                    value={formData.originCode}
-                                    onChange={handleInputChange}
-                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0A8F8F]/20 focus:border-[#0A8F8F] bg-white"
-                                >
-                                    <option value="">Sélectionner une ville</option>
-                                    {TUNISIA_CITIES.map((city) => (
-                                        <option key={city.code} value={city.code}>
-                                            {city.name}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            {/* Destination */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Ville d&apos;arrivée
-                                </label>
-                                <select
-                                    name="destinationCode"
-                                    value={formData.destinationCode}
-                                    onChange={handleInputChange}
-                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0A8F8F]/20 focus:border-[#0A8F8F] bg-white"
-                                >
-                                    <option value="">Sélectionner une ville</option>
-                                    {TUNISIA_CITIES.map((city) => (
-                                        <option key={city.code} value={city.code}>
-                                            {city.name}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
+                    {/* Error Message */}
+                    {error && (
+                        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
+                            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                            <p className="text-red-700">{error}</p>
                         </div>
-                    </section>
+                    )}
 
-                    {/* Date & Time Section */}
-                    <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                        <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-900 mb-4">
-                            <Calendar className="w-5 h-5 text-[#0A8F8F]" />
-                            Date et heure
-                        </h2>
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        {/* Route Section */}
+                        <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                            <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-900 mb-4">
+                                <MapPin className="w-5 h-5 text-[#0A8F8F]" />
+                                Itinéraire
+                            </h2>
 
-                        <div className="grid grid-cols-2 gap-4">
-                            {/* Date */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Date de départ
-                                </label>
-                                <input
-                                    type="date"
-                                    name="departureDate"
-                                    value={formData.departureDate}
-                                    onChange={handleInputChange}
-                                    min={getMinDate()}
-                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0A8F8F]/20 focus:border-[#0A8F8F]"
-                                />
-                            </div>
-
-                            {/* Time */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Heure de départ
-                                </label>
-                                <div className="relative">
-                                    <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                                    <input
-                                        type="time"
-                                        name="departureTime"
-                                        value={formData.departureTime}
+                            <div className="space-y-4">
+                                {/* Origin */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Ville de départ
+                                    </label>
+                                    <select
+                                        name="originCode"
+                                        value={formData.originCode}
                                         onChange={handleInputChange}
-                                        className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0A8F8F]/20 focus:border-[#0A8F8F]"
+                                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0A8F8F]/20 focus:border-[#0A8F8F] bg-white"
+                                    >
+                                        <option value="">Sélectionner une ville</option>
+                                        {TUNISIA_CITIES.map((city) => (
+                                            <option key={city.code} value={city.code}>
+                                                {city.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                {/* Destination */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Ville d&apos;arrivée
+                                    </label>
+                                    <select
+                                        name="destinationCode"
+                                        value={formData.destinationCode}
+                                        onChange={handleInputChange}
+                                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0A8F8F]/20 focus:border-[#0A8F8F] bg-white"
+                                    >
+                                        <option value="">Sélectionner une ville</option>
+                                        {TUNISIA_CITIES.map((city) => (
+                                            <option key={city.code} value={city.code}>
+                                                {city.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* Date & Time Section */}
+                        <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                            <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-900 mb-4">
+                                <Calendar className="w-5 h-5 text-[#0A8F8F]" />
+                                Date et heure
+                            </h2>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                {/* Date */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Date de départ
+                                    </label>
+                                    <input
+                                        type="date"
+                                        name="departureDate"
+                                        value={formData.departureDate}
+                                        onChange={handleInputChange}
+                                        min={getMinDate()}
+                                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0A8F8F]/20 focus:border-[#0A8F8F]"
                                     />
                                 </div>
-                            </div>
-                        </div>
-                    </section>
 
-                    {/* Seats & Price Section */}
-                    <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                        <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-900 mb-4">
-                            <Users className="w-5 h-5 text-[#0A8F8F]" />
-                            Places et prix
-                        </h2>
-
-                        <div className="space-y-4">
-                            {/* Seats */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Nombre de places disponibles
-                                </label>
-                                <div className="flex items-center gap-4">
-                                    <button
-                                        type="button"
-                                        onClick={() => handleSeatsChange(-1)}
-                                        disabled={formData.totalSeats <= 1}
-                                        className="w-12 h-12 rounded-xl border border-gray-200 flex items-center justify-center text-xl font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        −
-                                    </button>
-                                    <span className="text-2xl font-bold text-gray-900 w-12 text-center">
-                                        {formData.totalSeats}
-                                    </span>
-                                    <button
-                                        type="button"
-                                        onClick={() => handleSeatsChange(1)}
-                                        disabled={formData.totalSeats >= 8}
-                                        className="w-12 h-12 rounded-xl border border-gray-200 flex items-center justify-center text-xl font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        +
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* Price */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Prix par place (TND)
-                                </label>
-                                <div className="relative">
-                                    <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                                    <input
-                                        type="number"
-                                        name="pricePerSeat"
-                                        value={formData.pricePerSeat}
-                                        onChange={handleInputChange}
-                                        placeholder="15.00"
-                                        step="0.5"
-                                        min="0"
-                                        className="w-full pl-12 pr-16 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0A8F8F]/20 focus:border-[#0A8F8F]"
-                                    />
-                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500">
-                                        TND
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* Preferences Section */}
-                    <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                        <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-900 mb-4">
-                            <User className="w-5 h-5 text-[#0A8F8F]" />
-                            Préférences
-                        </h2>
-
-                        <div className="space-y-4">
-                            {/* Smoking */}
-                            <label className="flex items-center justify-between p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50">
-                                <div className="flex items-center gap-3">
-                                    <Cigarette className="w-5 h-5 text-gray-400" />
-                                    <div>
-                                        <p className="font-medium text-gray-900">Fumeur autorisé</p>
-                                        <p className="text-sm text-gray-500">Autoriser les fumeurs dans votre véhicule</p>
+                                {/* Time */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Heure de départ
+                                    </label>
+                                    <div className="relative">
+                                        <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                        <input
+                                            type="time"
+                                            name="departureTime"
+                                            value={formData.departureTime}
+                                            onChange={handleInputChange}
+                                            className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0A8F8F]/20 focus:border-[#0A8F8F]"
+                                        />
                                     </div>
                                 </div>
-                                <input
-                                    type="checkbox"
-                                    name="allowsSmoking"
-                                    checked={formData.allowsSmoking}
-                                    onChange={handleInputChange}
-                                    className="w-5 h-5 text-[#0A8F8F] border-gray-300 rounded focus:ring-[#0A8F8F]"
-                                />
-                            </label>
+                            </div>
+                        </section>
 
-                            {/* Gender Preference */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Préférence de genre
-                                </label>
-                                <div className="grid grid-cols-3 gap-3">
-                                    {[
-                                        { value: "ANY", label: "Mixte" },
-                                        { value: "MALE_ONLY", label: "Hommes" },
-                                        { value: "FEMALE_ONLY", label: "Femmes" },
-                                    ].map((option) => (
+                        {/* Vehicle Selection */}
+                        <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                            <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-900 mb-4">
+                                <Car className="w-5 h-5 text-[#0A8F8F]" />
+                                Véhicule
+                            </h2>
+                            <VehicleSelector
+                                value={formData.vehicleId}
+                                onChange={(id) => setFormData(prev => ({ ...prev, vehicleId: id }))}
+                            />
+                        </section>
+
+                        {/* Seats & Price Section */}
+                        <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                            <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-900 mb-4">
+                                <Users className="w-5 h-5 text-[#0A8F8F]" />
+                                Places et prix
+                            </h2>
+
+                            <div className="space-y-4">
+                                {/* Seats */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Nombre de places disponibles
+                                    </label>
+                                    <div className="flex items-center gap-4">
                                         <button
-                                            key={option.value}
                                             type="button"
-                                            onClick={() =>
-                                                setFormData((prev) => ({
-                                                    ...prev,
-                                                    genderPreference: option.value as GenderPreference,
-                                                }))
-                                            }
-                                            className={`py-3 px-4 rounded-xl border text-sm font-medium transition-colors ${formData.genderPreference === option.value
-                                                ? "border-[#0A8F8F] bg-[#0A8F8F]/10 text-[#0A8F8F]"
-                                                : "border-gray-200 text-gray-700 hover:bg-gray-50"
-                                                }`}
+                                            onClick={() => handleSeatsChange(-1)}
+                                            disabled={formData.totalSeats <= 1}
+                                            className="w-12 h-12 rounded-xl border border-gray-200 flex items-center justify-center text-xl font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
-                                            {option.label}
+                                            −
                                         </button>
-                                    ))}
+                                        <span className="text-2xl font-bold text-gray-900 w-12 text-center">
+                                            {formData.totalSeats}
+                                        </span>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleSeatsChange(1)}
+                                            disabled={formData.totalSeats >= 8}
+                                            className="w-12 h-12 rounded-xl border border-gray-200 flex items-center justify-center text-xl font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            +
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Price */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Prix par place (TND)
+                                    </label>
+                                    <div className="relative">
+
+                                        <input
+                                            type="number"
+                                            name="pricePerSeat"
+                                            value={formData.pricePerSeat}
+                                            onChange={handleInputChange}
+                                            placeholder="15.00"
+                                            step="0.1"
+                                            min="0"
+                                            className="w-full pl-4 pr-16 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0A8F8F]/20 focus:border-[#0A8F8F]"
+                                        />
+                                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500">
+                                            TND
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </section>
+                        </section>
 
-                    {/* Submit Button */}
-                    <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="w-full py-4 bg-[#0A8F8F] text-white font-semibold rounded-xl hover:bg-[#0A8F8F]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                    >
-                        {isSubmitting ? (
-                            <>
-                                <Loader2 className="w-5 h-5 animate-spin" />
-                                Publication en cours...
-                            </>
-                        ) : (
-                            "Publier le trajet"
-                        )}
-                    </button>
-                </form>
+                        {/* Preferences Section */}
+                        <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                            <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-900 mb-4">
+                                <User className="w-5 h-5 text-[#0A8F8F]" />
+                                Préférences
+                            </h2>
+
+                            <div className="space-y-4">
+                                {/* Smoking */}
+                                <label className="flex items-center justify-between p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50">
+                                    <div className="flex items-center gap-3">
+                                        <Cigarette className="w-5 h-5 text-gray-400" />
+                                        <div>
+                                            <p className="font-medium text-gray-900">Fumeur autorisé</p>
+                                            <p className="text-sm text-gray-500">Autoriser les fumeurs dans votre véhicule</p>
+                                        </div>
+                                    </div>
+                                    <input
+                                        type="checkbox"
+                                        name="allowsSmoking"
+                                        checked={formData.allowsSmoking}
+                                        onChange={handleInputChange}
+                                        className="w-5 h-5 text-[#0A8F8F] border-gray-300 rounded focus:ring-[#0A8F8F]"
+                                    />
+                                </label>
+
+                                {/* Gender Preference */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Préférence de genre
+                                    </label>
+                                    <div className="grid grid-cols-3 gap-3">
+                                        {[
+                                            { value: "ANY", label: "Mixte" },
+                                            { value: "MALE_ONLY", label: "Hommes" },
+                                            { value: "FEMALE_ONLY", label: "Femmes" },
+                                        ].map((option) => (
+                                            <button
+                                                key={option.value}
+                                                type="button"
+                                                onClick={() =>
+                                                    setFormData((prev) => ({
+                                                        ...prev,
+                                                        genderPreference: option.value as GenderPreference,
+                                                    }))
+                                                }
+                                                className={`py-3 px-4 rounded-xl border text-sm font-medium transition-colors ${formData.genderPreference === option.value
+                                                    ? "border-[#0A8F8F] bg-[#0A8F8F]/10 text-[#0A8F8F]"
+                                                    : "border-gray-200 text-gray-700 hover:bg-gray-50"
+                                                    }`}
+                                            >
+                                                {option.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* Submit Button */}
+                        <button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="w-full py-4 bg-[#0A8F8F] text-white font-semibold rounded-xl hover:bg-[#0A8F8F]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        >
+                            {isSubmitting ? (
+                                <>
+                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                    Publication en cours...
+                                </>
+                            ) : (
+                                "Publier le trajet"
+                            )}
+                        </button>
+                    </form>
+                </div>
             </div>
-        </div>
+        </>
     );
 }
 

@@ -15,7 +15,6 @@ import { Phone, Calendar, User, Loader2, X } from "lucide-react";
 interface CompleteProfileModalProps {
     isOpen: boolean;
     onComplete: () => void;
-    token: string;
     currentData: {
         firstName: string;
         lastName: string;
@@ -43,7 +42,6 @@ interface FormErrors {
 export default function CompleteProfileModal({
     isOpen,
     onComplete,
-    token,
     currentData,
 }: CompleteProfileModalProps) {
     const [formData, setFormData] = useState<FormData>({
@@ -107,8 +105,8 @@ export default function CompleteProfileModal({
                 `${process.env.NEXT_PUBLIC_API_URL}/user/me`,
                 {
                     method: "PUT",
+                    credentials: "include",
                     headers: {
-                        Authorization: `Bearer ${token}`,
                         "Content-Type": "application/json",
                     },
                     body: JSON.stringify({
@@ -154,8 +152,8 @@ export default function CompleteProfileModal({
             <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl p-8 mx-4 animate-in fade-in zoom-in duration-200">
                 {/* Header */}
                 <div className="text-center mb-6">
-                    <div className="w-16 h-16 bg-gradient-to-br from-[#006B8F] to-[#005673] rounded-full flex items-center justify-center mx-auto mb-4">
-                        <User className="w-8 h-8 text-white" />
+                    <div className="mb-4 p-3 bg-[var(--color-blassa-teal)]/10 rounded-full w-12 h-12 flex items-center justify-center">
+                        <User className="w-6 h-6 text-[var(--color-blassa-teal)]" />
                     </div>
                     <h2 className="text-xl font-bold text-slate-900 font-[family-name:var(--font-poppins)]">
                         Complétez votre profil
@@ -190,7 +188,7 @@ export default function CompleteProfileModal({
                                 placeholder="+21612345678"
                                 value={formData.phoneNumber}
                                 onChange={handleChange}
-                                className={`w-full h-12 pl-12 pr-4 bg-slate-50 border rounded-xl text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#006B8F] focus:border-transparent transition-all ${errors.phoneNumber ? "border-red-400" : "border-slate-200"
+                                className={`w-full h-12 pl-12 pr-4 bg-slate-50 border rounded-xl text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[var(--color-blassa-teal)] focus:border-transparent transition-all ${errors.phoneNumber ? "border-red-400" : "border-slate-200"
                                     }`}
                             />
                         </div>

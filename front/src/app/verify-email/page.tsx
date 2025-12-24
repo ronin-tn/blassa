@@ -3,13 +3,12 @@
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Mail, Loader2, ArrowLeft, CheckCircle2, RefreshCw, Edit3, Eye, EyeOff, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { parseApiError } from "@/lib/api-utils";
 
 function VerifyEmailContent() {
-    const router = useRouter();
     const searchParams = useSearchParams();
 
     const [email, setEmail] = useState(searchParams.get("email") || "");

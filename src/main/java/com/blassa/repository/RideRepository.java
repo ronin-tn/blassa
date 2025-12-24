@@ -53,4 +53,6 @@ public interface RideRepository extends JpaRepository<Ride, UUID> {
     Page<Ride> findByDriverId(UUID id, Pageable pageable);
 
     List<Ride> findByIdAndStatus(UUID id, RideStatus status);
+
+    int countByDriverIdAndStatus(UUID driverId, RideStatus status);
 }

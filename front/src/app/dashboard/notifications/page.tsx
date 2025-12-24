@@ -11,8 +11,6 @@ import {
     Ticket,
     ArrowLeft,
     Loader2,
-    AlertCircle,
-    Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -236,7 +234,6 @@ export default function NotificationsPage() {
         unreadCount,
         markAsRead,
         markAllAsRead,
-        fetchNotifications,
     } = useNotifications();
     const [filter, setFilter] = useState<"ALL" | "UNREAD" | "READ">("ALL");
     const [isMarkingAll, setIsMarkingAll] = useState(false);

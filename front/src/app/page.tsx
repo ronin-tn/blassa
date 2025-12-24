@@ -8,7 +8,7 @@ import CTASection from "@/components/landing/CTASection";
 
 export default function Home() {
   return (
-    <div className="min-h-screen flex flex-col font-sans bg-slate-50 relative overflow-x-hidden">
+    <div id="main-content" className="min-h-screen flex flex-col font-sans bg-slate-50 relative overflow-x-hidden">
       <Navbar />
 
       {/* Spacer for fixed navbar */}

@@ -14,10 +14,14 @@ import {
     Loader2,
     Facebook,
     Instagram,
+    Settings,
+    Star,
+    LogOut,
+    ChevronRight,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { UserProfile } from "@/types/auth";
 import { parseApiError } from "@/lib/api-utils";
+import ProfilePictureUpload from "@/components/profile/ProfilePictureUpload";
 
 interface ProfileFormData {
     firstName: string;
@@ -30,7 +34,7 @@ interface ProfileFormData {
 
 export default function ProfilePage() {
     const router = useRouter();
-    const { user, isAuthenticated, isLoading: authLoading, refreshUser } = useAuth();
+    const { user, isAuthenticated, isLoading: authLoading, refreshUser, logout } = useAuth();
 
     const [isEditing, setIsEditing] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
@@ -95,18 +99,13 @@ export default function ProfilePage() {
         setIsSaving(true);
 
         try {
-            const token = localStorage.getItem("blassa_token");
-            if (!token) {
-                throw new Error("Non authentifié");
-            }
-
             const response = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/user/me`,
                 {
                     method: "PUT",
+                    credentials: "include",
                     headers: {
                         "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`,
                     },
                     body: JSON.stringify(formData),
                 }
@@ -228,16 +227,12 @@ export default function ProfilePage() {
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                     {/* Avatar & Name Section */}
                     <div className="bg-gradient-to-r from-[#0A8F8F] to-[#0A7070] p-8 text-center">
-                        <div className="w-24 h-24 mx-auto rounded-full bg-white/20 backdrop-blur flex items-center justify-center text-white text-3xl font-bold mb-4 border-4 border-white/30">
-                            {user.profilePictureUrl ? (
-                                <img
-                                    src={user.profilePictureUrl}
-                                    alt={`${user.firstName} ${user.lastName}`}
-                                    className="w-full h-full rounded-full object-cover"
-                                />
-                            ) : (
-                                getInitials()
-                            )}
+                        <div className="flex justify-center mb-4">
+                            <ProfilePictureUpload
+                                currentImageUrl={user.profilePictureUrl || null}
+                                initials={getInitials()}
+                                onUploadSuccess={refreshUser}
+                            />
                         </div>
 
                         {isEditing ? (
@@ -409,6 +404,72 @@ export default function ProfilePage() {
                                 </div>
                             </div>
                         </section>
+                    </div>
+
+                    {/* Main Menu Section (Mobile / Hub style) */}
+                    <div className="border-t border-gray-100 p-6 bg-gray-50/50 space-y-8">
+
+                        {/* Activités */}
+                        <div>
+                            <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-900 mb-4">
+                                <Star className="w-5 h-5 text-[#0A8F8F]" />
+                                Mes activités
+                            </h2>
+                            <div className="space-y-3">
+                                <Link
+                                    href="/dashboard/reviews"
+                                    className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl hover:border-[#0A8F8F]/50 hover:shadow-sm transition-all group"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-amber-50 rounded-full flex items-center justify-center text-amber-600 group-hover:bg-amber-100 transition-colors">
+                                            <Star className="w-5 h-5" />
+                                        </div>
+                                        <span className="font-medium text-gray-700 group-hover:text-gray-900">Mes avis</span>
+                                    </div>
+                                    <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-gray-600" />
+                                </Link>
+                            </div>
+                        </div>
+
+                        {/* Settings */}
+                        <div>
+                            <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-900 mb-4">
+                                <Settings className="w-5 h-5 text-[#0A8F8F]" />
+                                Paramètres du compte
+                            </h2>
+                            <div className="space-y-3">
+                                <Link
+                                    href="/dashboard/settings"
+                                    className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl hover:border-[#0A8F8F]/50 hover:shadow-sm transition-all group"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-slate-50 rounded-full flex items-center justify-center text-slate-600 group-hover:bg-slate-100 transition-colors">
+                                            <Settings className="w-5 h-5" />
+                                        </div>
+                                        <span className="font-medium text-gray-700 group-hover:text-gray-900">Paramètres</span>
+                                    </div>
+                                    <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-gray-600" />
+                                </Link>
+
+                                <button
+                                    onClick={() => {
+                                        if (confirm("Êtes-vous sûr de vouloir vous déconnecter ?")) {
+                                            logout();
+                                            router.push("/login"); // or home
+                                        }
+                                    }}
+                                    className="w-full flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl hover:bg-red-50 hover:border-red-200 transition-all group mt-4 text-red-600"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-red-50 rounded-full flex items-center justify-center text-red-600 group-hover:bg-red-100 transition-colors">
+                                            <LogOut className="w-5 h-5" />
+                                        </div>
+                                        <span className="font-medium">Déconnexion</span>
+                                    </div>
+                                    <ChevronRight className="w-5 h-5 text-red-300 group-hover:text-red-500" />
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

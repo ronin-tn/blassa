@@ -32,6 +32,10 @@ public class Ride {
     @JoinColumn(name = "driver_id", nullable = false)
     private User driver;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "vehicle_id")
+    private Vehicle vehicle;
+
     @Size(max = 255)
     @NotNull
     @Column(name = "origin_name", nullable = false)

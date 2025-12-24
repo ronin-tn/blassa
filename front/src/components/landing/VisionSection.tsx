@@ -16,6 +16,7 @@ export default function VisionSection() {
                             alt="Covoiturage Tunisie"
                             width={600}
                             height={400}
+                            sizes="(max-width: 1024px) 100vw, 50vw"
                             className="relative rounded-2xl shadow-xl border-4 border-white rotate-1 hover:rotate-0 transition duration-500"
                         />
                     </div>

@@ -47,6 +47,7 @@ public class Vehicle {
     @Size(max = 20)
     @NotNull
     @Column(name = "license_plate", nullable = false, length = 20)
+    //Tunisian license Plate
     private String licensePlate;
 
     @Column(name = "production_year")

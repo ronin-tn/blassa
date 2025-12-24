@@ -34,7 +34,14 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  /* Blassa Custom Colors */
+  /* Blassa Brand Colors (used throughout components) */
+  --color-blassa-teal: #006B8F;
+  --color-blassa-teal-dark: #005673;
+  --color-blassa-teal-light: #0A8F8F;
+  --color-blassa-amber: #FF9A3E;
+  --color-blassa-amber-dark: #E88A35;
+  
+  /* Legacy Blassa Custom Colors */
   --color-brand: #0e7490;
   --color-brand-dark: #164e63;
   --color-brand-light: #cffafe;
@@ -174,4 +181,18 @@ nextjs-portal,
 [class*="nextjs-portal"],
 [class*="__next"] {
   display: none !important;
+}
+
+/* Slide up animation for mobile modals */
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
 }

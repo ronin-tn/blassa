@@ -13,7 +13,7 @@ interface ProfileGuardProps {
  * Shows a non-dismissable modal overlay.
  */
 export default function ProfileGuard({ children }: ProfileGuardProps) {
-    const { user, token, needsProfileCompletion, refreshUser, isLoading } = useAuth();
+    const { user, needsProfileCompletion, refreshUser, isLoading } = useAuth();
 
     // Show loading state while checking auth
     if (isLoading) {
@@ -21,7 +21,7 @@ export default function ProfileGuard({ children }: ProfileGuardProps) {
     }
 
     // If profile is incomplete, show blocking modal
-    if (needsProfileCompletion && user && token) {
+    if (needsProfileCompletion && user) {
         return (
             <>
                 {/* Render page content behind (blurred/blocked) */}
@@ -35,7 +35,7 @@ export default function ProfileGuard({ children }: ProfileGuardProps) {
                     onComplete={async () => {
                         await refreshUser();
                     }}
-                    token={token}
+
                     currentData={{
                         firstName: user.firstName,
                         lastName: user.lastName,

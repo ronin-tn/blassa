@@ -12,7 +12,6 @@ function OAuthCallbackHandler() {
 
     useEffect(() => {
         const handleCallback = async () => {
-            const token = searchParams.get("token");
             const error = searchParams.get("error");
 
             if (error) {
@@ -21,16 +20,14 @@ function OAuthCallbackHandler() {
                 return;
             }
 
-            if (token) {
-                try {
-                    await login(token);
-                    router.replace("/dashboard");
-                } catch (err) {
-                    console.error("Failed to process OAuth token:", err);
-                    router.replace("/login?error=token_invalid");
-                }
-            } else {
-                router.replace("/login?error=no_token");
+            // With cookie-based auth, the cookie is already set by the backend
+            // We just need to fetch the user profile and redirect
+            try {
+                await login();
+                router.replace("/dashboard");
+            } catch (err) {
+                console.error("Failed to process OAuth login:", err);
+                router.replace("/login?error=oauth_failed");
             }
         };
 
@@ -60,3 +57,4 @@ export default function OAuthCallbackPage() {
         </Suspense>
     );
 }
+

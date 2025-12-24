@@ -122,18 +122,13 @@ export default function SettingsPage() {
         setIsChangingPassword(true);
 
         try {
-            const token = localStorage.getItem("blassa_token");
-            if (!token) {
-                throw new Error("Non authentifié");
-            }
-
             const response = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/user/me/password`,
                 {
                     method: "PUT",
+                    credentials: "include",
                     headers: {
                         "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`,
                     },
                     body: JSON.stringify(passwordForm),
                 }
@@ -164,18 +159,11 @@ export default function SettingsPage() {
         setDeleteError(null);
 
         try {
-            const token = localStorage.getItem("blassa_token");
-            if (!token) {
-                throw new Error("Non authentifié");
-            }
-
             const response = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/user/me`,
                 {
                     method: "DELETE",
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
+                    credentials: "include",
                 }
             );
 

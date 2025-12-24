@@ -49,6 +49,13 @@ export default function RootLayout({
   return (
     <html lang="fr" className={`${poppins.variable} ${inter.variable}`}>
       <body className="antialiased font-sans">
+        {/* Skip Link for Accessibility */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-[#006B8F] focus:text-white focus:rounded-lg focus:font-medium focus:shadow-lg"
+        >
+          Aller au contenu principal
+        </a>
         <Providers>{children}</Providers>
       </body>
     </html>

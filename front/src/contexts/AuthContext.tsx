@@ -10,22 +10,20 @@ import {
     useMemo,
 } from "react";
 import { UserProfile } from "@/types/auth";
+import { API_URL } from "@/lib/config";
 
 interface AuthContextType {
     user: UserProfile | null;
-    token: string | null;
     isAuthenticated: boolean;
     isLoading: boolean;
     isProfileComplete: boolean;
     needsProfileCompletion: boolean;
-    login: (token: string) => Promise<void>;
-    logout: () => void;
+    login: () => Promise<void>;
+    logout: () => Promise<void>;
     refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-const TOKEN_KEY = "blassa_token";
 
 // Helper function to check if profile is complete
 function checkProfileComplete(user: UserProfile | null): boolean {
@@ -35,23 +33,32 @@ function checkProfileComplete(user: UserProfile | null): boolean {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<UserProfile | null>(null);
-    const [token, setToken] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
-    const fetchUserProfile = useCallback(async (authToken: string) => {
+    const fetchUserProfile = useCallback(async () => {
         try {
-            const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/user/me`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${authToken}`,
-                        "Content-Type": "application/json",
-                    },
-                }
-            );
+            const response = await fetch(`${API_URL}/user/me`, {
+                credentials: "include", // Send cookies
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
 
             if (!response.ok) {
-                throw new Error("Failed to fetch user profile");
+                // Not authenticated or token invalid
+                if (response.status === 401 || response.status === 403) {
+                    try {
+                        // Clear the invalid cookie
+                        await fetch(`${API_URL}/auth/logout`, {
+                            method: "POST",
+                            credentials: "include",
+                        });
+                    } catch (e) {
+                        console.error("Failed to clear invalid session:", e);
+                    }
+                }
+                setUser(null);
+                return null;
             }
 
             const profile: UserProfile = await response.json();
@@ -59,60 +66,57 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             return profile;
         } catch (error) {
             console.error("Error fetching user profile:", error);
-            // Token might be invalid, clear it
-            localStorage.removeItem(TOKEN_KEY);
-            setToken(null);
             setUser(null);
             return null;
         }
     }, []);
 
-    // Initialize auth state from localStorage
+    // Initialize auth state by fetching user profile
     useEffect(() => {
         const initAuth = async () => {
-            const storedToken = localStorage.getItem(TOKEN_KEY);
-            if (storedToken) {
-                setToken(storedToken);
-                await fetchUserProfile(storedToken);
-            }
+            await fetchUserProfile();
             setIsLoading(false);
         };
 
         initAuth();
     }, [fetchUserProfile]);
 
-    const login = useCallback(
-        async (newToken: string) => {
-            localStorage.setItem(TOKEN_KEY, newToken);
-            setToken(newToken);
-            await fetchUserProfile(newToken);
-        },
-        [fetchUserProfile]
-    );
+    // Login: Fetch user profile after successful backend login
+    // (Cookie is set by backend, we just need to fetch user data)
+    const login = useCallback(async () => {
+        await fetchUserProfile();
+    }, [fetchUserProfile]);
 
-    const logout = useCallback(() => {
-        localStorage.removeItem(TOKEN_KEY);
-        setToken(null);
-        setUser(null);
+    // Logout: Call backend to clear cookie
+    const logout = useCallback(async () => {
+        try {
+            await fetch(`${API_URL}/auth/logout`, {
+                method: "POST",
+                credentials: "include",
+            });
+        } catch (error) {
+            console.error("Logout error:", error);
+        } finally {
+            setUser(null);
+            // Force redirect to home (middleware will handle if needed)
+            window.location.href = "/";
+        }
     }, []);
 
     const refreshUser = useCallback(async () => {
-        if (token) {
-            await fetchUserProfile(token);
-        }
-    }, [token, fetchUserProfile]);
+        await fetchUserProfile();
+    }, [fetchUserProfile]);
 
     // Computed properties for profile completion status
     const isProfileComplete = useMemo(() => checkProfileComplete(user), [user]);
     const needsProfileCompletion = useMemo(
-        () => !!user && !!token && !isProfileComplete,
-        [user, token, isProfileComplete]
+        () => !!user && !isProfileComplete,
+        [user, isProfileComplete]
     );
 
     const value: AuthContextType = {
         user,
-        token,
-        isAuthenticated: !!user && !!token,
+        isAuthenticated: !!user,
         isLoading,
         isProfileComplete,
         needsProfileCompletion,
@@ -131,3 +135,4 @@ export function useAuth() {
     }
     return context;
 }
+

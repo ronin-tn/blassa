@@ -1,49 +1,21 @@
-// Ride types matching backend RideResponse
-export interface Ride {
-    id: string;
-    driverName: string;
-    driverEmail: string;
-    driverRating: number | null;
-    driverFacebookUrl: string | null;
-    driverInstagramUrl: string | null;
-    driverPhoneNumber: string;
-    originName: string;
-    originLat: number;
-    originLon: number;
-    destinationName: string;
-    destinationLat: number;
-    destinationLon: number;
-    departureTime: string;
-    totalSeats: number;
-    availableSeats: number;
-    pricePerSeat: number;
-    allowsSmoking: boolean;
-    genderPreference: RideGenderPreference;
-    status: RideStatus;
-}
+/**
+ * Ride types with UI helpers
+ * Core types are imported from models.ts
+ */
 
-export type RideGenderPreference = "ANY" | "MALE_ONLY" | "FEMALE_ONLY";
+import {
+    Ride,
+    RideStatus,
+    RideGenderPreference,
+    PagedResponse,
+    CreateRideRequest,
+    SearchRidesParams,
+} from "./models";
 
-export type RideStatus =
-    | "SCHEDULED"
-    | "FULL"
-    | "IN_PROGRESS"
-    | "COMPLETED"
-    | "CANCELLED";
+// Re-export core types
+export type { Ride, RideStatus, RideGenderPreference, PagedResponse, CreateRideRequest, SearchRidesParams };
 
-// Paginated response
-export interface PagedResponse<T> {
-    content: T[];
-    totalPages: number;
-    totalElements: number;
-    size: number;
-    number: number; // current page (0-indexed)
-    first: boolean;
-    last: boolean;
-    empty: boolean;
-}
-
-// Status labels and colors
+// UI Helper Constants
 export const RideStatusLabels: Record<RideStatus, string> = {
     SCHEDULED: "Planifié",
     FULL: "Complet",

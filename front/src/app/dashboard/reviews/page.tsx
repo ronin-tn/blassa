@@ -85,7 +85,7 @@ function ReviewCard({ review, type }: { review: Review; type: TabType }) {
                     {/* Comment */}
                     {review.comment ? (
                         <p className="text-slate-600 text-sm mt-3 bg-slate-50 rounded-lg p-3">
-                            "{review.comment}"
+                            &quot;{review.comment}&quot;
                         </p>
                     ) : (
                         <p className="text-slate-400 text-sm italic mt-3">
@@ -100,7 +100,7 @@ function ReviewCard({ review, type }: { review: Review; type: TabType }) {
 
 export default function ReviewsPage() {
     const router = useRouter();
-    const { token, isAuthenticated, isLoading: authLoading } = useAuth();
+    const { isAuthenticated, isLoading: authLoading } = useAuth();
 
     const [activeTab, setActiveTab] = useState<TabType>("received");
     const [receivedReviews, setReceivedReviews] = useState<Review[]>([]);
@@ -117,7 +117,7 @@ export default function ReviewsPage() {
     }, [authLoading, isAuthenticated, router]);
 
     const fetchReviews = useCallback(async () => {
-        if (!token) return;
+        if (!isAuthenticated) return;
 
         setIsLoading(true);
         setError("");
@@ -127,8 +127,8 @@ export default function ReviewsPage() {
             const receivedResponse = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/reviews/mine/received?page=0&size=50`,
                 {
+                    credentials: "include", // Send cookies
                     headers: {
-                        Authorization: `Bearer ${token}`,
                         "Content-Type": "application/json",
                     },
                 }
@@ -152,8 +152,8 @@ export default function ReviewsPage() {
             const sentResponse = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/reviews/mine/sent?page=0&size=50`,
                 {
+                    credentials: "include", // Send cookies
                     headers: {
-                        Authorization: `Bearer ${token}`,
                         "Content-Type": "application/json",
                     },
                 }
@@ -168,13 +168,13 @@ export default function ReviewsPage() {
         } finally {
             setIsLoading(false);
         }
-    }, [token]);
+    }, [isAuthenticated]);
 
     useEffect(() => {
-        if (token) {
+        if (isAuthenticated) {
             fetchReviews();
         }
-    }, [token, fetchReviews]);
+    }, [isAuthenticated, fetchReviews]);
 
     const currentReviews = activeTab === "received" ? receivedReviews : sentReviews;
 

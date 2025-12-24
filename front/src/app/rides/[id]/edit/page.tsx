@@ -78,12 +78,9 @@ export default function EditRidePage() {
             if (!rideId) return;
 
             try {
-                const token = localStorage.getItem("blassa_token");
                 const response = await fetch(
                     `${process.env.NEXT_PUBLIC_API_URL}/rides/${rideId}`,
-                    {
-                        headers: token ? { Authorization: `Bearer ${token}` } : {},
-                    }
+                    { credentials: "include" }
                 );
 
                 if (!response.ok) {
@@ -194,11 +191,6 @@ export default function EditRidePage() {
         setIsSubmitting(true);
 
         try {
-            const token = localStorage.getItem("blassa_token");
-            if (!token) {
-                throw new Error("Non authentifié");
-            }
-
             const origin = getCityByCode(formData.originCode);
             const destination = getCityByCode(formData.destinationCode);
 
@@ -227,9 +219,9 @@ export default function EditRidePage() {
                 `${process.env.NEXT_PUBLIC_API_URL}/rides/${rideId}`,
                 {
                     method: "PUT",
+                    credentials: "include",
                     headers: {
                         "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`,
                     },
                     body: JSON.stringify(requestBody),
                 }

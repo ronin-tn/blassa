@@ -8,14 +8,16 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 public record BookingResponse(
-                UUID id,
-                UUID rideID,
-                String rideSummary,
-                String driverName,
-                OffsetDateTime departureTime,
-                Integer seatsBooked,
-                BigDecimal priceTotal,
-                BookingStatus status,
-                RideStatus rideStatus,
-                OffsetDateTime createdAt) {
+        UUID id,
+        UUID rideID,
+        String rideSummary,
+        String driverName,
+        OffsetDateTime departureTime,
+        Integer seatsBooked,
+        BigDecimal priceTotal,
+        BookingStatus status,
+        RideStatus rideStatus,
+        OffsetDateTime createdAt,
+        String carLicensePlate,
+        String carDescription) {
 }

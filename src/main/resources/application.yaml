@@ -2,6 +2,9 @@
 app:
   base-url: http://localhost:8088
   frontend-url: http://localhost:3000
+  cookie:
+    secure: false  # Set to true in production (HTTPS)
+    max-age: 604800  # 7 days in seconds
 server:
   port: 8088
 spring:
@@ -19,9 +22,9 @@ spring:
   application:
     name: blassa-backend
   datasource:
-    url: jdbc:postgresql://localhost:5432/blassa_db?stringtype=unspecified
-    username: postgres
-    password: ronintn
+    url: jdbc:postgresql://ep-rough-meadow-agoq0blw-pooler.c-2.eu-central-1.aws.neon.tech:5432/neondb?sslmode=require&autosave=conservative
+    username: neondb_owner
+    password: npg_uH9OUp1zrXVo
     driver-class-name: org.postgresql.Driver
 
     hikari:
@@ -64,6 +67,8 @@ spring:
     enabled: true
     # If you have existing tables, this lets Flyway start managing them without crashing
     baseline-on-migrate: true
+    # Baseline at version 9 (latest) since neon_complete_migration.sql was already run
+    baseline-version: 9
 
   # 4. FILE UPLOADS (For Profile Pictures & ID Cards)
   servlet:
@@ -88,3 +93,9 @@ sentry:
   # Set traces-sample-rate to 1.0 to capture 100% of transactions for tracing
   # We recommend adjusting this value in production (e.g., 0.1 for 10%)
   traces-sample-rate: 1.0
+
+# Cloudinary Configuration for image uploads
+cloudinary:
+  cloud-name: ${CLOUDINARY_CLOUD_NAME:blassa}
+  api-key: ${CLOUDINARY_API_KEY:242843735143177}
+  api-secret: ${CLOUDINARY_API_SECRET:RI4SeXs0QH9F0Q9d8__U5f-Xvxc}
