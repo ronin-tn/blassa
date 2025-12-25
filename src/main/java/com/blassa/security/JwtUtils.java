@@ -23,6 +23,10 @@ public class JwtUtils {
     @Value("${application.security.jwt.expiration}")
     private long jwtExpiration;
 
+    // Refresh token expiration: 30 days in milliseconds
+    @Value("${application.security.jwt.refresh-expiration:2592000000}")
+    private long refreshTokenExpiration;
+
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
@@ -39,6 +43,39 @@ public class JwtUtils {
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
+    }
+
+    /**
+     * Generate a refresh token with longer expiration for mobile clients.
+     */
+    public String generateRefreshToken(UserDetails userDetails) {
+        return Jwts.builder()
+                .setSubject(userDetails.getUsername())
+                .claim("type", "refresh")
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + refreshTokenExpiration))
+                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    /**
+     * Get access token expiration in seconds (for mobile clients to know when to
+     * refresh).
+     */
+    public long getAccessTokenExpirationSeconds() {
+        return jwtExpiration / 1000;
+    }
+
+    /**
+     * Check if this is a refresh token.
+     */
+    public boolean isRefreshToken(String token) {
+        try {
+            Claims claims = extractAllClaims(token);
+            return "refresh".equals(claims.get("type", String.class));
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
