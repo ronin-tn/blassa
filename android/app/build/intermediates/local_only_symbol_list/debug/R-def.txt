@@ -1,0 +1,34 @@
+R_DEF: Internal format may change without notice
+local
+color black
+color blassa_background
+color blassa_cyan
+color blassa_yellow
+color purple_200
+color purple_500
+color purple_700
+color teal_200
+color teal_700
+color white
+drawable app_logo
+drawable blassa_logo
+drawable ic_launcher_background
+drawable ic_launcher_foreground
+drawable onboarding_car_exact
+drawable onboarding_map_exact
+drawable onboarding_woman_exact
+mipmap ic_launcher
+mipmap ic_launcher_round
+string app_name
+string next
+string onboarding_desc_1
+string onboarding_desc_2
+string onboarding_desc_3
+string onboarding_title_1
+string onboarding_title_2
+string onboarding_title_3
+string skip
+string start
+style Theme.Blassa
+xml backup_rules
+xml data_extraction_rules
