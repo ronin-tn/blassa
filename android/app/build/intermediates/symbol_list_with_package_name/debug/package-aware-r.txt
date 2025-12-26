@@ -57,6 +57,8 @@ dimen notification_subtext_size
 dimen notification_top_pad
 dimen notification_top_pad_large_text
 drawable app_logo
+drawable avatar_driver_review
+drawable avatar_user_settings
 drawable blassa_logo
 drawable ic_call_answer
 drawable ic_call_answer_low

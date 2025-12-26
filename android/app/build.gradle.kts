@@ -59,6 +59,7 @@ dependencies {
     // Accompanist for Pager if needed, though M3 likely suffices. 
     // Using standard Compose Foundation Pager
     implementation("androidx.compose.foundation:foundation:1.5.4")
+    implementation("androidx.compose.material:material-icons-extended:1.5.4")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

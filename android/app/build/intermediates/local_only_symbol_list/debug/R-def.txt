@@ -11,6 +11,8 @@ color teal_200
 color teal_700
 color white
 drawable app_logo
+drawable avatar_driver_review
+drawable avatar_user_settings
 drawable blassa_logo
 drawable ic_launcher_background
 drawable ic_launcher_foreground
