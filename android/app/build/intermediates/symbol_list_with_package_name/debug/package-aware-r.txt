@@ -82,6 +82,9 @@ drawable notify_panel_notification_icon_bg
 drawable onboarding_car_exact
 drawable onboarding_map_exact
 drawable onboarding_woman_exact
+drawable state_empty_img
+drawable state_error_img
+drawable state_offline_img
 id accessibility_action_clickable_span
 id accessibility_custom_action_0
 id accessibility_custom_action_1

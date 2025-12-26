@@ -81,6 +81,9 @@ int drawable notify_panel_notification_icon_bg 0x7f040016
 int drawable onboarding_car_exact 0x7f040017
 int drawable onboarding_map_exact 0x7f040018
 int drawable onboarding_woman_exact 0x7f040019
+int drawable state_empty_img 0x7f04001a
+int drawable state_error_img 0x7f04001b
+int drawable state_offline_img 0x7f04001c
 int id accessibility_action_clickable_span 0x7f050000
 int id accessibility_custom_action_0 0x7f050001
 int id accessibility_custom_action_1 0x7f050002

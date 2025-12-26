@@ -17,6 +17,9 @@ drawable ic_launcher_foreground
 drawable onboarding_car_exact
 drawable onboarding_map_exact
 drawable onboarding_woman_exact
+drawable state_empty_img
+drawable state_error_img
+drawable state_offline_img
 mipmap ic_launcher
 mipmap ic_launcher_round
 string app_name
