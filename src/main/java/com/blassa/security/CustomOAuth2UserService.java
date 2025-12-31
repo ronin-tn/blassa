@@ -16,13 +16,12 @@ import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.Optional;
 
-/**
- * Custom OAuth2 user service that handles user creation/retrieval for OAuth2
- * login.
- * When a user logs in with Google, this service:
- * 1. Loads user info from Google
- * 2. Creates a new user if they don't exist (auto-registration)
- * 3. Links Google account to existing user if email matches
+/*
+ Service hedha lel OAuth2 login, creation wala retrieval mta3 users.
+Ki user ylogin b Google:
+Yjib user info men Google
+Ken user mch mawjoud, y3amel creation automatique (auto-registration)
+Ken email mawjouda, yrabet compte Google b user mawjoud
  */
 @Service
 @RequiredArgsConstructor
@@ -44,14 +43,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String firstName = (String) attributes.get("given_name");
         String lastName = (String) attributes.get("family_name");
         String pictureUrl = (String) attributes.get("picture");
-
-        log.info("OAuth2 login attempt for email: {} with provider: {}", email, registrationId);
-
         // Check if user exists by OAuth ID first
         Optional<User> existingUserByOAuth = userRepository.findByOauthProviderAndOauthId(registrationId, googleId);
 
         if (existingUserByOAuth.isPresent()) {
-            log.info("Found existing user by OAuth ID: {}", email);
             return oauth2User;
         }
 
@@ -60,7 +55,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         Optional<User> existingUserByEmail = userRepository.findByEmail(email);
 
         if (existingUserByEmail.isPresent()) {
-            // Link OAuth to existing account
             User user = existingUserByEmail.get();
             user.setOauthProvider(registrationId);
             user.setOauthId(googleId);
@@ -72,7 +66,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             return oauth2User;
         }
 
-        // Create new user
         User newUser = User.builder()
                 .email(email)
                 .firstName(firstName != null ? firstName : "User")
@@ -80,19 +73,18 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 .oauthProvider(registrationId)
                 .oauthId(googleId)
                 .profilePictureUrl(pictureUrl)
-                .passwordHash(null) // OAuth users don't have passwords
-                .phoneNumber(null) // Will need to be updated by user in profile
-                .dateOfBirth(null) // Will need to be updated by user in profile
-                .gender(null) // Will need to be updated by user in profile
+                .passwordHash(null)
+                .phoneNumber(null)
+                .dateOfBirth(null)
+                .gender(null)
                 .role(UserRole.USER)
-                .isVerified(true) // Google accounts are verified by Google
+                .isVerified(true)
                 .emailVerified(true)
                 .createdAt(OffsetDateTime.now())
                 .updatedAt(OffsetDateTime.now())
                 .build();
 
         userRepository.save(newUser);
-        log.info("Created new OAuth user: {}", email);
 
         return oauth2User;
     }

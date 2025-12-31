@@ -80,16 +80,12 @@ front/build/
 # Environment variables (CRITICAL - contains secrets!)
 .env
 .env.local
-.env.development.local
-.env.test.local
-.env.production.local
-.env*.local
+.env.*.local
 front/.env
 front/.env.local
-front/.env.development.local
-front/.env.test.local
-front/.env.production.local
-front/.env*.local
+front/.env.*.local
+android/local.properties
+
 
 # Vercel
 front/.vercel/

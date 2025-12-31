@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Ride, PassengerInfo } from "@/types/models";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Home, PlusCircle, Coins, Users, Send } from "lucide-react";
@@ -19,14 +20,41 @@ export default function CompletedDriverView({ ride, passengers }: CompletedDrive
     const confirmedPassengers = passengers.filter(p => p.status === 'CONFIRMED');
 
     // Calculate simple stats
-    const totalEarnings = confirmedPassengers.length * ride.pricePerSeat;
+    const totalEarnings = confirmedPassengers.reduce((sum, p) => sum + (p.seatsBooked * ride.pricePerSeat), 0);
 
     // Track review status for each passenger
-    // In a real app, we might check if we already reviewed them from the backend
     const [reviewedPassengers, setReviewedPassengers] = useState<Set<string>>(new Set());
     const [ratings, setRatings] = useState<Record<string, number>>({});
     const [comments, setComments] = useState<Record<string, string>>({});
     const [submitting, setSubmitting] = useState<string | null>(null);
+
+    // Check for existing reviews on mount
+    useEffect(() => {
+        const checkExistingReviews = async () => {
+            try {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/reviews/mine/sent?size=100`, {
+                    credentials: 'include'
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    const existingBookingIds = new Set<string>();
+                    data.content?.forEach((review: { bookingId: string }) => {
+                        // Check if this review is for one of our passengers
+                        const matchingPassenger = confirmedPassengers.find(p => p.bookingId === review.bookingId);
+                        if (matchingPassenger) {
+                            existingBookingIds.add(review.bookingId);
+                        }
+                    });
+                    if (existingBookingIds.size > 0) {
+                        setReviewedPassengers(existingBookingIds);
+                    }
+                }
+            } catch {
+                // Silently fail - we'll let the submit action catch duplicates
+            }
+        };
+        checkExistingReviews();
+    }, [confirmedPassengers]);
 
     const handleRatingChange = (passengerId: string, rating: number) => {
         setRatings(prev => ({ ...prev, [passengerId]: rating }));
@@ -57,7 +85,12 @@ export default function CompletedDriverView({ ride, passengers }: CompletedDrive
                 showSuccess("Avis envoyé avec succès !");
                 setReviewedPassengers(prev => new Set(prev).add(passenger.bookingId));
             } else {
-                showError(result.error || "Une erreur est survenue");
+                // Check if it's a duplicate review error
+                if (result.error?.includes("déjà") || result.error?.includes("already")) {
+                    setReviewedPassengers(prev => new Set(prev).add(passenger.bookingId));
+                } else {
+                    showError(result.error || "Une erreur est survenue");
+                }
             }
         } catch {
             showError("Erreur de connexion");
@@ -120,14 +153,35 @@ export default function CompletedDriverView({ ride, passengers }: CompletedDrive
                             return (
                                 <div key={passenger.bookingId} className="p-6 transition-colors hover:bg-slate-50/50">
                                     <div className="flex items-start gap-4">
-                                        <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center text-slate-600 font-bold shrink-0">
-                                            {passenger.passengerName.charAt(0)}
-                                        </div>
+                                        {/* Passenger Profile Picture with Link */}
+                                        <Link
+                                            href={`/users/${passenger.passengerId}`}
+                                            className="w-12 h-12 rounded-full overflow-hidden bg-slate-100 shrink-0 hover:ring-2 hover:ring-[#006B8F] transition-all"
+                                        >
+                                            {passenger.passengerProfilePictureUrl ? (
+                                                <Image
+                                                    src={passenger.passengerProfilePictureUrl.replace("=s96-c", "=s100-c")}
+                                                    alt={passenger.passengerName}
+                                                    width={48}
+                                                    height={48}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center text-slate-600 font-bold">
+                                                    {passenger.passengerName.charAt(0)}
+                                                </div>
+                                            )}
+                                        </Link>
                                         <div className="flex-1 space-y-4">
                                             <div>
-                                                <h3 className="font-bold text-slate-900">{passenger.passengerName}</h3>
+                                                <Link
+                                                    href={`/users/${passenger.passengerId}`}
+                                                    className="font-bold text-slate-900 hover:text-[#006B8F] transition-colors"
+                                                >
+                                                    {passenger.passengerName}
+                                                </Link>
                                                 {isReviewed ? (
-                                                    <span className="inline-flex items-center text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full mt-1">
+                                                    <span className="inline-flex items-center text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full mt-1 ml-2">
                                                         <CheckCircle className="w-3 h-3 mr-1" />
                                                         Avis envoyé
                                                     </span>
@@ -184,7 +238,7 @@ export default function CompletedDriverView({ ride, passengers }: CompletedDrive
                         Retour à l&apos;accueil
                     </Button>
                 </Link>
-                <Link href="/rides/create" className="flex-1">
+                <Link href="/publish" className="flex-1">
                     <Button className="w-full h-14 bg-[#006B8F] hover:bg-[#005673] text-white rounded-xl gap-2 font-bold shadow-lg shadow-blue-900/10">
                         <PlusCircle className="w-5 h-5" />
                         Publier un trajet

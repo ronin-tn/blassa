@@ -7,29 +7,19 @@ interface ProfileGuardProps {
     children: React.ReactNode;
 }
 
-/**
- * Wrapper component that blocks access to protected pages
- * until the user has completed their profile (phone, DOB, gender).
- * Shows a non-dismissable modal overlay.
- */
 export default function ProfileGuard({ children }: ProfileGuardProps) {
     const { user, needsProfileCompletion, refreshUser, isLoading } = useAuth();
 
-    // Show loading state while checking auth
     if (isLoading) {
         return <>{children}</>;
     }
-
-    // If profile is incomplete, show blocking modal
     if (needsProfileCompletion && user) {
         return (
             <>
-                {/* Render page content behind (blurred/blocked) */}
                 <div className="pointer-events-none select-none opacity-50 blur-sm">
                     {children}
                 </div>
 
-                {/* Non-dismissable modal overlay */}
                 <CompleteProfileModal
                     isOpen={true}
                     onComplete={async () => {
@@ -51,6 +41,5 @@ export default function ProfileGuard({ children }: ProfileGuardProps) {
         );
     }
 
-    // Profile is complete, render children normally
     return <>{children}</>;
 }

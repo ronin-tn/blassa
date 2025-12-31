@@ -1,7 +1,3 @@
-/**
- * Dashboard components barrel export
- */
-
 export { default as DashboardStats } from "./DashboardStats";
 export type { DashboardStatsData } from "./DashboardStats";
 

@@ -56,7 +56,6 @@ export default function ReviewPage() {
 
     const rideId = params.id as string;
 
-    // Redirect if not authenticated
     useEffect(() => {
         if (!authLoading && !isAuthenticated) {
             router.replace("/login");
@@ -70,7 +69,6 @@ export default function ReviewPage() {
         setError("");
 
         try {
-            // Fetch ride info
             const rideResponse = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/rides/${rideId}`,
                 {
@@ -89,7 +87,6 @@ export default function ReviewPage() {
             const rideData = await rideResponse.json();
             setRide(rideData);
 
-            // Fetch user's booking for this ride
             const bookingResponse = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/bookings/ride/${rideId}/mine`,
                 {
@@ -110,12 +107,10 @@ export default function ReviewPage() {
             const bookingData = await bookingResponse.json();
             setBooking(bookingData);
 
-            // Check if ride is completed
             if (rideData.status !== "COMPLETED") {
                 setError("Le trajet doit être terminé pour laisser un avis");
             }
 
-            // Check if booking is confirmed
             if (bookingData.status !== "CONFIRMED") {
                 setError("Votre réservation doit être confirmée pour laisser un avis");
             }
@@ -179,7 +174,6 @@ export default function ReviewPage() {
         ? "le passager"
         : ride?.driverName || "le conducteur";
 
-    // Loading state
     if (authLoading || isLoading) {
         return (
             <div className="min-h-screen bg-[#F8FAFC]">
@@ -192,7 +186,6 @@ export default function ReviewPage() {
         );
     }
 
-    // Success state
     if (isSuccess) {
         return (
             <div className="min-h-screen bg-[#F8FAFC]">
@@ -227,7 +220,6 @@ export default function ReviewPage() {
         );
     }
 
-    // Error state - can't review
     if (error && !ride) {
         return (
             <div className="min-h-screen bg-[#F8FAFC]">
@@ -265,7 +257,6 @@ export default function ReviewPage() {
                 </button>
 
                 <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                    {/* Header */}
                     <div className="p-6 border-b border-slate-100 bg-gradient-to-r from-[#006B8F]/5 to-[#FF9A3E]/5">
                         <div className="flex items-center gap-3 mb-3">
                             <div className="w-12 h-12 bg-[#006B8F] rounded-xl flex items-center justify-center">
@@ -281,7 +272,6 @@ export default function ReviewPage() {
                             </div>
                         </div>
 
-                        {/* Ride info summary */}
                         {ride && (
                             <div className="mt-4 p-3 bg-white rounded-xl border border-slate-100">
                                 <div className="flex items-center gap-2 text-slate-700">
@@ -300,9 +290,7 @@ export default function ReviewPage() {
                         )}
                     </div>
 
-                    {/* Review Form */}
                     <form onSubmit={handleSubmit} className="p-6">
-                        {/* Error banner if ride not completed */}
                         {error && (
                             <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-sm">
                                 <AlertCircle className="w-4 h-4 inline mr-2" />
@@ -310,7 +298,6 @@ export default function ReviewPage() {
                             </div>
                         )}
 
-                        {/* Star Rating */}
                         <div className="mb-6">
                             <label className="block text-sm font-medium text-slate-700 mb-3">
                                 Note *
@@ -346,7 +333,6 @@ export default function ReviewPage() {
                             </p>
                         </div>
 
-                        {/* Comment */}
                         <div className="mb-6">
                             <label
                                 htmlFor="comment"
@@ -368,7 +354,6 @@ export default function ReviewPage() {
                             </p>
                         </div>
 
-                        {/* Submit Button */}
                         <Button
                             type="submit"
                             disabled={isSubmitting || rating === 0 || !!error}

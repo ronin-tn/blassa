@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Loader2, Check, X, Phone, Mail, Facebook, Instagram } from "lucide-react";
 import { PassengerInfo, BookingStatus } from "@/types/models";
 import { BookingStatusLabels, BookingStatusColors } from "@/constants/statusLabels";
+import { useState } from "react";
 
 interface PassengerCardProps {
     passenger: PassengerInfo;
@@ -22,6 +23,7 @@ export default function PassengerCard({
     isLoading
 }: PassengerCardProps) {
     const profileUrl = `/users/${passenger.passengerId}`;
+    const [imageError, setImageError] = useState(false);
 
     return (
         <div
@@ -33,12 +35,13 @@ export default function PassengerCard({
             <div className="flex items-start gap-4">
                 {/* Avatar - Clickable */}
                 <Link href={profileUrl} className="w-12 h-12 rounded-full overflow-hidden bg-emerald-100 flex-shrink-0 border border-slate-100 relative hover:ring-2 hover:ring-[#0A8F8F] transition-all">
-                    {passenger.passengerProfilePictureUrl ? (
+                    {passenger.passengerProfilePictureUrl && !imageError ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
                             src={passenger.passengerProfilePictureUrl.replace("=s96-c", "=s100-c")}
                             alt={passenger.passengerName}
                             className="w-full h-full object-cover"
+                            onError={() => setImageError(true)}
                         />
                     ) : (
                         <div className="w-full h-full flex items-center justify-center text-emerald-700 font-bold text-lg bg-emerald-100">

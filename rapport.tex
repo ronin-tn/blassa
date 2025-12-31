@@ -1,0 +1,326 @@
+\documentclass[12pt,a4paper]{report}
+
+% Packages et configuration
+\usepackage[a4paper, margin=2.5cm]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{graphicx}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{hyperref}
+\usepackage{float}
+\usepackage{subcaption}
+\usepackage{titlesec}
+\usepackage{xcolor}
+
+% Configuration des liens
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    filecolor=magenta,      
+    urlcolor=blue,
+    pdftitle={Rapport Projet Blassa},
+}
+
+% Personnalisation des titres de chapitres (Suppression du mot "Chapitre")
+\titleformat{\chapter}[hang]
+  {\normalfont\huge\bfseries}
+  {\thechapter.}
+  {1em}
+  {}
+
+\begin{document}
+
+% --- PAGE DE TITRE ---
+\begin{titlepage}
+    \begin{center}
+        \vspace*{1cm}
+        
+        \includegraphics[width=0.3\textwidth]{logo} % Assurez-vous d'avoir un fichier logo.png ou .jpg
+        \vspace{1cm}
+        
+        {\Large \textbf{Institut Supérieur de l'Informatique et du Multimédia de Monastir (ISIMM)}}
+        \vspace{1.5cm}
+        
+        {\large \textbf{Rapport de Projet}}
+        \vspace{0.5cm}
+        
+        {\Huge \textbf{Blassa}}
+        \vspace{0.5cm}
+        
+        {\Large Plateforme de Covoiturage Intelligente}
+        \vspace{2cm}
+        
+        \textbf{Réalisé par l'équipe Fallaga :}
+        \vspace{0.5cm}
+        
+        \begin{tabular}{l l}
+            Cherif Rayen & (Ingénieur 1) \\
+            Ben Hassen Abidi & (Licence 3) \\
+            Boujdaria Abderrahmen & (Licence 3)
+        \end{tabular}
+        \vspace{2cm}
+        
+        \textbf{Année Universitaire :} 2025 - 2026
+        \vspace{1cm}
+        
+        \vfill
+    \end{center}
+\end{titlepage}
+
+% --- TABLE DES MATIÈRES ---
+\newpage
+\tableofcontents
+
+
+
+% --- CHAPITRE 1 : INTRODUCTION GÉNÉRALE & CADRE DU PROJET ---
+\newpage
+\chapter{Introduction et Cadre Général}
+
+\section{Introduction Générale}
+Le secteur du transport en Tunisie connaît des mutations profondes. Entre l'augmentation des coûts du carburant, la saturation des transports en commun et la conscience écologique grandissante, les citoyens cherchent des alternatives économiques et flexibles. Le covoiturage émerge comme une solution collaborative efficace, mais manque souvent d'outils numériques fiables et sécurisés pour organiser les trajets.
+
+\section{Cadre Général du Projet}
+\subsection{Contexte}
+Le projet \textbf{Blassa} s'inscrit dans le domaine de la \textit{Logistique et du Transport Participatif}. Il vise à optimiser l'utilisation des véhicules personnels en permettant le partage de sièges vides.
+
+\subsection{Problématique}
+Les solutions existantes (groupes Facebook, applications informelles) souffrent de plusieurs limites :
+\begin{itemize}
+    \item \textbf{Manque de confiance :} Profils non vérifiés, insécurité.
+    \item \textbf{Organisation difficile :} Pas de recherche structurée, annulations fréquentes.
+    \item \textbf{Information fragmentée :} Difficulté à trouver un trajet précis à une heure donnée.
+\end{itemize}
+Comment concevoir une plateforme centralisée et sécurisée qui fluidifie la mise en relation entre conducteurs et passagers tout en garantissant la fiabilité des informations ?
+
+\subsection{Motivation et Objectifs}
+L'objectif principal est de développer une plateforme robuste (\textit{Blassa}) permettant de :
+\begin{itemize}
+    \item Simplifier la publication et la recherche de trajets.
+    \item Sécuriser les échanges grâce à des profils vérifiés (Email, Téléphone).
+    \item Améliorer l'expérience utilisateur via une application mobile native et un web performant.
+    \item Réduire l'empreinte carbone et les frais de transport des utilisateurs.
+\end{itemize}
+
+\subsection{Organisation du rapport}
+Ce rapport s'articule autour de trois parties majeures :
+\begin{enumerate}
+    \item \textbf{Analyse des besoins :} Identification des acteurs et des fonctionnalités.
+    \item \textbf{Conception et Architecture :} Choix techniques et modélisation du système.
+    \item \textbf{Développement et Réalisation :} Présentation des résultats et des interfaces.
+\end{enumerate}
+
+% --- CHAPITRE 2 : ANALYSE DES BESOINS & SPÉCIFICATIONS ---
+\newpage
+\chapter{Analyse des Besoins et Spécifications}
+
+\section{Identification des Acteurs}
+\begin{itemize}
+    \item \textbf{Passager :} Recherche un trajet, réserve une place, consulte l'historique, note le conducteur.
+    \item \textbf{Conducteur :} Publie une offre de trajet, gère les demandes de réservation, consulte ses statistiques.
+    \item \textbf{Administrateur :} Gère les utilisateurs, modère le contenu, analyse les statistiques globales.
+\end{itemize}
+
+\section{Besoins Fonctionnels}
+\subsection{Module Authentification}
+\begin{itemize}
+    \item Inscription/Connexion (Email, Mot de passe).
+    \item Authentification sociale (Google).
+    \item Vérification (Email, Téléphone, Age > 18 ans).
+\end{itemize}
+
+\subsection{Module Covoiturage}
+\begin{itemize}
+    \item \textbf{Publication :} Définir départ, arrivée, date, heure, prix, nombre de places.
+    \item \textbf{Recherche :} Filtres multicritères (Ville, Date, Prix, Genre).
+    \item \textbf{Réservation :} Demande instantanée ou avec approbation.
+\end{itemize}
+
+\subsection{Module Communication & Suivi}
+\begin{itemize}
+    \item Messagerie instantanée entre conducteur et passager.
+    \item Notifications temps réel (WebSocket) pour les statuts de réservation.
+    \item Historique des trajets et avis.
+\end{itemize}
+
+\section{Besoins Non-Fonctionnels}
+\begin{itemize}
+    \item \textbf{Performance :} Temps de réponse de l'API < 200ms.
+    \item \textbf{Disponibilité :} Service accessible 24/7.
+    \item \textbf{Sécurité :} Chiffrement des mots de passe, Tokens JWT, Validation des données.
+    \item \textbf{Ergonomie :} Interface intuitive (Design System Material 3 pour Android).
+\end{itemize}
+
+\section{Diagramme de Cas d'Utilisation}
+\begin{figure}[H]
+    \centering
+    % Placeholder pour l'image
+    \fbox{\begin{minipage}{0.8\textwidth}
+        \centering
+        \vspace{2cm}
+        \textit{[Insérer ici le Diagramme de Cas d'Utilisation Global]}
+        \vspace{2cm}
+    \end{minipage}}
+    \caption{Diagramme de Cas d'Utilisation Global}
+\end{figure}
+
+% --- CHAPITRE 3 : CONCEPTION ET ARCHITECTURE ---
+\newpage
+\chapter{Conception et Architecture}
+
+\section{Choix Technologiques}
+
+\subsection{Backend (Serveur)}
+\begin{itemize}
+    \item \textbf{Langage :} Java 21.
+    \item \textbf{Framework :} Spring Boot 3 (Robustesse, Sécurité, Rapidité de développement).
+    \item \textbf{Base de Données :} PostgreSQL (SGBD Relationnel fiable et performant pour les données spatiales via PostGIS si nécessaire).
+    \item \textbf{Sécurité :} Spring Security + JWT (Stateless Authentication).
+    \item \textbf{Temps Réel :} WebSocket (STOMP) pour les notifications et le chat.
+    \item \textbf{Build :} Maven.
+\end{itemize}
+
+\subsection{Frontend Web}
+\begin{itemize}
+    \item \textbf{Framework :} Next.js (React) pour le rendu hybride (SSR/CSR) et le référencement (SEO).
+    \item \textbf{Langage :} TypeScript (Typage statique pour réduire les erreurs).
+    \item \textbf{Style :} Tailwind CSS (Design rapide et responsive).
+\end{itemize}
+
+\subsection{Frontend Mobile (Android)}
+\begin{itemize}
+    \item \textbf{Langage :} Kotlin (Moderne, concis, officiel Android).
+    \item \textbf{UI Toolkit :} Jetpack Compose (UI déclarative moderne).
+    \item \textbf{Architecture :} MVVM (Model-View-ViewModel) + Clean Architecture.
+    \item \textbf{Injection de Dépendances :} Hilt.
+    \item \textbf{Réseau :} Retrofit + OkHttp.
+\end{itemize}
+
+\section{Architecture Logicielle}
+Nous avons opté pour une \textbf{Architecture N-Tiers} classique et efficace pour le backend, exposant une API RESTful consommée par les clients Web et Mobile.
+
+\begin{enumerate}
+    \item \textbf{Couche Présentation (Clients) :} Applications Android et Web.
+    \item \textbf{Couche API (Controller) :} Gestion des requêtes HTTP (`MobileAuthController`, `RideController`).
+    \item \textbf{Couche Service (Business Logic) :} Règles métier, validation, calculs (`AuthenticationService`, `RideService`).
+    \item \textbf{Couche Données (Repository) :} Accès à la base de données (`UserRepository`, `JpaRepository`).
+\end{enumerate}
+
+\section{Diagrammes UML}
+
+\subsection{Diagramme de Classes}
+Modélisation des entités principales : \texttt{User}, \texttt{Ride} (Trajet), \texttt{Booking} (Réservation), \texttt{Vehicle}.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\begin{minipage}{0.8\textwidth}
+        \centering
+        \vspace{3cm}
+        \textit{[Insérer Diagramme de Classes]}
+        \vspace{3cm}
+    \end{minipage}}
+    \caption{Diagramme de Classes Simplifié}
+\end{figure}
+
+\subsection{Diagramme de Séquence : Publication d'un Trajet}
+Ce scénario illustre l'interaction entre le conducteur, l'application mobile et le backend lors de la création d'une annonce.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\begin{minipage}{0.8\textwidth}
+        \centering
+        \vspace{3cm}
+        \textit{[Insérer Diagramme de Séquence]}
+        \vspace{3cm}
+    \end{minipage}}
+    \caption{Séquence : Publication d'un trajet}
+\end{figure}
+
+% --- CHAPITRE 4 : DÉVELOPPEMENT ET RÉALISATION ---
+\newpage
+\chapter{Développement et Réalisation}
+
+\section{Environnement de Développement}
+\begin{itemize}
+    \item \textbf{IDE :} IntelliJ IDEA (Backend), Android Studio (Mobile), VS Code (Web).
+    \item \textbf{Version Control :} Git & GitHub.
+    \item \textbf{API Testing :} Postman.
+\end{itemize}
+
+\section{Modules Développés et Interfaces}
+
+\subsection{Authentification et Onboarding}
+L'application propose un flux d'inscription fluide avec validation des données (Email, Téléphone unique, Age).
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        % \includegraphics[width=0.8\textwidth]{android_login}
+        \fbox{Capture Login}
+        \caption{Écran de Connexion Mobile}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        % \includegraphics[width=0.8\textwidth]{android_register}
+        \fbox{Capture Register}
+        \caption{Écran d'Inscription}
+    \end{subfigure}
+    \caption{Interfaces d'Authentification}
+\end{figure}
+
+\subsection{Recherche et Réservation (Mobile)}
+Les passagers peuvent rechercher des trajets par ville de départ/arrivée et date.
+\begin{figure}[H]
+    \centering
+    \fbox{\begin{minipage}{0.6\textwidth}
+        \centering
+        \vspace{4cm}
+        \textit{[Capture d'écran Résultats de Recherche]}
+        \vspace{4cm}
+    \end{minipage}}
+    \caption{Interface de Recherche de Trajet}
+\end{figure}
+
+\subsection{Échantillon de Code : Gestion des Erreurs (Android)}
+L'extrait suivant montre comment le ViewModel mobile gère les erreurs API pour afficher des messages conviviaux (ex: "Numéro déjà utilisé").
+
+\begin{verbatim}
+// CompleteProfileViewModel.kt
+viewModelScope.launch {
+    try {
+        RetrofitClient.dashboardApiService.updateUserProfile(request)
+        _uiState.update { it.copy(isSuccess = true) }
+    } catch (e: retrofit2.HttpException) {
+        val errorBody = e.response()?.errorBody()?.string()
+        val message = parseError(errorBody) // Extraction du message JSON
+        _uiState.update { it.copy(error = message) }
+    }
+}
+\end{verbatim}
+
+\section{Dashboard Web (Administration)}
+Une interface Next.js permet de visualiser les utilisateurs et les statistiques de la plateforme.
+
+% --- CONCLUSION ---
+\newpage
+\chapter*{Conclusion Générale}
+\addcontentsline{toc}{chapter}{Conclusion Générale}
+
+Le projet \textbf{Blassa} a permis de réaliser une plateforme de covoiturage complète et fonctionnelle, répondant aux standards modernes de développement. L'intégration d'une application mobile native et d'un backend robuste offre une expérience utilisateur fluide et sécurisée.
+\\
+Ce projet nous a permis de consolider nos compétences techniques sur la stack \textbf{Spring Boot / Android / React}, mais aussi d'appréhender les défis liés à la gestion de projet, à l'architecture logicielle et au déploiement.
+\\
+\textbf{Perspectives :}
+\begin{itemize}
+    \item Intégration du paiement en ligne sécurisé.
+    \item Système d'avis et de réputation basé sur la Blockchain pour plus de transparence.
+    \item Algorithme de matching intelligent pour optimiser les détours des conducteurs.
+\end{itemize}
+
+\end{document}

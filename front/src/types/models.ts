@@ -11,10 +11,12 @@
 
 export interface PagedResponse<T> {
     content: T[];
-    totalElements: number;
-    totalPages: number;
-    size: number;
-    number: number; // current page (0-indexed)
+    page: {
+        totalElements: number;
+        totalPages: number;
+        size: number;
+        number: number; // current page (0-indexed)
+    };
     first?: boolean;
     last?: boolean;
     empty?: boolean;
@@ -36,6 +38,7 @@ export interface UserProfile {
     facebookUrl: string | null;
     instagramUrl: string | null;
     oauthProvider?: string | null;
+    role: "USER" | "ADMIN";
 }
 
 export interface UserStats {
@@ -86,6 +89,9 @@ export interface Ride {
     availableSeats: number;
     pricePerSeat: number;
     allowsSmoking: boolean;
+    allowsMusic: boolean;
+    allowsPets: boolean;
+    luggageSize: string;
     genderPreference: RideGenderPreference;
     status: RideStatus;
     driverEmail: string;
@@ -109,6 +115,9 @@ export interface CreateRideRequest {
     totalSeats: number;
     pricePerSeat: number;
     allowsSmoking: boolean;
+    allowsMusic: boolean;
+    allowsPets: boolean;
+    luggageSize: string;
     genderPreference: RideGenderPreference;
 }
 
@@ -127,6 +136,7 @@ export interface SearchRidesParams {
     destLon?: number;
     seats?: number;
     departureTime?: string;
+    sortBy?: string;
 }
 
 // ============================================================================

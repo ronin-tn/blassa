@@ -27,10 +27,8 @@ public class VerificationController {
     public void verifyEmail(@RequestParam String token, HttpServletResponse response) throws IOException {
         try {
             authenticationService.verifyEmail(token);
-            // Redirect to frontend success page
             response.sendRedirect(frontendUrl + "/email-verified?status=success");
         } catch (IllegalArgumentException e) {
-            // Redirect to frontend error page
             String errorMessage = java.net.URLEncoder.encode(e.getMessage(), "UTF-8");
             response.sendRedirect(frontendUrl + "/email-verified?status=error&message=" + errorMessage);
         }

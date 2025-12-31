@@ -34,7 +34,7 @@ function LoginForm() {
     const [showPassword, setShowPassword] = useState(false);
     const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
-    // Redirect if already authenticated
+
     useEffect(() => {
         if (!authLoading && isAuthenticated) {
             router.replace("/dashboard");
@@ -46,14 +46,18 @@ function LoginForm() {
             setShowSuccessMessage(true);
             window.history.replaceState({}, "", "/login");
         }
-        // Handle OAuth errors
+
         if (searchParams.get("error") === "oauth_failed") {
             setApiError("La connexion avec Google a échoué. Veuillez réessayer.");
             window.history.replaceState({}, "", "/login");
         }
+
+        if (searchParams.get("error") === "banned") {
+            setApiError("Votre compte a été banni. Veuillez contacter le support.");
+            window.history.replaceState({}, "", "/login");
+        }
     }, [searchParams]);
 
-    // Show loading while checking auth
     if (authLoading) {
         return (
             <div className="h-48 flex items-center justify-center">
@@ -62,7 +66,6 @@ function LoginForm() {
         );
     }
 
-    // Don't render form if authenticated (will redirect)
     if (isAuthenticated) {
         return (
             <div className="h-48 flex items-center justify-center">
@@ -119,7 +122,6 @@ function LoginForm() {
                 }
             );
 
-            // Handle rate limiting
             if (response.status === 429) {
                 throw new Error("Trop de tentatives. Veuillez réessayer plus tard.");
             }
@@ -135,12 +137,11 @@ function LoginForm() {
                 throw new Error(errorMessage);
             }
 
-            // Parse response - new format: {status, email, verificationSentAt?}
             const data = await response.json();
 
             // Check if email verification is needed
             if (data.status === "EMAIL_NOT_VERIFIED") {
-                // Redirect to verification page with email
+
                 const params = new URLSearchParams({
                     email: data.email,
                     ...(data.verificationSentAt && { sentAt: data.verificationSentAt }),
@@ -149,12 +150,12 @@ function LoginForm() {
                 return;
             }
 
-            // Check if login was successful
+
             if (data.status === "SUCCESS") {
-                // Cookie is set by backend, fetch user profile
+
                 await login();
 
-                // Clear sensitive data from state
+
                 setFormData({ email: "", password: "" });
 
                 router.push("/dashboard");
@@ -163,7 +164,7 @@ function LoginForm() {
                 setApiError("Une erreur est survenue. Veuillez réessayer.");
             }
         } catch (error) {
-            // Handle network errors specifically
+
             if (error instanceof TypeError && error.message.includes("fetch")) {
                 setApiError("Erreur réseau. Vérifiez votre connexion internet.");
             } else {
@@ -178,7 +179,7 @@ function LoginForm() {
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Success Message */}
+
             {showSuccessMessage && (
                 <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm flex items-center gap-3">
                     <CheckCircle2 className="w-5 h-5 shrink-0" />
@@ -186,14 +187,12 @@ function LoginForm() {
                 </div>
             )}
 
-            {/* API Error */}
             {apiError && (
                 <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
                     {apiError}
                 </div>
             )}
 
-            {/* Email Field */}
             <div className="space-y-2">
                 <label
                     htmlFor="email"
@@ -222,7 +221,6 @@ function LoginForm() {
                 )}
             </div>
 
-            {/* Password Field */}
             <div className="space-y-2">
                 <div className="flex items-center justify-between">
                     <label
@@ -270,7 +268,6 @@ function LoginForm() {
                 )}
             </div>
 
-            {/* Submit Button */}
             <Button
                 type="submit"
                 className="w-full h-12 text-[15px] font-medium bg-[var(--color-blassa-teal)] hover:bg-[var(--color-blassa-teal-dark)] text-white rounded-xl transition-all duration-200 shadow-sm"
@@ -286,7 +283,6 @@ function LoginForm() {
                 )}
             </Button>
 
-            {/* Divider */}
             <div className="relative my-6">
                 <div className="absolute inset-0 flex items-center">
                     <span className="w-full border-t border-slate-200" />
@@ -296,7 +292,6 @@ function LoginForm() {
                 </div>
             </div>
 
-            {/* Google OAuth Button */}
             <Button
                 type="button"
                 onClick={() => {
@@ -314,7 +309,7 @@ function LoginForm() {
                     </>
                 ) : (
                     <>
-                        {/* Google Icon */}
+
                         <svg className="w-5 h-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
                             <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
@@ -332,15 +327,13 @@ function LoginForm() {
 export default function LoginPage() {
     return (
         <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC] p-4">
-            {/* Background Gradient Blobs */}
+
             <div className="fixed inset-0 pointer-events-none overflow-hidden">
                 <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-[#006B8F] rounded-full mix-blend-multiply filter blur-[120px] opacity-[0.08]"></div>
                 <div className="absolute -bottom-40 -right-40 w-[600px] h-[600px] bg-[#FF9A3E] rounded-full mix-blend-multiply filter blur-[120px] opacity-[0.08]"></div>
             </div>
 
-            {/* Login Card */}
-            <div className="relative w-full max-w-[400px] bg-white rounded-[20px] p-8 shadow-[0_8px_20px_rgba(0,0,0,0.06)]">
-                {/* Logo */}
+            <div className="relative w-full max-w-[440px] bg-white rounded-[20px] p-8 shadow-[0_8px_20px_rgba(0,0,0,0.06)]">
                 <div className="flex justify-center mb-6">
                     <Link href="/">
                         <Image
@@ -353,7 +346,6 @@ export default function LoginPage() {
                     </Link>
                 </div>
 
-                {/* Header */}
                 <div className="text-center mb-8">
                     <h1 className="text-[22px] font-bold text-slate-900 font-[family-name:var(--font-poppins)] mb-2">
                         Connexion
@@ -362,14 +354,12 @@ export default function LoginPage() {
                         Connectez-vous à votre compte Blassa
                     </p>
 
-                    {/* Trust Indicator */}
                     <div className="flex items-center justify-center gap-1.5 mt-3 text-xs text-slate-400">
                         <Lock className="w-3.5 h-3.5" strokeWidth={1.5} />
                         <span>Sécurisé par Blassa</span>
                     </div>
                 </div>
 
-                {/* Form */}
                 <Suspense
                     fallback={
                         <div className="h-48 flex items-center justify-center">
@@ -380,7 +370,6 @@ export default function LoginPage() {
                     <LoginForm />
                 </Suspense>
 
-                {/* Register Link */}
                 <div className="mt-8 text-center">
                     <p className="text-sm text-slate-600">
                         Pas encore de compte ?{" "}
@@ -393,7 +382,6 @@ export default function LoginPage() {
                     </p>
                 </div>
 
-                {/* Back to Home */}
                 <div className="mt-4 text-center">
                     <Link
                         href="/"
@@ -404,5 +392,6 @@ export default function LoginPage() {
                 </div>
             </div>
         </div>
+
     );
 }

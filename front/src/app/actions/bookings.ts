@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
-import { BookingStatus, CreateBookingRequest } from "@/types/models";
+import { CreateBookingRequest } from "@/types/models";
 import { AUTH_COOKIE_NAME } from "@/lib/config";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8088/api/v1";
@@ -33,7 +33,7 @@ export async function createBookingAction(data: CreateBookingRequest) {
 
         revalidatePath(`/rides/${data.rideId}`);
         return { success: true };
-    } catch (e) {
+    } catch {
         return { success: false, error: "Erreur serveur" };
     }
 }
@@ -50,9 +50,9 @@ export async function acceptBookingAction(bookingId: string) {
 
         if (!res.ok) return { success: false, error: "Impossible d'accepter" };
 
-        revalidatePath("/dashboard/rides"); // Revalidate broadly
+        revalidatePath("/dashboard/rides");
         return { success: true };
-    } catch (e) {
+    } catch {
         return { success: false, error: "Erreur serveur" };
     }
 }
@@ -71,12 +71,11 @@ export async function rejectBookingAction(bookingId: string) {
 
         revalidatePath("/dashboard/rides");
         return { success: true };
-    } catch (e) {
+    } catch {
         return { success: false, error: "Erreur serveur" };
     }
 }
 
-// Add this function to fetch secure booking details
 export async function getMyBookingForRideAction(rideId: string) {
     const token = await getAuthToken();
     if (!token) return { success: false, error: "Non authentifié" };
@@ -90,7 +89,7 @@ export async function getMyBookingForRideAction(rideId: string) {
 
         const booking = await res.json();
         return { success: true, booking };
-    } catch (e) {
+    } catch {
         return { success: false, error: "Erreur serveur" };
     }
 }

@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft, Calendar, User, ShieldCheck, Star } from "lucide-react";
-import { PublicProfile } from "@/types/models";
+import { ArrowLeft, Calendar, User, ShieldCheck, Star, Car, UserCircle } from "lucide-react";
+import { PublicProfile, ReviewResponse, PagedResponse } from "@/types/models";
 import Navbar from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/button";
 
@@ -15,17 +15,27 @@ export default function PublicProfilePage() {
     const userId = params.id as string;
 
     const [profile, setProfile] = useState<PublicProfile | null>(null);
+    const [reviews, setReviews] = useState<ReviewResponse[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
 
     useEffect(() => {
-        const fetchProfile = async () => {
+        const fetchData = async () => {
             try {
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/${userId}/public`);
-                if (!response.ok) throw new Error("Profil introuvable");
-                const data = await response.json();
-                setProfile(data);
-            } catch (err) {
+                const profileRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/${userId}/public`);
+                if (!profileRes.ok) throw new Error("Profil introuvable");
+                const profileData = await profileRes.json();
+                setProfile(profileData);
+
+                try {
+                    const reviewsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/reviews/user/${userId}?size=10`);
+                    if (reviewsRes.ok) {
+                        const reviewsData: PagedResponse<ReviewResponse> = await reviewsRes.json();
+                        setReviews(reviewsData.content);
+                    }
+                } catch {
+                }
+            } catch {
                 setError("Impossible de charger le profil");
             } finally {
                 setIsLoading(false);
@@ -33,7 +43,7 @@ export default function PublicProfilePage() {
         };
 
         if (userId) {
-            fetchProfile();
+            fetchData();
         }
     }, [userId]);
 
@@ -54,9 +64,9 @@ export default function PublicProfilePage() {
                 <Navbar />
                 <div className="max-w-md mx-auto mt-20 p-6 text-center">
                     <h2 className="text-xl font-bold text-slate-900 mb-2">Profil introuvable</h2>
-                    <p className="text-slate-600 mb-6">Ce profil n'existe pas ou n'est plus disponible.</p>
+                    <p className="text-slate-600 mb-6">Ce profil n&apos;existe pas ou n&apos;est plus disponible.</p>
                     <Link href="/dashboard">
-                        <Button>Retour à l'accueil</Button>
+                        <Button>Retour à l&apos;accueil</Button>
                     </Link>
                 </div>
             </div>
@@ -70,9 +80,33 @@ export default function PublicProfilePage() {
         });
     };
 
+    const formatReviewDate = (dateStr: string) => {
+        return new Date(dateStr).toLocaleDateString("fr-FR", {
+            day: "numeric",
+            month: "short",
+            year: "numeric"
+        });
+    };
+
     const getInitials = () => {
         return `${profile.firstName.charAt(0)}${profile.lastName.charAt(0)}`.toUpperCase();
     };
+
+    const getDriverExperienceBadge = () => {
+        const ridesCount = profile.completedRidesCount ?? 0;
+        if (ridesCount < 5) {
+            return {
+                label: "Nouveau conducteur",
+                color: "bg-blue-100 text-blue-700"
+            };
+        }
+        return {
+            label: "Conducteur expérimenté",
+            color: "bg-emerald-100 text-emerald-700"
+        };
+    };
+
+    const experienceBadge = getDriverExperienceBadge();
 
     return (
         <div className="min-h-screen bg-slate-50 pb-20">
@@ -89,7 +123,6 @@ export default function PublicProfilePage() {
                 </button>
 
                 <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                    {/* Header Banner */}
                     <div className="h-32 bg-gradient-to-r from-[#006B8F] to-[#004e69]"></div>
 
                     <div className="px-8 pb-8">
@@ -109,7 +142,9 @@ export default function PublicProfilePage() {
                                     </div>
                                 )}
                             </div>
-                            {/* Future: Add 'Verified' badge here */}
+                            <span className={`px-3 py-1.5 rounded-full text-sm font-medium ${experienceBadge.color}`}>
+                                {experienceBadge.label}
+                            </span>
                         </div>
 
                         <div className="space-y-6">
@@ -133,7 +168,6 @@ export default function PublicProfilePage() {
                                 </p>
                             </div>
 
-                            {/* Stats */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="p-4 rounded-xl border border-slate-100 bg-white text-center">
                                     <div className="flex items-center justify-center gap-1 text-slate-900 font-bold text-xl mb-1">
@@ -143,11 +177,58 @@ export default function PublicProfilePage() {
                                     <p className="text-xs text-slate-500 uppercase font-medium">Note moyenne</p>
                                 </div>
                                 <div className="p-4 rounded-xl border border-slate-100 bg-white text-center">
-                                    <div className="text-slate-900 font-bold text-xl mb-1">
-                                        {profile.completedRidesCount}
+                                    <div className="flex items-center justify-center gap-1 text-slate-900 font-bold text-xl mb-1">
+                                        <Car className="w-5 h-5 text-[#006B8F]" />
+                                        <span>{profile.completedRidesCount}</span>
                                     </div>
                                     <p className="text-xs text-slate-500 uppercase font-medium">Trajets effectués</p>
                                 </div>
+                            </div>
+
+                            <div className="border-t border-slate-100 pt-6">
+                                <h2 className="font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                                    <Star className="w-5 h-5 text-amber-400" />
+                                    Avis ({reviews.length})
+                                </h2>
+
+                                {reviews.length === 0 ? (
+                                    <div className="text-center py-8 text-slate-500 bg-slate-50 rounded-xl border border-slate-100">
+                                        <UserCircle className="w-10 h-10 mx-auto mb-2 text-slate-400" />
+                                        <p>Aucun avis pour le moment</p>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-4">
+                                        {reviews.map((review) => (
+                                            <div key={review.id} className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-10 h-10 rounded-full bg-[#006B8F]/10 flex items-center justify-center">
+                                                            <User className="w-5 h-5 text-[#006B8F]" />
+                                                        </div>
+                                                        <div>
+                                                            <p className="font-medium text-slate-900">{review.reviewerName}</p>
+                                                            <p className="text-xs text-slate-500">{formatReviewDate(review.createdAt)}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-0.5">
+                                                        {[1, 2, 3, 4, 5].map((star) => (
+                                                            <Star
+                                                                key={star}
+                                                                className={`w-4 h-4 ${star <= review.rating
+                                                                    ? "text-amber-400 fill-amber-400"
+                                                                    : "text-slate-200"
+                                                                    }`}
+                                                            />
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                                {review.comment && (
+                                                    <p className="text-slate-600 text-sm mt-2">{review.comment}</p>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>

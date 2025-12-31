@@ -38,13 +38,10 @@ public class ReviewController {
         Long count = reviewService.getReviewCountForUser(userId);
         return ResponseEntity.ok(Map.of(
                 "userId", userId,
-                "averageRating", Math.round(avgRating * 10.0) / 10.0, // Round to 1 decimal
+                "averageRating", Math.round(avgRating * 10.0) / 10.0,
                 "totalReviews", count));
     }
 
-    /**
-     * Get reviews received by the current user.
-     */
     @GetMapping("/mine/received")
     public ResponseEntity<Page<ReviewResponse>> getMyReceivedReviews(
             @RequestParam(defaultValue = "0") int page,
@@ -52,9 +49,6 @@ public class ReviewController {
         return ResponseEntity.ok(reviewService.getMyReceivedReviews(page, size));
     }
 
-    /**
-     * Get reviews sent by the current user.
-     */
     @GetMapping("/mine/sent")
     public ResponseEntity<Page<ReviewResponse>> getMySentReviews(
             @RequestParam(defaultValue = "0") int page,

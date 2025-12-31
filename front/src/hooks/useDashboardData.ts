@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from "react";
 import { clientGet } from "@/lib/api/client-api";
 import { Ride, Booking, PagedResponse } from "@/types/models";
 
-// Types for dashboard data
 export interface DashboardStatsData {
     totalTrips: number;
     totalRides: number;
@@ -40,10 +39,6 @@ const defaultStats: DashboardStatsData = {
     rating: 0,
 };
 
-/**
- * Custom hook for fetching dashboard data
- * Handles loading, error states, and parallel data fetching
- */
 export function useDashboardData(isAuthenticated: boolean): UseDashboardDataResult {
     const [stats, setStats] = useState<DashboardStatsData>(defaultStats);
     const [upcomingRides, setUpcomingRides] = useState<DashboardRide[]>([]);
@@ -60,7 +55,6 @@ export function useDashboardData(isAuthenticated: boolean): UseDashboardDataResu
         setError(null);
 
         try {
-            // Fetch all data in parallel using Promise.allSettled for resilience
             const [ridesData, bookingsData, reviewsData] = await Promise.allSettled([
                 clientGet<PagedResponse<Ride>>("/rides/mine?page=0&size=50"),
                 clientGet<PagedResponse<Booking>>("/bookings/mine?page=0&size=50"),
@@ -74,10 +68,9 @@ export function useDashboardData(isAuthenticated: boolean): UseDashboardDataResu
             let totalEarnings = 0;
             let avgRating = 0;
 
-            // Process rides data
             if (ridesData.status === "fulfilled") {
                 const ridesResponse = ridesData.value;
-                publishedRidesCount = ridesResponse.totalElements ?? ridesResponse.content?.length ?? 0;
+                publishedRidesCount = ridesResponse.page.totalElements ?? ridesResponse.content?.length ?? 0;
 
                 driverRides = ridesResponse.content
                     .filter((r) => ["SCHEDULED", "FULL", "IN_PROGRESS"].includes(r.status))
@@ -102,7 +95,6 @@ export function useDashboardData(isAuthenticated: boolean): UseDashboardDataResu
                 });
             }
 
-            // Process bookings data
             if (bookingsData.status === "fulfilled") {
                 const bookingsResponse = bookingsData.value;
 
@@ -128,13 +120,10 @@ export function useDashboardData(isAuthenticated: boolean): UseDashboardDataResu
                     });
             }
 
-            // Process reviews data
             if (reviewsData.status === "fulfilled" && reviewsData.value.content.length > 0) {
                 const ratings = reviewsData.value.content.map((r) => r.rating);
                 avgRating = Math.round((ratings.reduce((a, b) => a + b, 0) / ratings.length) * 10) / 10;
             }
-
-            // Combine and sort rides
             const allRides = [...driverRides, ...passengerRides].sort(
                 (a, b) => new Date(a.departureTime).getTime() - new Date(b.departureTime).getTime()
             );

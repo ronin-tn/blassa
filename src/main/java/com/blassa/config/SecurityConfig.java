@@ -44,13 +44,12 @@ public class SecurityConfig {
                                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers("/api/v1/auth/**").permitAll()
-                                                .requestMatchers("/api/v1/rides/search").permitAll() // Public search
+                                                .requestMatchers("/api/v1/rides/search").permitAll()
                                                 .requestMatchers(org.springframework.http.HttpMethod.GET,
                                                                 "/api/v1/rides/*")
-                                                .permitAll() // Public ride details
-                                                .requestMatchers("/api/v1/user/*/public").permitAll() // Public profile
-                                                                                                      // for lazy
-                                                                                                      // registration
+                                                .permitAll()
+                                                .requestMatchers("/api/v1/user/*/public").permitAll()
+                                                .requestMatchers("/api/v1/reviews/user/**").permitAll()
                                                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
                                                 .requestMatchers("/ws/**").permitAll()
                                                 .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
@@ -81,12 +80,11 @@ public class SecurityConfig {
         @Bean
         public CorsConfigurationSource corsConfigurationSource() {
                 CorsConfiguration configuration = new CorsConfiguration();
-                // When using credentials, cannot use wildcard "*"
                 configuration.setAllowedOrigins(List.of("http://localhost:3000"));
                 configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
                 configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "Accept"));
-                configuration.setAllowCredentials(true); // Required for cookies/credentials
-                configuration.setMaxAge(3600L); // Cache preflight for 1 hour
+                configuration.setAllowCredentials(true);
+                configuration.setMaxAge(3600L);
                 UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
                 source.registerCorsConfiguration("/**", configuration);
                 return source;

@@ -49,7 +49,6 @@ export default function Navbar() {
         return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
     };
 
-    // Check if link is active
     const isActiveLink = (href: string) => {
         if (href === "/dashboard") {
             return pathname === "/dashboard";
@@ -59,7 +58,6 @@ export default function Navbar() {
 
     return (
         <>
-            {/* Main Navbar */}
             <nav
                 className={cn(
                     "fixed top-0 left-0 right-0 z-50 bg-white transition-all duration-300",
@@ -70,7 +68,6 @@ export default function Navbar() {
             >
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between h-16 relative">
-                        {/* Centered Logo on Mobile */}
                         <Link href="/" className="absolute left-1/2 -translate-x-1/2 md:static md:translate-x-0 flex items-center gap-2 shrink-0">
                             <Image
                                 src="/LOGO.png"
@@ -84,7 +81,6 @@ export default function Navbar() {
                             </span>
                         </Link>
 
-                        {/* Left: Main Nav Links (when logged in) - Desktop Only */}
                         <div className="hidden lg:flex items-center gap-8">
                             {isAuthenticated && (
                                 <div className="flex items-center gap-1">
@@ -134,12 +130,9 @@ export default function Navbar() {
                             )}
                         </div>
 
-                        {/* Left spacer for mobile to balance right-side notification */}
                         <div className="w-10 md:hidden" aria-hidden="true"></div>
 
-                        {/* Right: Actions */}
                         <div className="flex items-center gap-2 md:gap-3">
-                            {/* Search - Desktop (always visible) */}
                             <Link
                                 href="/search-form"
                                 className="hidden md:flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-600 hover:text-[var(--color-blassa-teal)] transition-colors"
@@ -148,7 +141,6 @@ export default function Navbar() {
                                 <span>Rechercher</span>
                             </Link>
 
-                            {/* Publish Button - Always visible on desktop */}
                             <Link href="/publish" className="hidden md:block">
                                 <Button
                                     variant="outline"
@@ -159,29 +151,22 @@ export default function Navbar() {
                                 </Button>
                             </Link>
 
-                            {/* Auth Section */}
                             {isLoading ? (
-                                // Loading skeleton
                                 <div className="hidden md:flex items-center gap-2">
                                     <div className="w-20 h-9 bg-slate-100 rounded-full animate-pulse"></div>
                                 </div>
                             ) : isAuthenticated && user ? (
                                 <>
-                                    {/* Notifications - Visible on Mobile & Desktop */}
                                     <div className="flex items-center">
                                         <NotificationDropdown />
                                     </div>
 
-                                    {/* Profile Dropdown - Visible on Mobile & Desktop */}
                                     <div className="flex items-center gap-2">
-                                        {/* Divider - Desktop only */}
                                         <div className="hidden md:block w-px h-6 bg-slate-200 mx-1"></div>
-                                        {/* Profile Dropdown - Extracted Component */}
                                         <ProfileDropdown user={user} onLogout={handleLogout} />
                                     </div>
                                 </>
                             ) : (
-                                // Logged out state
                                 <div className="hidden md:flex items-center gap-1">
                                     <Link href="/login">
                                         <Button
@@ -199,7 +184,6 @@ export default function Navbar() {
                                 </div>
                             )}
 
-                            {/* Mobile Menu Button - Hide when authenticated (use bottom nav) */}
                             {!isAuthenticated && (
                                 <button
                                     className="lg:hidden p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
@@ -217,11 +201,9 @@ export default function Navbar() {
                     </div>
                 </div>
 
-                {/* Mobile Menu */}
                 {isMenuOpen && (
                     <div className="lg:hidden border-t border-slate-100 bg-white animate-in slide-in-from-top-2 duration-200">
                         <div className="px-4 py-4 space-y-2">
-                            {/* User Info (if logged in) */}
                             {isAuthenticated && user && (
                                 <div className="flex items-center gap-3 px-3 py-3 bg-slate-50 rounded-xl mb-3">
                                     {user.profilePictureUrl ? (
@@ -246,7 +228,6 @@ export default function Navbar() {
                                 </div>
                             )}
 
-                            {/* Main Nav Links for logged-in users */}
                             {isAuthenticated && (
                                 <>
                                     <Link
@@ -292,7 +273,6 @@ export default function Navbar() {
                                 </>
                             )}
 
-                            {/* Search (for non-logged in users) */}
                             {!isAuthenticated && (
                                 <Link
                                     href="/search-form"
@@ -379,7 +359,6 @@ export default function Navbar() {
                 )}
             </nav>
 
-            {/* Mobile Bottom Nav - Extracted Component */}
             <MobileBottomNav isAuthenticated={isAuthenticated} />
         </>
     );

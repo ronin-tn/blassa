@@ -51,15 +51,14 @@ export default function ForgotPasswordPage() {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC] p-4">
-            {/* Background Gradient Blobs */}
+
             <div className="fixed inset-0 pointer-events-none overflow-hidden">
                 <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-[#006B8F] rounded-full mix-blend-multiply filter blur-[120px] opacity-[0.08]"></div>
                 <div className="absolute -bottom-40 -right-40 w-[600px] h-[600px] bg-[#FF9A3E] rounded-full mix-blend-multiply filter blur-[120px] opacity-[0.08]"></div>
             </div>
 
-            {/* Card */}
             <div className="relative w-full max-w-[440px] bg-white rounded-[20px] p-8 shadow-[0_8px_20px_rgba(0,0,0,0.06)]">
-                {/* Logo */}
+
                 <div className="flex justify-center mb-6">
                     <Link href="/">
                         <Image
@@ -73,7 +72,7 @@ export default function ForgotPasswordPage() {
                 </div>
 
                 {isSuccess ? (
-                    /* Success State */
+
                     <div className="text-center">
                         <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-emerald-100 to-emerald-50 flex items-center justify-center">
                             <CheckCircle2 className="w-10 h-10 text-emerald-600" />
@@ -94,9 +93,9 @@ export default function ForgotPasswordPage() {
                         </Link>
                     </div>
                 ) : (
-                    /* Form State */
+
                     <div>
-                        {/* Header */}
+
                         <div className="text-center mb-6">
                             <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-[#0A8F8F]/20 to-[#006B8F]/10 flex items-center justify-center">
                                 <Mail className="w-8 h-8 text-[#0A8F8F]" />
@@ -109,14 +108,12 @@ export default function ForgotPasswordPage() {
                             </p>
                         </div>
 
-                        {/* Error */}
                         {error && (
                             <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
                                 {error}
                             </div>
                         )}
 
-                        {/* Form */}
                         <form onSubmit={handleSubmit} className="space-y-5">
                             <div className="space-y-2">
                                 <label className="block text-sm font-medium text-slate-700">
@@ -152,7 +149,6 @@ export default function ForgotPasswordPage() {
                             </Button>
                         </form>
 
-                        {/* Back to Login */}
                         <div className="mt-6 text-center">
                             <Link
                                 href="/login"

@@ -42,6 +42,7 @@ public class RideService {
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final NotificationService notificationService;
+    private final EmailService emailService;
 
     private final com.blassa.service.VehicleService vehicleService; // Inject VehicleService
 
@@ -51,10 +52,10 @@ public class RideService {
     public RideResponse createRide(RideRequest rideRequest) {
         User driver = getCurrentUser();
 
-        // Validate gender preference consistency (Fix #6)
+        // Verifi consistency t3 preference de genre (Fix #6)
         validateGenderPreference(driver, rideRequest.genderPreference());
 
-        // Validate and fetch vehicle
+        // Verifi u jib l vehicle
         if (rideRequest.vehicleId() == null) {
             throw new IllegalArgumentException("A vehicle must be selected for the ride");
         }
@@ -69,7 +70,7 @@ public class RideService {
 
         Ride ride = new Ride();
         ride.setDriver(driver);
-        ride.setVehicle(vehicle); // Set vehicle
+        ride.setVehicle(vehicle); // 7ott l vehicle
         ride.setOriginName(rideRequest.originName());
         ride.setOriginPoint(origin);
         ride.setDestinationName(rideRequest.destinationName());
@@ -79,6 +80,9 @@ public class RideService {
         ride.setAvailableSeats(rideRequest.totalSeats());
         ride.setPricePerSeat(rideRequest.pricePerSeat());
         ride.setAllowsSmoking(rideRequest.allowsSmoking());
+        ride.setAllowsMusic(rideRequest.allowsMusic());
+        ride.setAllowsPets(rideRequest.allowsPets());
+        ride.setLuggageSize(rideRequest.luggageSize());
         ride.setGenderPreference(rideRequest.genderPreference());
         ride.setStatus(RideStatus.SCHEDULED);
         Ride saved = rideRepository.save(ride);
@@ -90,19 +94,27 @@ public class RideService {
         String carModel = ride.getVehicle() != null ? ride.getVehicle().getModel() : null;
         String carColor = ride.getVehicle() != null ? ride.getVehicle().getColor() : null;
 
+        String carLicensePlate = null;
+        User currentUser = getCurrentUserOrNull();
+
+        // Show license plate only to the driver
+        if (currentUser != null && ride.getDriver().getId().equals(currentUser.getId())) {
+            carLicensePlate = ride.getVehicle() != null ? ride.getVehicle().getLicensePlate() : null;
+        }
+
         return new RideResponse(
                 ride.getId(),
                 ride.getDriver().getId(),
                 ride.getDriver().getFirstName() + " " + ride.getDriver().getLastName(),
                 ride.getDriver().getProfilePictureUrl(),
                 ride.getDriver().getEmail(),
-                0.0, // Placeholder for rating calculation
+                0.0,
                 ride.getDriver().getFacebookUrl(),
                 ride.getDriver().getInstagramUrl(),
                 ride.getDriver().getPhoneNumber(),
                 ride.getOriginName(),
-                ride.getOriginPoint().getY(), // Latitude
-                ride.getOriginPoint().getX(), // Longitude
+                ride.getOriginPoint().getY(),
+                ride.getOriginPoint().getX(),
                 ride.getDestinationName(),
                 ride.getDestinationPoint().getY(),
                 ride.getDestinationPoint().getX(),
@@ -111,21 +123,25 @@ public class RideService {
                 ride.getAvailableSeats(),
                 ride.getPricePerSeat(),
                 ride.getAllowsSmoking(),
+                ride.getAllowsMusic(),
+                ride.getAllowsPets(),
+                ride.getLuggageSize(),
                 ride.getGenderPreference(),
                 ride.getStatus(),
                 carMake,
                 carModel,
-                carColor);
+                carColor,
+                carLicensePlate);
     }
 
     /**
-     * Public search endpoint - works for both authenticated and anonymous users.
+     * Endpoint search publique - yemchi lel authenticated u l anonymous users.
      * 
-     * For anonymous users: Shows ALL rides by default, or filtered if genderFilter
-     * is provided.
-     * For authenticated users: Shows rides matching their gender preference.
+     * Lel anonymous users: Ywarri rides LKOL par défaut, walla mfiltria b
+     * genderFilter...
+     * Lel authenticated users: Ywarri rides li ymwaf9ou l genre te3hom.
      * 
-     * @param genderFilter Optional gender filter (\"FEMALE_ONLY\" to show
+     * @param genderFilter Filter optionnel lel genre (\"FEMALE_ONLY\" to show
      *                     women-only rides)
      */
     public Page<RideResponse> searchRides(
@@ -136,18 +152,19 @@ public class RideService {
             String genderFilter, // Optional gender filter
             Double radiusKm,
             int page,
-            int size) {
-        // Determine allowed preferences based on auth status and filter
+            int size,
+            String sortBy) {
+        // 7added preferences masmou7a 7asb auth status u filter
         List<String> allowedPreferences;
 
         User currentUser = getCurrentUserOrNull();
         if (currentUser != null) {
-            // Authenticated: Filter by user's gender
+            // Authenticated: Filtri b genre t3 user
             allowedPreferences = (currentUser.getGender() == Gender.MALE)
                     ? List.of("ANY", "MALE_ONLY")
                     : List.of("ANY", "FEMALE_ONLY");
         } else if (genderFilter != null && !genderFilter.isEmpty() && !genderFilter.equals("ANY")) {
-            // Anonymous with gender filter: Show ANY + matching gender-specific rides
+            // Anonymous ma3 gender filter: Warri ANY + rides spécifiques lel genre
             if (genderFilter.equals("FEMALE_ONLY")) {
                 allowedPreferences = List.of("ANY", "FEMALE_ONLY");
             } else if (genderFilter.equals("MALE_ONLY")) {
@@ -156,7 +173,7 @@ public class RideService {
                 allowedPreferences = List.of("ANY", "MALE_ONLY", "FEMALE_ONLY");
             }
         } else {
-            // Anonymous without filter: Show ALL rides
+            // Anonymous blech filter: Warri rides LKOL
             allowedPreferences = List.of("ANY", "MALE_ONLY", "FEMALE_ONLY");
         }
 
@@ -165,7 +182,6 @@ public class RideService {
         Point destination = geometryFactory.createPoint(new Coordinate(destLon, destLat));
 
         // 3. Time Window
-        // 3. Time Window
         OffsetDateTime start;
         OffsetDateTime end;
 
@@ -173,20 +189,40 @@ public class RideService {
             start = departureTime.minusHours(2);
             end = departureTime.plusHours(2);
         } else {
-            // Optional Date: Search for ALL future rides (from Now until next year)
+            // Date Optionnelle: Lawej 3ala rides jayin lkol (men Taw 7atta l 3am jey)
             start = OffsetDateTime.now();
             end = OffsetDateTime.now().plusYears(1);
         }
 
-        // 4. Radius Logic (Convert Km to Meters)
+        // 4. Logique rayon (Converti Km l Meters)
         double pickupRadiusMeters = (radiusKm != null) ? radiusKm * 1000 : 3000.0;
         double dropoffRadiusMeters = 5000.0;
 
         // 5. Pagination & Sorting Setup
-        // For native queries, we must sort by DB column name (snake_case)
-        Pageable pageable = PageRequest.of(page, size, Sort.by("departure_time").ascending());
+        // Mappi frontend sort keys l colonnes DB (native query t7eb snake_case)
+        Sort sort;
+        if (sortBy == null)
+            sortBy = "time_asc";
 
-        // 6. Execute
+        switch (sortBy) {
+            case "price_asc":
+                sort = Sort.by("price_per_seat").ascending();
+                break;
+            case "price_desc":
+                sort = Sort.by("price_per_seat").descending();
+                break;
+            case "time_desc":
+                sort = Sort.by("departure_time").descending();
+                break;
+            case "time_asc":
+            default:
+                sort = Sort.by("departure_time").ascending();
+                break;
+        }
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        // 6. Executi
         Page<Ride> ridePage = rideRepository.searchRides(
                 origin, pickupRadiusMeters,
                 destination, dropoffRadiusMeters,
@@ -195,12 +231,12 @@ public class RideService {
                 allowedPreferences,
                 pageable);
 
-        // 7. Map Entity Page -> DTO Page
+        // 7. Mappi Entity Page -> DTO Page
         return ridePage.map(this::mapToResponse);
     }
 
     /**
-     * Get current user or null if not authenticated (for public endpoints)
+     * Jib user l 7ali walla null kene mch authenticated (lel public endpoints)
      */
     private User getCurrentUserOrNull() {
         try {
@@ -223,7 +259,7 @@ public class RideService {
 
     private void validateGenderPreference(User driver, RideGenderPreference preference) {
         if (preference == null)
-            return; // Default to ANY is fine
+            return; // Par défaut ANY cv
 
         if (driver.getGender() == Gender.MALE && preference == RideGenderPreference.FEMALE_ONLY) {
             throw new IllegalArgumentException("Vous ne pouvez pas créer un trajet réservé aux femmes");
@@ -254,17 +290,17 @@ public class RideService {
 
         User currentUser = getCurrentUser();
 
-        // Security Check: Is the caller the owner?
+        // Security Check: Ya kene l caller huwwa l owner?
         if (!ride.getDriver().getId().equals(currentUser.getId())) {
             throw new RuntimeException("You are not authorized to cancel this ride");
         }
 
-        // Logic Check: Is the ride already happened?
+        // Logic Check: Ya kene l ride saret déjà?
         if (ride.getStatus() == COMPLETED || ride.getStatus() == RideStatus.CANCELLED) {
             throw new RuntimeException("Cannot cancel a ride that is already completed or cancelled");
         }
 
-        // Cancel all bookings associated with this ride
+        // Annuli bookings lkol l mraboutin b ride hedhi
         List<Booking> bookings = bookingRepository.findByRideId(rideId);
         for (Booking booking : bookings) {
             if (booking.getStatus() != BookingStatus.CANCELLED) {
@@ -275,7 +311,7 @@ public class RideService {
         ride.setStatus(RideStatus.CANCELLED);
         Ride saved = rideRepository.save(ride);
 
-        // Notify all passengers that ride was cancelled
+        // A3lem passengers lkol elli ride t'annulet
         for (Booking booking : bookings) {
             notificationService.sendNotification(
                     booking.getPassenger().getId(),
@@ -284,6 +320,11 @@ public class RideService {
                     "Le trajet " + ride.getOriginName() + " → " + ride.getDestinationName()
                             + " a été annulé par le conducteur",
                     null);
+
+            // Ab3ath email lel passager
+            emailService.sendRideCancelledEmail(
+                    booking.getPassenger().getEmail(),
+                    ride.getOriginName() + " → " + ride.getDestinationName());
         }
 
         return mapToResponse(saved);
@@ -296,22 +337,48 @@ public class RideService {
 
         User currentUser = getCurrentUser();
 
-        // Authorization: Only driver can update their ride status
+        // Authorization: Ken l chauffeur ynajjem ybeddel statu t3 ride
         if (!ride.getDriver().getId().equals(currentUser.getId())) {
             throw new RuntimeException("You are not authorized to update this ride's status");
         }
 
-        // Validate status transition
+        // Verifi transition t3 status
         validateStatusTransition(ride.getStatus(), request.getStatus());
 
         ride.setStatus(request.getStatus());
-        Ride saved = rideRepository.save(ride); // Actually persist!
+        Ride saved = rideRepository.save(ride); // Sajjel bel7a9!!
+
+        // Ab3ath emails 7asb tabdil status
+        if (request.getStatus() == RideStatus.IN_PROGRESS) {
+            // Ride bdet - A3lem passengers confirmés lkol
+            List<Booking> confirmedBookings = bookingRepository.findByRideId(rideId).stream()
+                    .filter(b -> b.getStatus() == CONFIRMED)
+                    .toList();
+
+            for (Booking booking : confirmedBookings) {
+                emailService.sendRideStartedEmail(
+                        booking.getPassenger().getEmail(),
+                        ride.getOriginName() + " → " + ride.getDestinationName(),
+                        currentUser.getFirstName() + " " + currentUser.getLastName(),
+                        currentUser.getPhoneNumber());
+            }
+        } else if (request.getStatus() == COMPLETED) {
+            // Ride kmelet - A3lem passengers lkol u otlob review
+            List<Booking> allBookings = bookingRepository.findByRideId(rideId);
+
+            for (Booking booking : allBookings) {
+                emailService.sendRideCompletedEmail(
+                        booking.getPassenger().getEmail(),
+                        ride.getOriginName() + " → " + ride.getDestinationName(),
+                        ride.getId().toString());
+            }
+        }
 
         return new RideStatusResponse(saved.getId(), saved.getStatus());
     }
 
     private void validateStatusTransition(RideStatus currentStatus, RideStatus newStatus) {
-        // Valid transitions:
+        // Transitions valides:
         // SCHEDULED -> IN_PROGRESS, CANCELLED
         // IN_PROGRESS -> COMPLETED, CANCELLED
         // FULL -> IN_PROGRESS, CANCELLED
@@ -334,18 +401,18 @@ public class RideService {
 
         User currentUser = getCurrentUser();
 
-        // Authorization: Only driver can start their ride
+        // Authorization: Ken l chauffeur ynajjem ybda ride te3ou
         if (!ride.getDriver().getId().equals(currentUser.getId())) {
             throw new RuntimeException("You are not authorized to start this ride");
         }
 
-        // Validation: Can only start SCHEDULED or FULL rides
+        // Validation: Tnajjem tabda ken rides SCHEDULED walla FULL
         if (ride.getStatus() != RideStatus.SCHEDULED && ride.getStatus() != RideStatus.FULL) {
             throw new IllegalArgumentException("Can only start a scheduled or full ride");
         }
 
-        // Note: Driver can start a ride even without confirmed passengers
-        // (e.g., departure time arrived, passengers may join later, or solo trip)
+        // Note: Chauffeur ynajjem ybda ride 7atta blech passengers confirmés
+        // (wa9t depart wsel, passengers ynajjmou yjwu mb3d, walla tri7 wa7dou)
 
         ride.setStatus(RideStatus.IN_PROGRESS);
         Ride saved = rideRepository.save(ride);
@@ -358,6 +425,13 @@ public class RideService {
                     "Trajet démarré",
                     "Le trajet " + saved.getOriginName() + " → " + saved.getDestinationName() + " a commencé",
                     "/rides/" + rideId);
+
+            // Ab3ath email kima fi updateRideStatus
+            emailService.sendRideStartedEmail(
+                    booking.getPassenger().getEmail(),
+                    ride.getOriginName() + " → " + ride.getDestinationName(),
+                    currentUser.getFirstName() + " " + currentUser.getLastName(),
+                    currentUser.getPhoneNumber());
         }
 
         return new RideStatusResponse(saved.getId(), saved.getStatus());
@@ -370,19 +444,19 @@ public class RideService {
 
         User currentUser = getCurrentUser();
 
-        // Authorization: Only driver can complete their ride
+        // Authorization: Ken l chauffeur ynajjem ykammel ride te3ou
         if (!ride.getDriver().getId().equals(currentUser.getId())) {
             throw new RuntimeException("You are not authorized to complete this ride");
         }
 
-        // Validation: Can only complete IN_PROGRESS rides
+        // Validation: Tnajjem tkammel ken rides IN_PROGRESS
         if (ride.getStatus() != RideStatus.IN_PROGRESS) {
             throw new IllegalArgumentException("Can only complete a ride that is in progress");
         }
 
         ride.setStatus(COMPLETED);
         Ride saved = rideRepository.save(ride);
-        // Notify all confirmed passengers that ride is completed
+        // A3lem passengers confirmés lkol elli ride kmelet
         List<Booking> confirmedBookings = bookingRepository.findByRideIdAndStatus(rideId, CONFIRMED);
         for (Booking booking : confirmedBookings) {
             notificationService.sendNotification(
@@ -392,11 +466,17 @@ public class RideService {
                     "Le trajet " + saved.getOriginName() + " → " + saved.getDestinationName()
                             + " est terminé. N'oubliez pas de laisser un avis !",
                     "/rides/" + rideId);
+
+            // Ab3ath email kima fi updateRideStatus
+            emailService.sendRideCompletedEmail(
+                    booking.getPassenger().getEmail(),
+                    ride.getOriginName() + " → " + ride.getDestinationName(),
+                    ride.getId().toString());
         }
 
-        // After completion, all bookings for this ride become eligible for reviews
-        // (ReviewService already checks ride.status == COMPLETED before allowing
-        // reviews)
+        // Mb3d completion, bookings lkol ywaliu eligible lel reviews
+        // (ReviewService déjà yverifi ride.status == COMPLETED 9bal ma ykhalik ta3mel
+        // review)
 
         return new RideStatusResponse(saved.getId(), saved.getStatus());
     }
@@ -418,16 +498,16 @@ public class RideService {
             throw new RuntimeException("Only scheduled rides can be edited");
         }
 
-        // Check for existing bookings - prevent update if passengers are booked
+        // Verifi bookings mawjoudin - emna3 l update kene famma passengers booked
         boolean hasBookings = !bookingRepository.findByRideIdAndStatus(rideId, CONFIRMED).isEmpty();
         if (hasBookings) {
             throw new RuntimeException(
                     "Cannot modify a ride that already has passengers booked. Please cancel the ride instead.");
         }
 
-        // Update Fields (Only allow updating fields that don't break strict logic)
-        // Note: Changing Origin/Dest might require re-calculating points, so we update
-        // those too.
+        // Beddel champs (Esma7 ken b tabdil champs li maykassrouch logic s7i7a)
+        // Note: Tabdil Origin/Dest ynajjem yest7aq 7sebet point jdida, aka 3lech
+        // nbedlouhom zeda.
         Point origin = geometryFactory.createPoint(new Coordinate(request.originLon(), request.originLat()));
         Point destination = geometryFactory
                 .createPoint(new Coordinate(request.destinationLon(), request.destinationLat()));
@@ -439,15 +519,17 @@ public class RideService {
         ride.setDepartureTime(request.departureTime());
         ride.setPricePerSeat(request.pricePerSeat());
         ride.setAllowsSmoking(request.allowsSmoking());
+        ride.setAllowsMusic(request.allowsMusic());
+        ride.setAllowsPets(request.allowsPets());
+        ride.setLuggageSize(request.luggageSize());
         ride.setGenderPreference(request.genderPreference());
 
-        // Handle Seats: Don't allow reducing seats below what is already booked
-        // (Advanced logic for Phase 5)
-        // For now, we just update total seats.
+        // Gerr l blays: Matn7ich blays a9al mli deja mawjoudin
+        // (Logic avancée l Phase 5)
+        // Tawwa, nbedlou total seats kahaw.
         ride.setTotalSeats(request.totalSeats());
-        // Simple logic: Reset available seats based on new total (assuming 0 bookings
-        // for now)
-        // In Phase 5, this line will need to be:
+        // Logic simple: Reset available seats 7asb total jdid (naseb 0 bookings taw)
+        // Fi Phase 5, ligne hedhi lezm tkoun:
         // ride.setAvailableSeats(request.totalSeats() - currentBookingsCount);
         ride.setAvailableSeats(request.totalSeats());
 

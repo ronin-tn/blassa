@@ -34,7 +34,7 @@ export default function SettingsPage() {
     const router = useRouter();
     const { isAuthenticated, isLoading: authLoading, logout } = useAuth();
 
-    // Local state for toggles (would normally sync with backend)
+
     const [notifications, setNotifications] = useState<SettingToggle[]>([
         {
             id: "email_bookings",
@@ -60,7 +60,7 @@ export default function SettingsPage() {
     const [isDeleting, setIsDeleting] = useState(false);
     const [deleteError, setDeleteError] = useState<string | null>(null);
 
-    // Password change modal state
+
     const [showPasswordModal, setShowPasswordModal] = useState(false);
     const [isChangingPassword, setIsChangingPassword] = useState(false);
     const [passwordError, setPasswordError] = useState<string | null>(null);
@@ -74,7 +74,7 @@ export default function SettingsPage() {
         confirmPassword: "",
     });
 
-    // Redirect if not authenticated
+
     useEffect(() => {
         if (!authLoading && !isAuthenticated) {
             router.replace("/login");
@@ -85,7 +85,7 @@ export default function SettingsPage() {
         setNotifications((prev) =>
             prev.map((n) => (n.id === id ? { ...n, enabled: !n.enabled } : n))
         );
-        // TODO: Sync with backend when endpoint is available
+
     };
 
     const handleLogout = () => {
@@ -103,7 +103,7 @@ export default function SettingsPage() {
         setPasswordError(null);
         setPasswordSuccess(null);
 
-        // Client-side validation
+
         if (!passwordForm.currentPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
             setPasswordError("Tous les champs sont requis");
             return;
@@ -142,7 +142,7 @@ export default function SettingsPage() {
             setPasswordSuccess("Mot de passe modifié avec succès");
             setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
 
-            // Close modal after 2 seconds
+
             setTimeout(() => {
                 setShowPasswordModal(false);
                 setPasswordSuccess(null);
@@ -172,7 +172,7 @@ export default function SettingsPage() {
                 throw new Error(errorMessage);
             }
 
-            // Logout and redirect
+
             logout();
             router.replace("/");
         } catch (err) {
@@ -188,7 +188,7 @@ export default function SettingsPage() {
         setPasswordSuccess(null);
     };
 
-    // Loading state
+
     if (authLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -203,7 +203,7 @@ export default function SettingsPage() {
     return (
         <div className="min-h-screen bg-gray-50 py-8 px-4">
             <div className="max-w-2xl mx-auto">
-                {/* Header */}
+
                 <div className="flex items-center gap-4 mb-6">
                     <Link
                         href="/dashboard"
@@ -216,7 +216,7 @@ export default function SettingsPage() {
                 </div>
 
                 <div className="space-y-6">
-                    {/* Notifications Section */}
+
                     <section className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                         <div className="px-6 py-4 border-b border-gray-100">
                             <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-900">
@@ -253,7 +253,7 @@ export default function SettingsPage() {
                         </div>
                     </section>
 
-                    {/* Security Section */}
+
                     <section className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                         <div className="px-6 py-4 border-b border-gray-100">
                             <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-900">
@@ -316,7 +316,7 @@ export default function SettingsPage() {
                         </div>
                     </section>
 
-                    {/* Preferences Section */}
+
                     <section className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                         <div className="px-6 py-4 border-b border-gray-100">
                             <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-900">
@@ -355,7 +355,7 @@ export default function SettingsPage() {
                         </div>
                     </section>
 
-                    {/* Account Actions */}
+
                     <section className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                         <div className="divide-y divide-gray-100">
                             <button
@@ -378,7 +378,7 @@ export default function SettingsPage() {
                         </div>
                     </section>
 
-                    {/* App Info */}
+
                     <div className="text-center text-sm text-gray-400 py-4">
                         <p>Blassa v1.0.0</p>
                         <p className="mt-1">© 2025 Blassa. Tous droits réservés.</p>
@@ -386,7 +386,7 @@ export default function SettingsPage() {
                 </div>
             </div>
 
-            {/* Change Password Modal */}
+
             {showPasswordModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl">
@@ -415,7 +415,7 @@ export default function SettingsPage() {
                         )}
 
                         <div className="space-y-4">
-                            {/* Current Password */}
+
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Mot de passe actuel
@@ -439,7 +439,7 @@ export default function SettingsPage() {
                                 </div>
                             </div>
 
-                            {/* New Password */}
+
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Nouveau mot de passe
@@ -464,7 +464,7 @@ export default function SettingsPage() {
                                 <p className="text-xs text-gray-500 mt-1">Minimum 8 caractères</p>
                             </div>
 
-                            {/* Confirm Password */}
+
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Confirmer le mot de passe
@@ -516,7 +516,7 @@ export default function SettingsPage() {
                 </div>
             )}
 
-            {/* Delete Account Modal */}
+
             {showDeleteModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl">

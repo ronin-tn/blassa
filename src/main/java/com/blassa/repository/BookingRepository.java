@@ -1,6 +1,8 @@
 package com.blassa.repository;
 
 import com.blassa.model.entity.Booking;
+import com.blassa.model.enums.BookingStatus;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -23,18 +25,18 @@ public interface BookingRepository extends JpaRepository<Booking, UUID> {
     @EntityGraph(attributePaths = { "ride", "ride.driver" })
     Page<Booking> findByPassengerId(UUID passengerId, Pageable pageable);
 
-    // Get all ride IDs that a passenger has booked (excluding cancelled bookings)
     @Query("SELECT b.ride.id FROM Booking b WHERE b.passenger.id = :passengerId AND b.status != :status")
     List<UUID> findRideIdsByPassengerIdAndStatusNot(@Param("passengerId") UUID passengerId,
-            @Param("status") com.blassa.model.enums.BookingStatus status);
+            @Param("status") BookingStatus status);
 
-    // Get all bookings for a specific ride (for driver to see passengers)
     @EntityGraph(attributePaths = { "passenger" })
-    List<Booking> findByRideIdAndStatus(UUID rideId, com.blassa.model.enums.BookingStatus status);
+    List<Booking> findByRideIdAndStatus(UUID rideId, BookingStatus status);
 
-    // Get all bookings for a specific ride (any status)
     List<Booking> findByRideId(UUID rideId);
 
-    // Count bookings by ride and status
-    long countByRideIdAndStatus(UUID rideId, com.blassa.model.enums.BookingStatus status);
+    long countByRideIdAndStatus(UUID rideId, BookingStatus status);
+
+    long countByPassengerIdAndStatusIn(UUID passengerId, List<BookingStatus> statuses);
+
+    List<Booking> findByPassengerId(UUID passengerId);
 }

@@ -12,8 +12,10 @@ import { startRideAction, completeRideAction, deleteRideAction } from "@/app/act
 import { useToast } from "@/contexts/ToastContext";
 import { useNotifications } from "@/contexts/NotificationContext";
 import ConfirmationModal from "@/components/ui/confirmation-modal";
+import ReportModal from "@/components/report/ReportModal";
+import { Flag } from "lucide-react";
 
-// Subcomponents
+
 import RideHeader from "./RideHeader";
 import RideDetailsGrid from "./RideDetailsGrid";
 import PassengerList from "./driver/PassengerList";
@@ -31,10 +33,7 @@ interface RideDetailsClientProps {
     currentUser: UserProfile | null;
 }
 
-/**
- * Ride details page client component - orchestrates subcomponents
- * Handles state management and action handlers
- */
+
 export default function RideDetailsClient({
     ride: initialRide,
     initialPassengers,
@@ -43,30 +42,31 @@ export default function RideDetailsClient({
     const router = useRouter();
     const { showError } = useToast();
 
-    // State
+
     const [ride, setRide] = useState<Ride>(initialRide);
     const [passengers, setPassengers] = useState<PassengerInfo[]>(initialPassengers);
     const [actionLoading, setActionLoading] = useState<string | null>(null);
     const [rideActionLoading, setRideActionLoading] = useState(false);
     const [showCancelModal, setShowCancelModal] = useState(false);
+    const [showReportModal, setShowReportModal] = useState(false);
 
     const { notifications } = useNotifications();
 
     const lastProcessedNotificationId = useRef<string | null>(null);
 
-    // Watch for relevant notifications to refresh data AND optimistically update UI
+
     useEffect(() => {
         if (notifications.length > 0) {
             const latest = notifications[0];
 
-            // Prevent processing the same notification multiple times
+
             if (latest.id === lastProcessedNotificationId.current) {
                 return;
             }
 
-            // If we get a booking update
+
             if (latest.type === "BOOKING_ACCEPTED") {
-                // 1. Optimistically mark my pending booking as CONFIRMED
+
                 if (currentUser) {
                     setPassengers(prev => {
                         return prev.map(p => {
@@ -78,15 +78,15 @@ export default function RideDetailsClient({
                     });
                 }
                 lastProcessedNotificationId.current = latest.id;
-                // 2. Refresh server data
+
                 router.refresh();
             } else if (latest.type === "BOOKING_REJECTED") {
                 lastProcessedNotificationId.current = latest.id;
-                // Optimistically remove
+
                 if (currentUser) {
                     setPassengers(prev => prev.filter(p => p.passengerEmail.toLowerCase() !== currentUser.email.toLowerCase()));
                 }
-                // Refresh to clear pending state
+
                 router.refresh();
             } else if (latest.type === "RIDE_CANCELLED") {
                 lastProcessedNotificationId.current = latest.id;
@@ -96,43 +96,43 @@ export default function RideDetailsClient({
         }
     }, [notifications, router, currentUser]);
 
-    // Sync state with server props on refresh
+
     useEffect(() => {
         setRide(initialRide);
     }, [initialRide]);
 
-    // Sync state with server props on refresh, but preserve my pending optimistic updates
+
     useEffect(() => {
         setPassengers(prev => {
-            // Check for current user in previous state
+
             const myLocal = prev.find(p =>
                 currentUser &&
                 p.passengerEmail.toLowerCase() === currentUser.email.toLowerCase()
             );
 
-            // If server now has me, use server data (it's confirmed or whatever server says)
+
             const serverHasMe = initialPassengers.some(p =>
                 currentUser && p.passengerEmail.toLowerCase() === currentUser.email.toLowerCase()
             );
 
             if (myLocal && !serverHasMe) {
-                // If I exist locally but not on server yet (likely race condition or optimistic update)
-                // Keep me if I'm PENDING or CONFIRMED
+
                 if (myLocal.status === "PENDING" || myLocal.status === "CONFIRMED") {
-                    // Start with server data
+
                     const filteredServer = initialPassengers.filter(p => !p.bookingId.startsWith("temp-"));
-                    // Make sure we don't add duplicates based on email (just in case)
+
                     const uniqueLocal = !filteredServer.some(p => p.passengerEmail.toLowerCase() === myLocal.passengerEmail.toLowerCase());
                     return uniqueLocal ? [...filteredServer, myLocal] : filteredServer;
                 }
             }
 
-            // Otherwise, purely trust server
+
             return initialPassengers;
         });
     }, [initialPassengers, currentUser]);
 
-    // Fetch secure booking details (for license plate) if confirmed
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [secureBooking, setSecureBooking] = useState<any>(null);
     useEffect(() => {
         const fetchSecureDetails = async () => {
@@ -147,20 +147,19 @@ export default function RideDetailsClient({
         fetchSecureDetails();
     }, [currentUser, passengers, ride.id]);
 
-    // Derived state for Lifecycle Logic
+
     const isOwnRide = currentUser && ride.driverEmail.toLowerCase() === currentUser.email.toLowerCase();
 
     const confirmedPassengersCount = passengers.filter(p => p.status === "CONFIRMED").length;
 
-    // Check if within 30 minutes of departure (Operational Window)
+
     const operationalThresholdMinutes = 30;
     const now = new Date();
     const departure = new Date(ride.departureTime);
     const diffInMinutes = (departure.getTime() - now.getTime()) / (1000 * 60);
     const isWithinOperationalWindow = diffInMinutes <= operationalThresholdMinutes;
 
-    // Acquisition Phase: No bookings AND not yet close to departure
-    // If we have >0 bookings OR we are close/past departure time, we are Operational
+
     const isAcquisitionPhase = confirmedPassengersCount === 0 && !isWithinOperationalWindow;
 
     const currentPassenger = currentUser ? passengers.find(p => p.passengerEmail.toLowerCase() === currentUser.email.toLowerCase()) : null;
@@ -170,21 +169,22 @@ export default function RideDetailsClient({
 
     const handleBookingSuccess = (seatsBooked: number) => {
         if (!currentUser) return;
-        // Optimistic update
+
         const newPassenger: PassengerInfo = {
-            bookingId: "temp-" + Date.now(), // Temporary ID until refresh
+            bookingId: "temp-" + Date.now(),
             passengerName: `${currentUser.firstName} ${currentUser.lastName}`,
             passengerEmail: currentUser.email,
             passengerPhone: currentUser.phoneNumber || "",
             facebookUrl: currentUser.facebookUrl || null,
             instagramUrl: currentUser.instagramUrl || null,
             seatsBooked: seatsBooked,
-            status: "PENDING"
+            status: "PENDING",
+            passengerId: "temp-passenger-id"
         };
         setPassengers(prev => [...prev, newPassenger]);
     };
 
-    // Booking handlers
+
     const handleAcceptBooking = async (bookingId: string) => {
         setActionLoading(bookingId);
         try {
@@ -217,13 +217,13 @@ export default function RideDetailsClient({
         }
     };
 
-    // Ride action handlers
+
     const handleStartRide = async () => {
         setRideActionLoading(true);
         try {
             const result = await startRideAction(ride.id);
             if (!result.success || !result.ride) throw new Error(result.error);
-            // API returns status only, merge it
+
             setRide(prev => ({ ...prev, status: result.ride!.status }));
         } catch (err) {
             console.error("Failed to start ride:", err);
@@ -238,7 +238,7 @@ export default function RideDetailsClient({
         try {
             const result = await completeRideAction(ride.id);
             if (!result.success || !result.ride) throw new Error(result.error);
-            // The API returns a lightweight status response, merged here.
+
             setRide(prev => ({ ...prev, status: result.ride!.status }));
         } catch (err) {
             console.error("Failed to complete ride:", err);
@@ -261,7 +261,7 @@ export default function RideDetailsClient({
         } catch (err) {
             console.error("Failed to cancel ride:", err);
             showError("Erreur lors de l'annulation du trajet");
-            setRideActionLoading(false); // Only stop loading on error, otherwise we navigate away
+            setRideActionLoading(false);
             setShowCancelModal(false);
         }
     };
@@ -272,14 +272,25 @@ export default function RideDetailsClient({
             <div className="h-16"></div>
 
             <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Back button */}
-                <button
-                    onClick={() => router.back()}
-                    className="flex items-center gap-2 text-slate-600 hover:text-slate-900 mb-6 transition-colors"
-                >
-                    <ArrowLeft className="w-5 h-5" />
-                    <span>Retour</span>
-                </button>
+
+                <div className="flex justify-between items-center mb-6">
+                    <button
+                        onClick={() => router.back()}
+                        className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors"
+                    >
+                        <ArrowLeft className="w-5 h-5" />
+                        <span>Retour</span>
+                    </button>
+                    {!isOwnRide && currentUser && (
+                        <button
+                            onClick={() => setShowReportModal(true)}
+                            className="flex items-center gap-2 text-slate-400 hover:text-red-600 transition-colors text-sm"
+                        >
+                            <Flag className="w-4 h-4" />
+                            <span>Signaler</span>
+                        </button>
+                    )}
+                </div>
 
                 <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
                     {isOwnRide && ride.status === 'IN_PROGRESS' ? (
@@ -297,13 +308,13 @@ export default function RideDetailsClient({
                         />
                     ) : (
                         <>
-                            {/* Route Header */}
+
                             <RideHeader ride={ride} />
 
-                            {/* Details Grid */}
+
                             <RideDetailsGrid ride={ride} />
 
-                            {/* Cancelled State Banner */}
+
                             {ride.status === 'CANCELLED' ? (
                                 <div className="p-8 text-center border-t border-slate-100 bg-red-50">
                                     <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -313,7 +324,7 @@ export default function RideDetailsClient({
                                     </div>
                                     <h3 className="text-xl font-bold text-red-900 mb-2">Trajet annulé</h3>
                                     <p className="text-red-700 max-w-md mx-auto">
-                                        Ce trajet a été annulé par le conducteur et n'est plus disponible.
+                                        Ce trajet a été annulé par le conducteur et n&apos;est plus disponible.
                                     </p>
                                 </div>
                             ) : isOwnRide ? (
@@ -325,12 +336,12 @@ export default function RideDetailsClient({
                                         loadingBookingId={actionLoading}
                                     />
                                     <div className="px-6 pb-6 bg-emerald-50">
-                                        {/* Demand Acquisition Mode Banner */}
+
                                         {isAcquisitionPhase && (
                                             <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-sm">
                                                 <p className="font-semibold mb-1">Phase de recherche de passagers</p>
                                                 <p>
-                                                    Le trajet n'a pas encore de passagers confirmés.
+                                                    Le trajet n&apos;a pas encore de passagers confirmés.
                                                     Vous pourrez le démarrer 30 minutes avant le départ ou dès la première réservation.
                                                 </p>
                                             </div>
@@ -360,11 +371,11 @@ export default function RideDetailsClient({
                                     currentPassenger={currentPassenger}
                                 />
                             ) : (
-                                /* Standard Passenger View */
+
                                 <>
                                     <DriverContactView ride={ride} />
 
-                                    {/* Secure Vehicle Info for Confirmed Passengers */}
+
                                     {secureBooking && secureBooking.carLicensePlate && (
                                         <div className="mb-6 p-4 border border-emerald-100 rounded-xl bg-emerald-50/50">
                                             <h3 className="font-semibold text-emerald-900 mb-2 flex items-center gap-2">
@@ -469,6 +480,13 @@ export default function RideDetailsClient({
                 cancelLabel="Non, garder le trajet"
                 isDestructive={true}
                 isLoading={rideActionLoading}
+            />
+
+            <ReportModal
+                isOpen={showReportModal}
+                onClose={() => setShowReportModal(false)}
+                rideId={ride.id}
+                reportedUserId={ride.driverId}
             />
         </div>
     );

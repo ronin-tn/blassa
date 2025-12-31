@@ -20,8 +20,7 @@ function OAuthCallbackHandler() {
                 return;
             }
 
-            // With cookie-based auth, the cookie is already set by the backend
-            // We just need to fetch the user profile and redirect
+
             try {
                 await login();
                 router.replace("/dashboard");

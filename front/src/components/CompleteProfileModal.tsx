@@ -128,7 +128,6 @@ export default function CompleteProfileModal({
                     const errorData = await response.json();
                     errorMessage = errorData.message || errorMessage;
                 } catch {
-                    // Response is not JSON
                 }
                 throw new Error(errorMessage);
             }
@@ -145,12 +144,8 @@ export default function CompleteProfileModal({
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
-            {/* Backdrop */}
             <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-
-            {/* Modal */}
             <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl p-8 mx-4 animate-in fade-in zoom-in duration-200">
-                {/* Header */}
                 <div className="text-center mb-6">
                     <div className="mb-4 p-3 bg-[var(--color-blassa-teal)]/10 rounded-full w-12 h-12 flex items-center justify-center">
                         <User className="w-6 h-6 text-[var(--color-blassa-teal)]" />
@@ -163,9 +158,7 @@ export default function CompleteProfileModal({
                     </p>
                 </div>
 
-                {/* Form */}
                 <form onSubmit={handleSubmit} className="space-y-5">
-                    {/* API Error */}
                     {apiError && (
                         <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm flex items-center gap-2">
                             <X className="w-4 h-4 shrink-0" />
@@ -173,7 +166,6 @@ export default function CompleteProfileModal({
                         </div>
                     )}
 
-                    {/* Phone Number */}
                     <div className="space-y-2">
                         <label className="block text-sm font-medium text-slate-700">
                             Numéro de téléphone
@@ -197,7 +189,6 @@ export default function CompleteProfileModal({
                         )}
                     </div>
 
-                    {/* Date of Birth */}
                     <div className="space-y-2">
                         <label className="block text-sm font-medium text-slate-700">
                             Date de naissance
@@ -227,7 +218,6 @@ export default function CompleteProfileModal({
                         )}
                     </div>
 
-                    {/* Gender */}
                     <div className="space-y-2">
                         <label className="block text-sm font-medium text-slate-700">
                             Genre
@@ -253,7 +243,6 @@ export default function CompleteProfileModal({
                         )}
                     </div>
 
-                    {/* Submit Button */}
                     <Button
                         type="submit"
                         className="w-full h-12 text-[15px] font-medium bg-[#006B8F] hover:bg-[#005673] text-white rounded-xl transition-all duration-200 shadow-sm"
@@ -270,7 +259,6 @@ export default function CompleteProfileModal({
                     </Button>
                 </form>
 
-                {/* Note */}
                 <p className="text-xs text-slate-400 text-center mt-4">
                     Pour les trajets, les conducteurs doivent pouvoir vous contacter
                 </p>

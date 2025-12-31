@@ -7,23 +7,27 @@ import com.blassa.security.JwtUtils;
 import com.blassa.security.MyUserDetailsService;
 import com.blassa.service.AuthenticationService;
 import com.blassa.service.EmailService;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
+import static java.util.Collections.singletonList;
+
 /**
- * Mobile-specific authentication endpoints.
- * 
- * Unlike the web controller (which uses HTTP-only cookies), this controller
- * returns tokens directly in the response body for mobile clients to store
- * in EncryptedSharedPreferences / Android Keystore.
- * 
- * Shares all business logic with AuthenticationService - only token delivery
- * differs.
+ * web controller m3ch yasla7 l android 5ater yst3ml fi HTTP-ONLY COOKIES, aw 3mlt controller edha
+ * ano nst3ml m3ah authenticationService w jawna fol, just lezmna nstockiw token directement
+ * fi EncryptedSharedPreferences
  */
 @RestController
 @RequestMapping("/api/v1/auth/mobile")
@@ -37,14 +41,13 @@ public class MobileAuthController {
     private final UserRepository userRepository;
     private final EmailService emailService;
 
-    /**
-     * Mobile registration - same as web, returns tokens in response body.
-     */
+    @Value("${spring.security.oauth2.client.registration.google.client-id}")
+    private String googleClientId;
+
+
     @PostMapping("/register")
     public ResponseEntity<MobileAuthResponse> register(@RequestBody @Valid RegisterRequest request) {
-        // Delegate to shared service for business logic
-        AuthenticationResponse serviceResponse = authenticationService.register(request);
-
+        AuthenticationResponse serviceResponse=authenticationService.register(request);
         return ResponseEntity.ok(MobileAuthResponse.builder()
                 .status("REGISTRATION_SUCCESS")
                 .email(serviceResponse.getEmail())
@@ -53,19 +56,17 @@ public class MobileAuthController {
                 .build());
     }
 
-    /**
-     * Mobile login - returns access token and refresh token in response body.
-     */
+
+
+    //Mobile login -asm3 lahne returni access token w refresh token fi response body.
     @PostMapping("/login")
     public ResponseEntity<MobileAuthResponse> login(@RequestBody @Valid AuthenticationRequest request) {
-        // Validate credentials using shared auth manager
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
 
-        User user = userRepository.findByEmail(request.getEmail())
+        User user=userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        // Check verification status
         if (!user.isVerified()) {
             return ResponseEntity.ok(MobileAuthResponse.builder()
                     .status("EMAIL_NOT_VERIFIED")
@@ -74,12 +75,9 @@ public class MobileAuthController {
                     .message("Please verify your email before logging in")
                     .build());
         }
-
-        // Generate tokens for mobile
-        UserDetails userDetails = userDetailsService.loadUserByUsername(request.getEmail());
-        String accessToken = jwtUtils.generateToken(userDetails);
-        String refreshToken = jwtUtils.generateRefreshToken(userDetails);
-
+        UserDetails userDetails=userDetailsService.loadUserByUsername(request.getEmail());
+        String accessToken=jwtUtils.generateToken(userDetails);
+        String refreshToken=jwtUtils.generateRefreshToken(userDetails);
         return ResponseEntity.ok(MobileAuthResponse.builder()
                 .status("SUCCESS")
                 .accessToken(accessToken)
@@ -89,14 +87,10 @@ public class MobileAuthController {
                 .build());
     }
 
-    /**
-     * Refresh access token using refresh token.
-     */
+    //edhy bch tst79ha bch trefreshi access token bel refresh token tmchich todkhl b3dhk
     @PostMapping("/refresh")
     public ResponseEntity<MobileAuthResponse> refreshToken(@RequestBody @Valid MobileRefreshRequest request) {
-        String refreshToken = request.getRefreshToken();
-
-        // Validate refresh token
+        String refreshToken=request.getRefreshToken();
         if (!jwtUtils.isRefreshToken(refreshToken)) {
             return ResponseEntity.badRequest().body(MobileAuthResponse.builder()
                     .status("INVALID_TOKEN")
@@ -104,8 +98,8 @@ public class MobileAuthController {
                     .build());
         }
 
-        String email = jwtUtils.extractUsername(refreshToken);
-        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+        String email=jwtUtils.extractUsername(refreshToken);
+        UserDetails userDetails=userDetailsService.loadUserByUsername(email);
 
         if (!jwtUtils.isTokenValid(refreshToken, userDetails)) {
             return ResponseEntity.status(401).body(MobileAuthResponse.builder()
@@ -114,23 +108,20 @@ public class MobileAuthController {
                     .build());
         }
 
-        // Generate new access token (keep same refresh token)
-        String newAccessToken = jwtUtils.generateToken(userDetails);
+        String newAccessToken=jwtUtils.generateToken(userDetails);
 
         return ResponseEntity.ok(MobileAuthResponse.builder()
                 .status("SUCCESS")
                 .accessToken(newAccessToken)
-                .refreshToken(refreshToken) // Return same refresh token
+                .refreshToken(refreshToken)
                 .expiresIn(jwtUtils.getAccessTokenExpirationSeconds())
                 .build());
     }
 
-    /**
-     * Resend verification email.
-     */
+   //edhy bch tresendi email verification
     @PostMapping("/resend-verification")
-    public ResponseEntity<MobileAuthResponse> resendVerification(@RequestBody java.util.Map<String, String> request) {
-        String email = request.get("email");
+    public ResponseEntity<MobileAuthResponse> resendVerification(@RequestBody Map<String, String> request) {
+        String email=request.get("email");
         if (email == null || email.isBlank()) {
             return ResponseEntity.badRequest().body(MobileAuthResponse.builder()
                     .status("ERROR")
@@ -138,8 +129,7 @@ public class MobileAuthController {
                     .build());
         }
 
-        AuthenticationResponse serviceResponse = authenticationService.resendVerificationEmail(email);
-
+        AuthenticationResponse serviceResponse=authenticationService.resendVerificationEmail(email);
         return ResponseEntity.ok(MobileAuthResponse.builder()
                 .status("SUCCESS")
                 .verificationSentAt(serviceResponse.getVerificationSentAt())
@@ -147,43 +137,119 @@ public class MobileAuthController {
                 .build());
     }
 
-    /**
-     * Request password reset (send email).
-     */
+    //Reset l pass
     @PostMapping("/forgot-password")
-    public ResponseEntity<MobileAuthResponse> forgotPassword(@RequestBody java.util.Map<String, String> request) {
-        String email = request.get("email");
+    public ResponseEntity<MobileAuthResponse> forgotPassword(@RequestBody Map<String, String> request) {
+        String email=request.get("email");
         if (email == null || email.isBlank()) {
             return ResponseEntity.badRequest().body(MobileAuthResponse.builder()
                     .status("ERROR")
                     .message("Email is required")
                     .build());
         }
-
-        // Use existing email service method - it handles token generation internally
         try {
             emailService.sendForgotPasswordEmail(email);
         } catch (Exception e) {
-            // Silently fail to prevent email enumeration
+            // fail w akhw
         }
-
         return ResponseEntity.ok(MobileAuthResponse.builder()
                 .status("SUCCESS")
                 .message("If this email exists, a password reset link has been sent")
                 .build());
     }
 
-    /**
-     * Mobile logout - client should discard tokens locally.
-     * This endpoint can be used for server-side token revocation if needed.
-     */
+   //logout l mobile
     @PostMapping("/logout")
     public ResponseEntity<MobileAuthResponse> logout() {
-        // For mobile, logout is primarily client-side (discard tokens)
-        // Server-side revocation can be added here if needed
+        //asm3 pour le moment bch nkhaliwha client-side (discardi tokens)
+        //server-side khaleha mra okhra kn st7a9ina
         return ResponseEntity.ok(MobileAuthResponse.builder()
                 .status("LOGGED_OUT")
                 .message("Successfully logged out")
                 .build());
+    }
+
+
+    //edhy l jme3a t3 gmail ani kamltha w testitha jawha fol
+    @PostMapping("/google")
+    public ResponseEntity<MobileAuthResponse> googleAuth(@RequestBody Map<String, String> request) {
+        String idToken=request.get("idToken");
+        if (idToken == null || idToken.isBlank()) {
+            return ResponseEntity.badRequest().body(MobileAuthResponse.builder()
+                    .status("ERROR")
+                    .message("ID token is required")
+                    .build());
+        }
+
+        try {
+            GoogleIdTokenVerifier verifier=new GoogleIdTokenVerifier.Builder(
+                    new NetHttpTransport(),
+                    new GsonFactory())
+                    .setAudience(singletonList(googleClientId))
+                    .build();
+
+            GoogleIdToken googleIdToken=verifier.verify(idToken);
+            if (googleIdToken == null) {
+                return ResponseEntity.status(401).body(MobileAuthResponse.builder()
+                        .status("INVALID_TOKEN")
+                        .message("Invalid Google ID token")
+                        .build());
+            }
+
+           GoogleIdToken.Payload payload=googleIdToken.getPayload();
+            String email=payload.getEmail();
+            String googleId=payload.getSubject();
+            String firstName=(String) payload.get("given_name");
+            String lastName=(String) payload.get("family_name");
+            String pictureUrl=(String) payload.get("picture");
+
+            //chof ken nalgoh wla le b3d m3ml login si nn creatih
+            User user=userRepository.findByEmail(email).orElse(null);
+            if (user == null) {
+                //CREATIH LAHNE
+                user=User.builder()
+                        .email(email)
+                        .firstName(firstName != null ? firstName : "User")
+                        .lastName(lastName != null ? lastName : "")
+                        .oauthProvider("google")
+                        .oauthId(googleId)
+                        .profilePictureUrl(pictureUrl)
+                        .passwordHash(null)
+                        .role(com.blassa.model.enums.UserRole.USER)
+                        .isVerified(true)
+                        .emailVerified(true)
+                        .createdAt(java.time.OffsetDateTime.now())
+                        .updatedAt(java.time.OffsetDateTime.now())
+                        .build();
+                userRepository.save(user);
+            } else {
+                if (user.getOauthId() == null) {
+                    user.setOauthProvider("google");
+                    user.setOauthId(googleId);
+                    if (user.getProfilePictureUrl() == null && pictureUrl != null) {
+                        user.setProfilePictureUrl(pictureUrl);
+                    }
+                    userRepository.save(user);
+                }
+            }
+            //geneari refresh w access token
+            UserDetails userDetails=userDetailsService.loadUserByUsername(email);
+            String accessToken=jwtUtils.generateToken(userDetails);
+            String refreshToken=jwtUtils.generateRefreshToken(userDetails);
+
+            return ResponseEntity.ok(MobileAuthResponse.builder()
+                    .status("SUCCESS")
+                    .accessToken(accessToken)
+                    .refreshToken(refreshToken)
+                    .expiresIn(jwtUtils.getAccessTokenExpirationSeconds())
+                    .email(email)
+                    .build());
+
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(MobileAuthResponse.builder()
+                    .status("ERROR")
+                    .message("Failed to verify Google token: " + e.getMessage())
+                    .build());
+        }
     }
 }

@@ -16,10 +16,10 @@ function EmailVerifiedContent() {
 
     return (
         <div className="text-center">
-            {/* Icon */}
+
             <div className={`w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center ${isSuccess
-                    ? "bg-gradient-to-br from-emerald-100 to-emerald-50"
-                    : "bg-gradient-to-br from-red-100 to-red-50"
+                ? "bg-gradient-to-br from-emerald-100 to-emerald-50"
+                : "bg-gradient-to-br from-red-100 to-red-50"
                 }`}>
                 {isSuccess ? (
                     <CheckCircle2 className="w-10 h-10 text-emerald-600" />
@@ -28,13 +28,11 @@ function EmailVerifiedContent() {
                 )}
             </div>
 
-            {/* Title */}
             <h1 className={`text-2xl font-bold mb-3 ${isSuccess ? "text-slate-900" : "text-red-700"
                 }`}>
                 {isSuccess ? "Email vérifié !" : "Échec de la vérification"}
             </h1>
 
-            {/* Description */}
             <p className="text-slate-600 mb-8">
                 {isSuccess
                     ? "Votre adresse email a été vérifiée avec succès. Vous pouvez maintenant vous connecter à votre compte."
@@ -44,7 +42,6 @@ function EmailVerifiedContent() {
                 }
             </p>
 
-            {/* Actions */}
             <div className="space-y-3">
                 {isSuccess ? (
                     <>
@@ -75,7 +72,6 @@ function EmailVerifiedContent() {
                 )}
             </div>
 
-            {/* Success confetti effect */}
             {isSuccess && (
                 <div className="mt-8 p-4 bg-emerald-50 rounded-xl border border-emerald-100">
                     <p className="text-sm text-emerald-700">
@@ -90,15 +86,14 @@ function EmailVerifiedContent() {
 export default function EmailVerifiedPage() {
     return (
         <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC] p-4">
-            {/* Background Gradient Blobs */}
+
             <div className="fixed inset-0 pointer-events-none overflow-hidden">
                 <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-[#006B8F] rounded-full mix-blend-multiply filter blur-[120px] opacity-[0.08]"></div>
                 <div className="absolute -bottom-40 -right-40 w-[600px] h-[600px] bg-[#FF9A3E] rounded-full mix-blend-multiply filter blur-[120px] opacity-[0.08]"></div>
             </div>
 
-            {/* Card */}
             <div className="relative w-full max-w-[440px] bg-white rounded-[20px] p-8 shadow-[0_8px_20px_rgba(0,0,0,0.06)]">
-                {/* Logo */}
+
                 <div className="flex justify-center mb-6">
                     <Link href="/">
                         <Image
@@ -111,7 +106,6 @@ export default function EmailVerifiedPage() {
                     </Link>
                 </div>
 
-                {/* Content */}
                 <Suspense
                     fallback={
                         <div className="h-48 flex items-center justify-center">

@@ -7,8 +7,6 @@ import { revalidateTag } from "next/cache";
 export async function submitReviewAction(data: ReviewRequest) {
     try {
         const review = await createReview(data);
-        // Revalidate relevant tags if necessary, e.g. user stats or booking details
-        // For now, simple revalidation
         revalidateTag("my-received-reviews", "max");
         revalidateTag("my-sent-reviews", "max");
         return { success: true, review };

@@ -14,23 +14,16 @@ export interface RecentSearch {
     timestamp: number;
 }
 
-/**
- * Hook to manage recent searches in localStorage
- * - Maximum 5 recent searches stored
- * - Deduplicates based on from/to combination
- * - Sorted by most recent first
- */
+
 export function useRecentSearches() {
     const [searches, setSearches] = useState<RecentSearch[]>([]);
     const [isLoaded, setIsLoaded] = useState(false);
 
-    // Load from localStorage on mount
     useEffect(() => {
         try {
             const stored = localStorage.getItem(STORAGE_KEY);
             if (stored) {
                 const parsed = JSON.parse(stored) as RecentSearch[];
-                // Validate and sanitize data
                 const valid = parsed.filter(
                     (s) =>
                         typeof s.from === "string" &&
@@ -40,27 +33,22 @@ export function useRecentSearches() {
                 setSearches(valid.slice(0, MAX_SEARCHES));
             }
         } catch {
-            // Invalid data, clear it
             localStorage.removeItem(STORAGE_KEY);
         } finally {
             setIsLoaded(true);
         }
     }, []);
 
-    // Save to localStorage
     const persist = useCallback((items: RecentSearch[]) => {
         try {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
         } catch {
-            // Storage full or unavailable - fail silently
         }
     }, []);
 
-    // Add a new search
     const addSearch = useCallback(
         (search: Omit<RecentSearch, "id" | "timestamp">) => {
             setSearches((prev) => {
-                // Remove duplicate (same from/to)
                 const filtered = prev.filter(
                     (s) =>
                         !(
@@ -83,13 +71,10 @@ export function useRecentSearches() {
         [persist]
     );
 
-    // Clear all searches
     const clearSearches = useCallback(() => {
         setSearches([]);
         localStorage.removeItem(STORAGE_KEY);
     }, []);
-
-    // Remove a single search
     const removeSearch = useCallback(
         (id: string) => {
             setSearches((prev) => {

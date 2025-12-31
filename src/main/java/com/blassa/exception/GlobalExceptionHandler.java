@@ -17,18 +17,17 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // Phase 5: Concurrency & Optimistic Locking (409 Conflict)
     @ExceptionHandler(OptimisticLockingFailureException.class)
     public ResponseEntity<Map<String, Object>> handleOptimisticLock(OptimisticLockingFailureException ex) {
         return buildErrorResponse(HttpStatus.CONFLICT, "SEAT_UPDATE_CONFLICT",
                 "The ride was updated by another user. Please try again.");
     }
+
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<Map<String, Object>> handleBadCredentials(BadCredentialsException ex) {
         return buildErrorResponse(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", "Email ou mot de passe incorrect");
     }
-    // Phase 5: Idempotency - unique(ride_id, passenger_id) constraint (409
-    // Conflict)
+
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<Map<String, Object>> handleDataIntegrity(DataIntegrityViolationException ex) {
         String message = ex.getMessage();
@@ -36,17 +35,27 @@ public class GlobalExceptionHandler {
             return buildErrorResponse(HttpStatus.CONFLICT, "PASSENGER_ALREADY_BOOKED",
                     "You have already booked a seat on this ride.");
         }
+        if (message != null && message.contains("vehicles_license_plate_key")) {
+            return buildErrorResponse(HttpStatus.BAD_REQUEST, "DUPLICATE_LICENSE_PLATE",
+                    "Ce numéro d'immatriculation existe déjà.");
+        }
+        if (message != null && (message.contains("users_phone_number_key") || message.contains("phone_number"))) {
+            return buildErrorResponse(HttpStatus.BAD_REQUEST, "DUPLICATE_PHONE_NUMBER",
+                    "Ce numéro de téléphone existe déjà.");
+        }
+        if (message != null && (message.contains("users_email_key") || message.contains("email"))) {
+            return buildErrorResponse(HttpStatus.BAD_REQUEST, "DUPLICATE_EMAIL",
+                    "Cet email existe déjà.");
+        }
         return buildErrorResponse(HttpStatus.BAD_REQUEST, "DATABASE_CONSTRAINT_VIOLATION",
-                "Invalid operation.");
+                "Opération invalide: " + (ex.getRootCause() != null ? ex.getRootCause().getMessage() : message));
     }
 
-    // Business Logic Violations (400 Bad Request)
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, Object>> handleIllegalArgument(IllegalArgumentException ex) {
         return buildErrorResponse(HttpStatus.BAD_REQUEST, "BUSINESS_RULE_VIOLATION", ex.getMessage());
     }
 
-    // Generic RuntimeExceptions with context-aware status codes
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<Map<String, Object>> handleRuntimeException(RuntimeException ex) {
         String message = ex.getMessage();
@@ -61,14 +70,12 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(HttpStatus.BAD_REQUEST, "BAD_REQUEST", message);
     }
 
-    // Auth errors
     @ExceptionHandler(UsernameNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleUsernameNotFound(UsernameNotFoundException ex) {
         return buildErrorResponse(HttpStatus.UNAUTHORIZED, "USER_NOT_FOUND",
                 "User not found: " + ex.getMessage());
     }
 
-    // Validation errors (DTO field validation)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidationErrors(MethodArgumentNotValidException ex) {
         Map<String, String> fieldErrors = new HashMap<>();

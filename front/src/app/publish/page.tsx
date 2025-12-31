@@ -9,8 +9,11 @@ import {
     Calendar,
     Clock,
     Users,
-    DollarSign,
+
     Cigarette,
+    Music,
+    Dog,
+    Briefcase,
     User,
     Loader2,
     CheckCircle,
@@ -33,6 +36,9 @@ interface RideFormData {
     totalSeats: number;
     pricePerSeat: string;
     allowsSmoking: boolean;
+    allowsMusic: boolean;
+    allowsPets: boolean;
+    luggageSize: string;
     genderPreference: GenderPreference;
     vehicleId: string;
 }
@@ -54,6 +60,9 @@ function PublishRideContent() {
         totalSeats: 3,
         pricePerSeat: "",
         allowsSmoking: false,
+        allowsMusic: false,
+        allowsPets: false,
+        luggageSize: "MEDIUM",
         genderPreference: "ANY",
         vehicleId: "",
     });
@@ -65,7 +74,6 @@ function PublishRideContent() {
         }
     }, [authLoading, isAuthenticated, router]);
 
-    // Set minimum date to today
     const getMinDate = () => {
         const today = new Date();
         return today.toISOString().split("T")[0];
@@ -108,7 +116,7 @@ function PublishRideContent() {
             return "Veuillez entrer un prix valide";
         }
 
-        // Check if departure is in the future
+
         const departureDateTime = new Date(`${formData.departureDate}T${formData.departureTime}`);
         if (departureDateTime <= new Date()) {
             return "La date et l'heure de départ doivent être dans le futur";
@@ -137,7 +145,6 @@ function PublishRideContent() {
                 throw new Error("Ville invalide");
             }
 
-            // Build OffsetDateTime string (Tunisia is UTC+1)
             const departureTime = `${formData.departureDate}T${formData.departureTime}:00+01:00`;
 
             const requestBody = {
@@ -151,6 +158,9 @@ function PublishRideContent() {
                 totalSeats: formData.totalSeats,
                 pricePerSeat: parseFloat(formData.pricePerSeat),
                 allowsSmoking: formData.allowsSmoking,
+                allowsMusic: formData.allowsMusic,
+                allowsPets: formData.allowsPets,
+                luggageSize: formData.luggageSize,
                 genderPreference: formData.genderPreference,
                 vehicleId: formData.vehicleId,
             };
@@ -184,7 +194,6 @@ function PublishRideContent() {
         }
     };
 
-    // Loading state
     if (authLoading) {
         return (
             <>
@@ -199,7 +208,6 @@ function PublishRideContent() {
         );
     }
 
-    // Success state
     if (success) {
         return (
             <>
@@ -243,7 +251,7 @@ function PublishRideContent() {
             <Navbar />
             <div className="min-h-screen bg-gray-50 py-8 px-4 pb-24 pt-20">
                 <div className="max-w-2xl mx-auto">
-                    {/* Header */}
+
                     <div className="flex items-center gap-4 mb-6">
                         <Link
                             href="/dashboard"
@@ -255,7 +263,6 @@ function PublishRideContent() {
                         <h1 className="text-2xl font-bold text-gray-900">Publier un trajet</h1>
                     </div>
 
-                    {/* Error Message */}
                     {error && (
                         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
                             <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
@@ -264,7 +271,7 @@ function PublishRideContent() {
                     )}
 
                     <form onSubmit={handleSubmit} className="space-y-6">
-                        {/* Route Section */}
+
                         <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                             <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-900 mb-4">
                                 <MapPin className="w-5 h-5 text-[#0A8F8F]" />
@@ -272,7 +279,7 @@ function PublishRideContent() {
                             </h2>
 
                             <div className="space-y-4">
-                                {/* Origin */}
+
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
                                         Ville de départ
@@ -292,7 +299,6 @@ function PublishRideContent() {
                                     </select>
                                 </div>
 
-                                {/* Destination */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
                                         Ville d&apos;arrivée
@@ -314,7 +320,6 @@ function PublishRideContent() {
                             </div>
                         </section>
 
-                        {/* Date & Time Section */}
                         <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                             <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-900 mb-4">
                                 <Calendar className="w-5 h-5 text-[#0A8F8F]" />
@@ -322,7 +327,7 @@ function PublishRideContent() {
                             </h2>
 
                             <div className="grid grid-cols-2 gap-4">
-                                {/* Date */}
+
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
                                         Date de départ
@@ -337,7 +342,6 @@ function PublishRideContent() {
                                     />
                                 </div>
 
-                                {/* Time */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
                                         Heure de départ
@@ -356,7 +360,6 @@ function PublishRideContent() {
                             </div>
                         </section>
 
-                        {/* Vehicle Selection */}
                         <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                             <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-900 mb-4">
                                 <Car className="w-5 h-5 text-[#0A8F8F]" />
@@ -368,7 +371,6 @@ function PublishRideContent() {
                             />
                         </section>
 
-                        {/* Seats & Price Section */}
                         <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                             <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-900 mb-4">
                                 <Users className="w-5 h-5 text-[#0A8F8F]" />
@@ -376,7 +378,7 @@ function PublishRideContent() {
                             </h2>
 
                             <div className="space-y-4">
-                                {/* Seats */}
+
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
                                         Nombre de places disponibles
@@ -404,7 +406,6 @@ function PublishRideContent() {
                                     </div>
                                 </div>
 
-                                {/* Price */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
                                         Prix par place (TND)
@@ -429,7 +430,6 @@ function PublishRideContent() {
                             </div>
                         </section>
 
-                        {/* Preferences Section */}
                         <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                             <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-900 mb-4">
                                 <User className="w-5 h-5 text-[#0A8F8F]" />
@@ -437,7 +437,7 @@ function PublishRideContent() {
                             </h2>
 
                             <div className="space-y-4">
-                                {/* Smoking */}
+
                                 <label className="flex items-center justify-between p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50">
                                     <div className="flex items-center gap-3">
                                         <Cigarette className="w-5 h-5 text-gray-400" />
@@ -455,7 +455,71 @@ function PublishRideContent() {
                                     />
                                 </label>
 
-                                {/* Gender Preference */}
+                                <label className="flex items-center justify-between p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50">
+                                    <div className="flex items-center gap-3">
+                                        <Music className="w-5 h-5 text-gray-400" />
+                                        <div>
+                                            <p className="font-medium text-gray-900">Musique autorisée</p>
+                                            <p className="text-sm text-gray-500">Autoriser la musique pendant le trajet</p>
+                                        </div>
+                                    </div>
+                                    <input
+                                        type="checkbox"
+                                        name="allowsMusic"
+                                        checked={formData.allowsMusic}
+                                        onChange={handleInputChange}
+                                        className="w-5 h-5 text-[#0A8F8F] border-gray-300 rounded focus:ring-[#0A8F8F]"
+                                    />
+                                </label>
+
+                                <label className="flex items-center justify-between p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50">
+                                    <div className="flex items-center gap-3">
+                                        <Dog className="w-5 h-5 text-gray-400" />
+                                        <div>
+                                            <p className="font-medium text-gray-900">Animaux autorisés</p>
+                                            <p className="text-sm text-gray-500">Autoriser les animaux de compagnie</p>
+                                        </div>
+                                    </div>
+                                    <input
+                                        type="checkbox"
+                                        name="allowsPets"
+                                        checked={formData.allowsPets}
+                                        onChange={handleInputChange}
+                                        className="w-5 h-5 text-[#0A8F8F] border-gray-300 rounded focus:ring-[#0A8F8F]"
+                                    />
+                                </label>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Taille des bagages
+                                    </label>
+                                    <div className="grid grid-cols-3 gap-3">
+                                        {[
+                                            { value: "SMALL", label: "Petit" },
+                                            { value: "MEDIUM", label: "Moyen" },
+                                            { value: "LARGE", label: "Grand" },
+                                        ].map((option) => (
+                                            <button
+                                                key={option.value}
+                                                type="button"
+                                                onClick={() =>
+                                                    setFormData((prev) => ({
+                                                        ...prev,
+                                                        luggageSize: option.value,
+                                                    }))
+                                                }
+                                                className={`py-3 px-4 rounded-xl border text-sm font-medium transition-colors flex items-center justify-center gap-2 ${formData.luggageSize === option.value
+                                                    ? "border-[#0A8F8F] bg-[#0A8F8F]/10 text-[#0A8F8F]"
+                                                    : "border-gray-200 text-gray-700 hover:bg-gray-50"
+                                                    }`}
+                                            >
+                                                <Briefcase className="w-4 h-4" />
+                                                {option.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
                                         Préférence de genre
@@ -488,7 +552,6 @@ function PublishRideContent() {
                             </div>
                         </section>
 
-                        {/* Submit Button */}
                         <button
                             type="submit"
                             disabled={isSubmitting}
@@ -510,7 +573,6 @@ function PublishRideContent() {
     );
 }
 
-// Wrap with ProfileGuard to block OAuth users with incomplete profiles
 export default function PublishRidePage() {
     return (
         <ProfileGuard>

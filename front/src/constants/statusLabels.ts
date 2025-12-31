@@ -1,13 +1,4 @@
-/**
- * Status labels and styling constants
- * Shared across components for consistent UI
- */
-
 import { RideStatus, BookingStatus, RideGenderPreference } from "@/types/models";
-
-// ============================================================================
-// Ride Status
-// ============================================================================
 
 export const RideStatusLabels: Record<RideStatus, string> = {
     SCHEDULED: "Prévu",
@@ -25,10 +16,6 @@ export const RideStatusColors: Record<RideStatus, string> = {
     FULL: "bg-purple-100 text-purple-700",
 };
 
-// ============================================================================
-// Booking Status
-// ============================================================================
-
 export const BookingStatusLabels: Record<BookingStatus, string> = {
     PENDING: "En attente",
     CONFIRMED: "Confirmée",
@@ -42,10 +29,6 @@ export const BookingStatusColors: Record<BookingStatus, string> = {
     REJECTED: "bg-red-50 text-red-700 border-red-200",
     CANCELLED: "bg-slate-50 text-slate-700 border-slate-200",
 };
-
-// ============================================================================
-// Gender Preference
-// ============================================================================
 
 export const GenderPreferenceLabels: Record<RideGenderPreference, string> = {
     MALE_ONLY: "Hommes uniquement",

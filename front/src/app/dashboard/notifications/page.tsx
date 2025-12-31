@@ -19,7 +19,7 @@ import Navbar from "@/components/layout/Navbar";
 import { Notification, NotificationType } from "@/types/notification";
 import { cn } from "@/lib/utils";
 
-// Get icon based on notification type
+
 function getNotificationIcon(type: NotificationType) {
     switch (type) {
         case "NEW_BOOKING":
@@ -36,7 +36,7 @@ function getNotificationIcon(type: NotificationType) {
     }
 }
 
-// Get icon background color based on notification type
+
 function getIconBgColor(type: NotificationType, isRead: boolean) {
     if (isRead) return "bg-slate-100 text-slate-400";
 
@@ -57,7 +57,7 @@ function getIconBgColor(type: NotificationType, isRead: boolean) {
     }
 }
 
-// Get notification type label
+
 function getTypeLabel(type: NotificationType): string {
     switch (type) {
         case "NEW_BOOKING":
@@ -79,7 +79,7 @@ function getTypeLabel(type: NotificationType): string {
     }
 }
 
-// Format date
+
 function formatDate(dateString: string): string {
     const date = new Date(dateString);
     const now = new Date();
@@ -119,7 +119,6 @@ function NotificationCard({
         >
             <div className="p-5">
                 <div className="flex items-start gap-4">
-                    {/* Icon */}
                     <div
                         className={cn(
                             "shrink-0 w-12 h-12 rounded-xl flex items-center justify-center",
@@ -133,11 +132,9 @@ function NotificationCard({
                         )}
                     </div>
 
-                    {/* Content */}
                     <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-3">
                             <div>
-                                {/* Type label */}
                                 <span
                                     className={cn(
                                         "inline-block px-2 py-0.5 rounded-full text-xs font-medium mb-2",
@@ -149,7 +146,6 @@ function NotificationCard({
                                     {getTypeLabel(notification.type)}
                                 </span>
 
-                                {/* Title */}
                                 <h3
                                     className={cn(
                                         "text-base mb-1",
@@ -161,7 +157,6 @@ function NotificationCard({
                                     {notification.title}
                                 </h3>
 
-                                {/* Message */}
                                 <p
                                     className={cn(
                                         "text-sm",
@@ -174,13 +169,11 @@ function NotificationCard({
                                 </p>
                             </div>
 
-                            {/* Unread dot */}
                             {!notification.isRead && (
                                 <div className="shrink-0 w-3 h-3 bg-[#006B8F] rounded-full animate-pulse" />
                             )}
                         </div>
 
-                        {/* Footer */}
                         <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-100">
                             <span className="text-xs text-slate-400">
                                 {formatDate(notification.createdAt)}
@@ -238,7 +231,6 @@ export default function NotificationsPage() {
     const [filter, setFilter] = useState<"ALL" | "UNREAD" | "READ">("ALL");
     const [isMarkingAll, setIsMarkingAll] = useState(false);
 
-    // Redirect if not authenticated
     useEffect(() => {
         if (!authLoading && !isAuthenticated) {
             router.replace("/login");
@@ -257,7 +249,6 @@ export default function NotificationsPage() {
         return true;
     });
 
-    // Loading state
     if (authLoading) {
         return (
             <div className="min-h-screen bg-[#F8FAFC]">
@@ -276,7 +267,6 @@ export default function NotificationsPage() {
             <div className="h-16"></div>
 
             <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                     <div className="flex items-center gap-3">
                         <Link
@@ -314,7 +304,6 @@ export default function NotificationsPage() {
                     )}
                 </div>
 
-                {/* Filter Tabs */}
                 <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
                     {(["ALL", "UNREAD", "READ"] as const).map((status) => (
                         <button
@@ -335,7 +324,6 @@ export default function NotificationsPage() {
                     ))}
                 </div>
 
-                {/* Notifications List */}
                 {filteredNotifications.length > 0 ? (
                     <div className="space-y-4">
                         {filteredNotifications.map((notification) => (
@@ -347,7 +335,6 @@ export default function NotificationsPage() {
                         ))}
                     </div>
                 ) : (
-                    // Empty State
                     <div className="bg-white rounded-2xl border border-slate-100 p-12 text-center">
                         <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
                             <Bell className="w-8 h-8 text-slate-400" />

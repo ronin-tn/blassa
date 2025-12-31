@@ -6,9 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-/**
- * Cloudinary configuration for image upload functionality.
- */
+//config lel service cloudinary lel image upload
 @Configuration
 public class CloudinaryConfig {
 

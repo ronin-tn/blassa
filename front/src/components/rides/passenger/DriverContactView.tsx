@@ -20,11 +20,14 @@ export default function DriverContactView({ ride }: DriverContactViewProps) {
             <Link href={`/users/${ride.driverId}`} className="flex items-center gap-4 mb-4 hover:bg-slate-100 p-2 -mx-2 rounded-xl transition-colors group">
                 <div className="relative w-14 h-14 bg-[#006B8F] rounded-full flex items-center justify-center text-white text-lg font-bold group-hover:bg-[#005673] transition-colors overflow-hidden">
                     {ride.driverProfilePictureUrl ? (
-                        <img
-                            src={ride.driverProfilePictureUrl.replace("=s96-c", "=s400-c")} // Fix low quality google images
-                            alt={ride.driverName}
-                            className="w-full h-full object-cover"
-                        />
+                        <>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                                src={ride.driverProfilePictureUrl.replace("=s96-c", "=s400-c")} // Fix low quality google images
+                                alt={ride.driverName}
+                                className="w-full h-full object-cover"
+                            />
+                        </>
                     ) : (
                         ride.driverName.charAt(0)
                     )}

@@ -13,10 +13,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
-/**
- * Handles successful OAuth2 authentication by generating a JWT token
- * and setting it as an httpOnly cookie before redirecting to the frontend.
- */
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -31,7 +27,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     @Value("${app.cookie.secure:true}")
     private boolean secureCookie;
 
-    @Value("${app.cookie.max-age:604800}") // 7 days in seconds
+    @Value("${app.cookie.max-age:604800}") // jem3a kemla
     private int cookieMaxAge;
 
     private static final String COOKIE_NAME = "blassa_token";
@@ -44,23 +40,27 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         log.info("OAuth2 authentication successful for: {}", email);
 
-        // Load user details and generate JWT
-        var userDetails = userDetailsService.loadUserByUsername(email);
-        String token = jwtUtils.generateToken(userDetails);
+        try {
+            var userDetails = userDetailsService.loadUserByUsername(email);
+            String token = jwtUtils.generateToken(userDetails);
 
-        // Set httpOnly cookie
-        Cookie cookie = new Cookie(COOKIE_NAME, token);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(secureCookie);
-        cookie.setPath("/");
-        cookie.setMaxAge(cookieMaxAge);
-        cookie.setAttribute("SameSite", "Lax");
-        response.addCookie(cookie);
+            // savi token fi httpOnly cookie
+            Cookie cookie = new Cookie(COOKIE_NAME, token);
+            cookie.setHttpOnly(true);
+            cookie.setSecure(secureCookie);
+            cookie.setPath("/");
+            cookie.setMaxAge(cookieMaxAge);
+            cookie.setAttribute("SameSite", "Lax");
+            response.addCookie(cookie);
+            String redirectUrl = frontendUrl + "/oauth-callback";
+            log.info("Redirecting OAuth2 user to: {}", redirectUrl);
 
-        // Redirect to frontend without token in URL
-        String redirectUrl = frontendUrl + "/oauth-callback";
-        log.info("Redirecting OAuth2 user to: {}", redirectUrl);
+            getRedirectStrategy().sendRedirect(request, response, redirectUrl);
 
-        getRedirectStrategy().sendRedirect(request, response, redirectUrl);
+        } catch (org.springframework.security.authentication.LockedException e) {
+            log.warn("Banned user tried to login via OAuth: {}", email);
+            String redirectUrl = frontendUrl + "/login?error=banned";
+            getRedirectStrategy().sendRedirect(request, response, redirectUrl);
+        }
     }
 }

@@ -86,7 +86,6 @@ export default function UpcomingRidesList({ rides }: UpcomingRidesListProps) {
                 </div>
             </div>
 
-            {/* Rides List */}
             <div className="divide-y divide-slate-100">
                 {filteredRides.length > 0 ? (
                     filteredRides.slice(0, 5).map((ride) => (
@@ -96,7 +95,6 @@ export default function UpcomingRidesList({ rides }: UpcomingRidesListProps) {
                             className="flex items-center justify-between p-6 hover:bg-slate-50 transition-colors"
                         >
                             <div className="flex items-center gap-4">
-                                {/* Type Badge */}
                                 <div
                                     className={`w-12 h-12 rounded-xl flex items-center justify-center ${ride.type === "driver"
                                         ? "bg-[#006B8F]/10 text-[#006B8F]"
@@ -110,7 +108,6 @@ export default function UpcomingRidesList({ rides }: UpcomingRidesListProps) {
                                     )}
                                 </div>
 
-                                {/* Ride Info */}
                                 <div>
                                     <div className="flex items-center gap-2 text-slate-900 font-medium">
                                         <span>{ride.origin}</span>
@@ -136,7 +133,6 @@ export default function UpcomingRidesList({ rides }: UpcomingRidesListProps) {
                                 </div>
                             </div>
 
-                            {/* Price & Arrow */}
                             <div className="flex items-center gap-4">
                                 <div className="text-right">
                                     <p className="text-lg font-bold text-slate-900">
@@ -190,7 +186,6 @@ export default function UpcomingRidesList({ rides }: UpcomingRidesListProps) {
                 )}
             </div>
 
-            {/* View All Link */}
             {filteredRides.length > 0 && (
                 <div className="p-4 border-t border-slate-100 text-center">
                     <Link

@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -31,12 +32,9 @@ public class BookingController {
         return ResponseEntity.ok(bookingService.getMyBookings(page, size));
     }
 
-    /**
-     * Get all ride IDs that the current user has booked (for disabling duplicate
-     * reservations).
-     */
+    // lahne nlawjo 3la rides eli deja passenger 3ml reservation lehom
     @GetMapping("/mine/ride-ids")
-    public ResponseEntity<java.util.List<java.util.UUID>> getMyBookedRideIds() {
+    public ResponseEntity<List<UUID>> getMyBookedRideIds() {
         return ResponseEntity.ok(bookingService.getMyBookedRideIds());
     }
 
@@ -46,43 +44,32 @@ public class BookingController {
         return ResponseEntity.ok().build();
     }
 
-    /**
-     * Get all passengers for a specific ride (for drivers only).
-     */
+    //hedhy bch yst79ha driver bch nrj3o lista t3 passengers li m3ah
     @GetMapping("/ride/{rideId}/passengers")
-    public ResponseEntity<java.util.List<RidePassengerResponse>> getPassengersForRide(
+    public ResponseEntity<List<RidePassengerResponse>> getPassengersForRide(
             @PathVariable UUID rideId) {
         return ResponseEntity.ok(bookingService.getPassengersForRide(rideId));
     }
 
-    /**
-     * Get current user's booking for a specific ride (for review page).
-     */
     @GetMapping("/ride/{rideId}/mine")
     public ResponseEntity<BookingResponse> getMyBookingForRide(@PathVariable UUID rideId) {
         return ResponseEntity.ok(bookingService.getMyBookingForRide(rideId));
     }
 
-    /**
-     * Cancel current user's booking for a specific ride.
-     */
+    //Canceli el machya
     @DeleteMapping("/ride/{rideId}")
     public ResponseEntity<Void> cancelBookingByRide(@PathVariable UUID rideId) {
         bookingService.cancelBookingByRide(rideId);
         return ResponseEntity.ok().build();
     }
 
-    /**
-     * Driver accepts a pending booking.
-     */
+    //Driver yaccepti request t3 passenger
     @PostMapping("/{id}/accept")
     public ResponseEntity<BookingResponse> acceptBooking(@PathVariable UUID id) {
         return ResponseEntity.ok(bookingService.acceptBooking(id));
     }
 
-    /**
-     * Driver rejects a pending booking.
-     */
+   //w hedhy reject
     @PostMapping("/{id}/reject")
     public ResponseEntity<Void> rejectBooking(@PathVariable UUID id) {
         bookingService.rejectBooking(id);

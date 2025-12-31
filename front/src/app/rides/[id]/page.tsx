@@ -11,9 +11,7 @@ interface PageProps {
     params: Promise<{ id: string }>;
 }
 
-/**
- * Generate dynamic metadata for SEO
- */
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
     const { id } = await params;
 
@@ -57,8 +55,6 @@ export default async function RideDetailsPage({ params }: PageProps) {
 
     let passengers: PassengerInfo[] = [];
 
-    // If user is the driver, fetch passengers server-side
-    // If user is a passenger, fetch their specific booking to show correct state
     if (user) {
         if (user.email === ride.driverEmail) {
             try {
@@ -78,11 +74,11 @@ export default async function RideDetailsPage({ params }: PageProps) {
                         facebookUrl: user.facebookUrl || null,
                         instagramUrl: user.instagramUrl || null,
                         seatsBooked: myBooking.seatsBooked,
-                        status: myBooking.status
+                        status: myBooking.status,
+                        passengerId: "current-user"
                     });
                 }
-            } catch (e) {
-                // Ignore errors (e.g. 404 if no booking found)
+            } catch {
             }
         }
     }

@@ -7,6 +7,9 @@ import {
     Banknote,
     Users,
     Cigarette,
+    Music,
+    Dog,
+    Briefcase,
     ArrowUpDown,
     X,
     RotateCcw,
@@ -18,6 +21,9 @@ export interface SearchFilters {
     maxPrice: number | null;
     ladiesOnly: boolean;
     noSmoking: boolean;
+    allowsMusic: boolean;
+    allowsPets: boolean;
+    luggageSize: "SMALL" | "MEDIUM" | "LARGE" | "";
 }
 
 interface SearchFiltersProps {
@@ -48,6 +54,9 @@ export const DEFAULT_FILTERS: SearchFilters = {
     maxPrice: null,
     ladiesOnly: false,
     noSmoking: false,
+    allowsMusic: false,
+    allowsPets: false,
+    luggageSize: "",
 };
 
 export default function SearchFiltersComponent({
@@ -92,7 +101,10 @@ export default function SearchFiltersComponent({
         filters.timeOfDay.length > 0 ||
         filters.maxPrice !== null ||
         filters.ladiesOnly ||
-        filters.noSmoking;
+        filters.noSmoking ||
+        filters.allowsMusic ||
+        filters.allowsPets ||
+        filters.luggageSize !== "";
 
     const FilterContent = (
         <div className="space-y-6">
@@ -203,6 +215,62 @@ export default function SearchFiltersComponent({
                             </span>
                         </div>
                     </label>
+                    <label className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors">
+                        <input
+                            type="checkbox"
+                            checked={filters.allowsMusic}
+                            onChange={(e) => updateFilter("allowsMusic", e.target.checked)}
+                            className="w-4 h-4 rounded border-slate-300 text-green-500 focus:ring-green-500"
+                        />
+                        <div className="flex items-center gap-2">
+                            <Music className="w-4 h-4 text-green-500" />
+                            <span className="text-sm font-medium text-slate-700">
+                                Musique autorisée
+                            </span>
+                        </div>
+                    </label>
+                    <label className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors">
+                        <input
+                            type="checkbox"
+                            checked={filters.allowsPets}
+                            onChange={(e) => updateFilter("allowsPets", e.target.checked)}
+                            className="w-4 h-4 rounded border-slate-300 text-purple-500 focus:ring-purple-500"
+                        />
+                        <div className="flex items-center gap-2">
+                            <Dog className="w-4 h-4 text-purple-500" />
+                            <span className="text-sm font-medium text-slate-700">
+                                Animaux autorisés
+                            </span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            {/* Luggage Size */}
+            <div>
+                <label className="flex items-center gap-2 text-sm font-semibold text-slate-900 mb-3">
+                    <Briefcase className="w-4 h-4 text-slate-500" />
+                    Taille des bagages
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                    {[
+                        { value: "", label: "Tous" },
+                        { value: "SMALL", label: "Petit" },
+                        { value: "MEDIUM", label: "Moyen" },
+                        { value: "LARGE", label: "Grand" },
+                    ].map((option) => (
+                        <button
+                            key={option.value}
+                            type="button"
+                            onClick={() => updateFilter("luggageSize", option.value as SearchFilters["luggageSize"])}
+                            className={`py-2 px-3 text-xs font-medium rounded-lg transition-colors ${filters.luggageSize === option.value
+                                    ? "bg-[#0A8F8F] text-white"
+                                    : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                                }`}
+                        >
+                            {option.label}
+                        </button>
+                    ))}
                 </div>
             </div>
 

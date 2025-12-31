@@ -5,6 +5,11 @@ import com.blassa.dto.Profile;
 import com.blassa.dto.ProfileUpdateRequest;
 import com.blassa.dto.PublicProfileResponse;
 import com.blassa.model.entity.User;
+import com.blassa.model.entity.Ride;
+import com.blassa.model.entity.Booking;
+import com.blassa.model.entity.Review;
+import com.blassa.model.enums.RideStatus;
+import com.blassa.model.enums.BookingStatus;
 import com.blassa.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,14 +21,17 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@lombok.extern.slf4j.Slf4j
 public class UserService {
     private final UserRepository userRepository;
     private final com.blassa.repository.RideRepository rideRepository;
     private final com.blassa.repository.ReviewRepository reviewRepository;
+    private final com.blassa.repository.BookingRepository bookingRepository;
     private final PasswordEncoder passwordEncoder;
     private final CloudinaryService cloudinaryService;
 
@@ -38,13 +46,21 @@ public class UserService {
 
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
+        if (request.getPhoneNumber() != null && !request.getPhoneNumber().equals(user.getPhoneNumber())) {
+            if (userRepository.existsByPhoneNumber(request.getPhoneNumber())) {
+                throw new RuntimeException("Ce numéro de téléphone existe déjà");
+            }
+        }
         user.setPhoneNumber(request.getPhoneNumber());
+
         user.setBio(request.getBio());
         user.setFacebookUrl(request.getFacebookUrl());
         user.setInstagramUrl(request.getInstagramUrl());
 
-        // Update dob and gender if provided (hedhy lel gmail users completing profile)
         if (request.getDob() != null) {
+            if (java.time.Period.between(request.getDob(), java.time.LocalDate.now()).getYears() < 18) {
+                throw new RuntimeException("Vous devez avoir au moins 18 ans pour utiliser Blassa");
+            }
             user.setDateOfBirth(request.getDob());
         }
         if (request.getGender() != null) {
@@ -55,29 +71,22 @@ public class UserService {
         return mapToProfile(savedUser);
     }
 
-    //Upload w updati PDP
-    @Transactional
     public Profile updateProfilePicture(MultipartFile file) throws IOException {
         User user = getCurrentUser();
-        // Upload to Cloudinary
         String imageUrl = cloudinaryService.uploadProfilePicture(file, user.getId());
-        // Update PDP t3 User
         user.setProfilePictureUrl(imageUrl);
         User savedUser = userRepository.save(user);
         return mapToProfile(savedUser);
     }
 
-    //Supprimi PDP
     @Transactional
     public Profile removeProfilePicture() throws IOException {
         User user = getCurrentUser();
 
-        // Delete from Cloudinary if exists
         if (user.getProfilePictureUrl() != null) {
             cloudinaryService.deleteProfilePicture(user.getId());
         }
 
-        //Clear el URL
         user.setProfilePictureUrl(null);
         User savedUser = userRepository.save(user);
 
@@ -88,24 +97,61 @@ public class UserService {
     public void changePassword(ChangePasswordRequest request) {
         User user = getCurrentUser();
 
-        // Validate current password
         if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPasswordHash())) {
             throw new IllegalArgumentException("Le mot de passe actuel est incorrect");
         }
 
-        // Validate new password matches confirmation
         if (!request.getNewPassword().equals(request.getConfirmPassword())) {
             throw new IllegalArgumentException("Les mots de passe ne correspondent pas");
         }
 
-        // Update password
         user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
     }
-//DELETE User mn platform
+
     @Transactional
     public void deleteAccount() {
         User user = getCurrentUser();
+        long activeRides = rideRepository.countByDriverIdAndStatusIn(user.getId(),
+                List.of(RideStatus.SCHEDULED, RideStatus.IN_PROGRESS));
+
+        if (activeRides > 0) {
+            throw new IllegalArgumentException(
+                    "Vous ne pouvez pas supprimer votre compte tant que vous avez des trajets en cours ou planifiés. Veuillez les annuler ou les terminer.");
+        }
+
+        long activeBookings = bookingRepository.countByPassengerIdAndStatusIn(user.getId(),
+                List.of(BookingStatus.CONFIRMED));
+
+        if (activeBookings > 0) {
+            throw new IllegalArgumentException(
+                    "Vous ne pouvez pas supprimer votre compte tant que vous avez des réservations actives. Veuillez les annuler.");
+        }
+
+        List<Review> userReviews = reviewRepository.findByReviewerId(user.getId());
+        reviewRepository.deleteAll(userReviews);
+
+        List<Review> reviewsAboutUser = reviewRepository.findByRevieweeId(user.getId());
+        reviewRepository.deleteAll(reviewsAboutUser);
+
+        List<Booking> userBookings = bookingRepository.findByPassengerId(user.getId());
+        bookingRepository.deleteAll(userBookings);
+
+        List<Ride> userRides = rideRepository.findByDriverId(user.getId());
+        for (Ride ride : userRides) {
+            List<Booking> rideBookings = bookingRepository.findByRideId(ride.getId());
+            bookingRepository.deleteAll(rideBookings);
+            rideRepository.delete(ride);
+        }
+
+        try {
+            if (user.getProfilePictureUrl() != null) {
+                cloudinaryService.deleteProfilePicture(user.getId());
+            }
+        } catch (Exception e) {
+            log.error("Failed to delete profile picture for user {}", user.getId(), e);
+        }
+
         userRepository.delete(user);
     }
 
@@ -120,7 +166,8 @@ public class UserService {
                 user.getBio(),
                 user.getProfilePictureUrl(),
                 user.getFacebookUrl(),
-                user.getInstagramUrl());
+                user.getInstagramUrl(),
+                user.getRole());
     }
 
     public PublicProfileResponse getPublicProfile(UUID userId) {

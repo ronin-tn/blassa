@@ -2,14 +2,9 @@ import Link from "next/link";
 import { Search, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-/**
- * QuickActions component - Server Component
- * Displays CTA cards for drivers and passengers
- */
 export default function QuickActions() {
     return (
         <div className="grid md:grid-cols-2 gap-6 mt-8">
-            {/* For Drivers */}
             <div className="bg-gradient-to-br from-[#006B8F] to-[#005673] rounded-2xl p-6 text-white">
                 <div className="flex items-center gap-3 mb-4">
                     <div className="p-3 bg-[var(--color-blassa-teal)]/10 rounded-xl w-fit mb-3 group-hover:bg-[var(--color-blassa-teal)]/20 transition-colors">
@@ -35,7 +30,6 @@ export default function QuickActions() {
                 </Link>
             </div>
 
-            {/* For Passengers */}
             <div className="bg-gradient-to-br from-[#FF9A3E] to-[#E88A35] rounded-2xl p-6 text-white">
                 <div className="flex items-center gap-3 mb-4">
                     <div className="p-3 bg-[var(--color-blassa-amber)]/10 rounded-xl w-fit mb-3 group-hover:bg-[var(--color-blassa-amber)]/20 transition-colors">

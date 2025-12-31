@@ -3,9 +3,6 @@ package com.blassa.dto;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
-/**
- * Request DTO for refreshing mobile access tokens.
- */
 @Data
 public class MobileRefreshRequest {
 

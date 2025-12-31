@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import Image from "next/image";
 import { Ride, Booking } from "@/types/models";
 import { Navigation, Phone, Facebook, Instagram, ShieldCheck, MapPin } from "lucide-react";
 
@@ -79,18 +81,37 @@ export default function ActivePassengerView({ ride, booking }: ActivePassengerVi
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
                 <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wide mb-6">Votre Conducteur</h3>
 
-                <div className="flex items-center gap-5 mb-8">
-                    <div className="w-16 h-16 bg-[#006B8F] rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-md">
-                        {ride.driverName.charAt(0)}
+                <Link
+                    href={`/users/${ride.driverId}`}
+                    className="flex items-center gap-5 mb-8 hover:opacity-80 transition-opacity group"
+                >
+                    {/* Driver Profile Picture */}
+                    <div className="w-16 h-16 rounded-full overflow-hidden bg-[#006B8F] shadow-md shrink-0">
+                        {ride.driverProfilePictureUrl ? (
+                            <Image
+                                src={ride.driverProfilePictureUrl.replace("=s96-c", "=s200-c")}
+                                alt={ride.driverName}
+                                width={64}
+                                height={64}
+                                className="w-full h-full object-cover"
+                            />
+                        ) : (
+                            <div className="w-full h-full flex items-center justify-center text-white text-2xl font-bold">
+                                {ride.driverName.charAt(0)}
+                            </div>
+                        )}
                     </div>
                     <div>
-                        <h4 className="text-xl font-bold text-slate-900">{ride.driverName}</h4>
+                        <h4 className="text-xl font-bold text-slate-900 group-hover:text-[#006B8F] transition-colors flex items-center gap-2">
+                            {ride.driverName}
+                            <span className="text-xs font-normal text-slate-400">Voir profil</span>
+                        </h4>
                         <div className="flex items-center gap-2 text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full text-xs font-medium w-fit mt-1">
                             <ShieldCheck className="w-3 h-3" />
                             <span>Conducteur vérifié</span>
                         </div>
                     </div>
-                </div>
+                </Link>
 
                 {/* Contact Actions */}
                 <div className="space-y-3">

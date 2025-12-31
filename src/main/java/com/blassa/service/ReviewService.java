@@ -35,22 +35,22 @@ public class ReviewService {
     public ReviewResponse createReview(ReviewRequest request) {
         User reviewer = getCurrentUser();
 
-        // Fetch booking
+        // Jib booking
         Booking booking = bookingRepository.findById(request.bookingId())
                 .orElseThrow(() -> new IllegalArgumentException("BOOKING_NOT_FOUND"));
 
-        // Validate review rules
+        // Verifi règles mta3 review
         validateReviewRules(booking, reviewer);
 
-        // Determine reviewee (the other party)
+        // Shkoun reviewee (l partie lokhra)
         User reviewee = determineReviewee(booking, reviewer);
 
-        // Check for duplicate review
+        // Checki kene 3mal review deja
         if (reviewRepository.existsByBookingIdAndReviewerId(booking.getId(), reviewer.getId())) {
             throw new IllegalArgumentException("ALREADY_REVIEWED");
         }
 
-        // Create review
+        // Asna3 review
         Review review = new Review();
         review.setBooking(booking);
         review.setReviewer(reviewer);
@@ -60,7 +60,7 @@ public class ReviewService {
 
         Review saved = reviewRepository.save(review);
 
-        // Send notification to reviewee
+        // Ab3ath notification lel reviewee
         String reviewerName = reviewer.getFirstName() + " " + reviewer.getLastName();
         notificationService.sendNotification(
                 reviewee.getId(),
@@ -80,7 +80,8 @@ public class ReviewService {
     }
 
     /**
-     * Get reviews received by the current user.
+     * /**
+     * Jib reviews li t'harhom user l 7ali.
      */
     @Transactional(readOnly = true)
     public Page<ReviewResponse> getMyReceivedReviews(int page, int size) {
@@ -91,7 +92,7 @@ public class ReviewService {
     }
 
     /**
-     * Get reviews sent by the current user.
+     * Jib reviews li b3athom user l 7ali.
      */
     @Transactional(readOnly = true)
     public Page<ReviewResponse> getMySentReviews(int page, int size) {
@@ -110,17 +111,17 @@ public class ReviewService {
     }
 
     private void validateReviewRules(Booking booking, User reviewer) {
-        // Booking must be CONFIRMED
+        // Booking lezm ykoun CONFIRMED
         if (booking.getStatus() != BookingStatus.CONFIRMED) {
             throw new IllegalArgumentException("BOOKING_NOT_CONFIRMED");
         }
 
-        // Ride must be COMPLETED
+        // Ride lezm tkoun COMPLETED
         if (booking.getRide().getStatus() != RideStatus.COMPLETED) {
             throw new IllegalArgumentException("RIDE_NOT_COMPLETED");
         }
 
-        // Reviewer must be part of the booking (driver or passenger)
+        // Reviewer lezm ykoun partie mel booking (driver walla passenger)
         UUID passengerId = booking.getPassenger().getId();
         UUID driverId = booking.getRide().getDriver().getId();
         UUID reviewerId = reviewer.getId();
@@ -131,8 +132,8 @@ public class ReviewService {
     }
 
     private User determineReviewee(Booking booking, User reviewer) {
-        // If reviewer is the passenger -> reviewee is the driver
-        // If reviewer is the driver -> reviewee is the passenger
+        // Kene reviewer huwwa passenger -> reviewee huwwa driver
+        // Kene reviewer huwwa driver -> reviewee huwwa passenger
         if (reviewer.getId().equals(booking.getPassenger().getId())) {
             return booking.getRide().getDriver();
         } else {

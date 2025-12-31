@@ -72,7 +72,6 @@ export default function EditRidePage() {
         genderPreference: "ANY",
     });
 
-    // Fetch ride data
     useEffect(() => {
         const fetchRide = async () => {
             if (!rideId) return;
@@ -89,7 +88,6 @@ export default function EditRidePage() {
 
                 const ride: RideResponse = await response.json();
 
-                // Find city codes by matching coordinates
                 const originCity = TUNISIA_CITIES.find(
                     (c) => c.name === ride.originName
                 );
@@ -97,7 +95,6 @@ export default function EditRidePage() {
                     (c) => c.name === ride.destinationName
                 );
 
-                // Parse departure time
                 const departureDate = new Date(ride.departureTime);
                 const dateStr = departureDate.toISOString().split("T")[0];
                 const timeStr = departureDate.toTimeString().slice(0, 5);
@@ -169,7 +166,6 @@ export default function EditRidePage() {
             return "Veuillez entrer un prix valide";
         }
 
-        // Check if departure is in the future
         const departureDateTime = new Date(`${formData.departureDate}T${formData.departureTime}`);
         if (departureDateTime <= new Date()) {
             return "La date et l'heure de départ doivent être dans le futur";
@@ -198,7 +194,6 @@ export default function EditRidePage() {
                 throw new Error("Ville invalide");
             }
 
-            // Build OffsetDateTime string (Tunisia is UTC+1)
             const departureTime = `${formData.departureDate}T${formData.departureTime}:00+01:00`;
 
             const requestBody = {
@@ -240,7 +235,6 @@ export default function EditRidePage() {
         }
     };
 
-    // Loading state
     if (authLoading || isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -252,7 +246,6 @@ export default function EditRidePage() {
         );
     }
 
-    // Success state
     if (success) {
         return (
             <div className="min-h-screen bg-gray-50 py-8 px-4">
@@ -290,7 +283,6 @@ export default function EditRidePage() {
     return (
         <div className="min-h-screen bg-gray-50 py-8 px-4 pb-24">
             <div className="max-w-2xl mx-auto">
-                {/* Header */}
                 <div className="flex items-center gap-4 mb-6">
                     <Link
                         href={`/rides/${rideId}`}
@@ -302,7 +294,6 @@ export default function EditRidePage() {
                     <h1 className="text-2xl font-bold text-gray-900">Modifier le trajet</h1>
                 </div>
 
-                {/* Error Message */}
                 {error && (
                     <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
                         <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
@@ -311,7 +302,6 @@ export default function EditRidePage() {
                 )}
 
                 <form onSubmit={handleSubmit} className="space-y-6">
-                    {/* Route Section */}
                     <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                         <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-900 mb-4">
                             <MapPin className="w-5 h-5 text-[#0A8F8F]" />
@@ -319,7 +309,6 @@ export default function EditRidePage() {
                         </h2>
 
                         <div className="space-y-4">
-                            {/* Origin */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
                                     Ville de départ
@@ -339,7 +328,6 @@ export default function EditRidePage() {
                                 </select>
                             </div>
 
-                            {/* Destination */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
                                     Ville d&apos;arrivée
@@ -361,7 +349,6 @@ export default function EditRidePage() {
                         </div>
                     </section>
 
-                    {/* Date & Time Section */}
                     <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                         <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-900 mb-4">
                             <Calendar className="w-5 h-5 text-[#0A8F8F]" />
@@ -369,7 +356,6 @@ export default function EditRidePage() {
                         </h2>
 
                         <div className="grid grid-cols-2 gap-4">
-                            {/* Date */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
                                     Date de départ
@@ -384,7 +370,6 @@ export default function EditRidePage() {
                                 />
                             </div>
 
-                            {/* Time */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
                                     Heure de départ
@@ -403,7 +388,6 @@ export default function EditRidePage() {
                         </div>
                     </section>
 
-                    {/* Seats & Price Section */}
                     <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                         <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-900 mb-4">
                             <Users className="w-5 h-5 text-[#0A8F8F]" />
@@ -411,7 +395,6 @@ export default function EditRidePage() {
                         </h2>
 
                         <div className="space-y-4">
-                            {/* Seats */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
                                     Nombre de places disponibles
@@ -439,7 +422,6 @@ export default function EditRidePage() {
                                 </div>
                             </div>
 
-                            {/* Price */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
                                     Prix par place (TND)
@@ -464,7 +446,6 @@ export default function EditRidePage() {
                         </div>
                     </section>
 
-                    {/* Preferences Section */}
                     <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                         <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-900 mb-4">
                             <User className="w-5 h-5 text-[#0A8F8F]" />
@@ -472,7 +453,6 @@ export default function EditRidePage() {
                         </h2>
 
                         <div className="space-y-4">
-                            {/* Smoking */}
                             <label className="flex items-center justify-between p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50">
                                 <div className="flex items-center gap-3">
                                     <Cigarette className="w-5 h-5 text-gray-400" />
@@ -490,7 +470,6 @@ export default function EditRidePage() {
                                 />
                             </label>
 
-                            {/* Gender Preference */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
                                     Préférence de genre
@@ -523,7 +502,6 @@ export default function EditRidePage() {
                         </div>
                     </section>
 
-                    {/* Submit Button */}
                     <button
                         type="submit"
                         disabled={isSubmitting}

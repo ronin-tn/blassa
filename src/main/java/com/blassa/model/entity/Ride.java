@@ -75,6 +75,18 @@ public class Ride {
     @Column(name = "allows_smoking")
     private Boolean allowsSmoking;
 
+    @ColumnDefault("false")
+    @Column(name = "allows_music")
+    private Boolean allowsMusic;
+
+    @ColumnDefault("false")
+    @Column(name = "allows_pets")
+    private Boolean allowsPets;
+
+    @Size(max = 20)
+    @Column(name = "luggage_size") // SMALL, MEDIUM, LARGE
+    private String luggageSize;
+
     @OneToMany(mappedBy = "ride")
     private Set<Booking> bookings = new LinkedHashSet<>();
 

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Ride, PassengerInfo } from "@/types/models";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Home, Send, ShieldCheck, MapPin } from "lucide-react";
@@ -22,6 +23,32 @@ export default function CompletedPassengerView({ ride, currentPassenger }: Compl
     const [comment, setComment] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
+    const [hasExistingReview, setHasExistingReview] = useState(false);
+
+    // Check if a review was already submitted for this booking
+    useEffect(() => {
+        const checkExistingReview = async () => {
+            try {
+                // Check if review already exists via the sent reviews endpoint
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/reviews/mine/sent?size=100`, {
+                    credentials: 'include'
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    const existingReview = data.content?.find(
+                        (review: { bookingId: string }) => review.bookingId === currentPassenger.bookingId
+                    );
+                    if (existingReview) {
+                        setHasExistingReview(true);
+                        setIsSubmitted(true);
+                    }
+                }
+            } catch {
+                // Silently fail - we'll let the submit action catch duplicates
+            }
+        };
+        checkExistingReview();
+    }, [currentPassenger.bookingId]);
 
     const handleSubmitReview = async () => {
         if (rating === 0) {
@@ -41,7 +68,13 @@ export default function CompletedPassengerView({ ride, currentPassenger }: Compl
                 showSuccess("Votre avis a été envoyé !");
                 setIsSubmitted(true);
             } else {
-                showError(result.error || "Une erreur est survenue");
+                // Check if it's a duplicate review error
+                if (result.error?.includes("déjà") || result.error?.includes("already")) {
+                    setIsSubmitted(true);
+                    setHasExistingReview(true);
+                } else {
+                    showError(result.error || "Une erreur est survenue");
+                }
             }
         } catch {
             showError("Erreur de connexion");
@@ -49,6 +82,8 @@ export default function CompletedPassengerView({ ride, currentPassenger }: Compl
             setIsSubmitting(false);
         }
     };
+
+    const reviewAlreadyDone = isSubmitted || hasExistingReview;
 
     return (
         <div className="p-6 md:p-8 space-y-8 animate-in fade-in duration-500">
@@ -59,7 +94,7 @@ export default function CompletedPassengerView({ ride, currentPassenger }: Compl
                 </div>
                 <h1 className="text-3xl font-bold text-slate-900">Vous êtes bien arrivé !</h1>
                 <p className="text-slate-600 max-w-md mx-auto">
-                    Merci d'avoir voyagé avec Blassa. Nous espérons que votre trajet vers <span className="font-semibold text-slate-900">{ride.destinationName}</span> s'est bien passé.
+                    Merci d&apos;avoir voyagé avec Blassa. Nous espérons que votre trajet vers <span className="font-semibold text-slate-900">{ride.destinationName}</span> s&apos;est bien passé.
                 </p>
             </div>
 
@@ -73,25 +108,45 @@ export default function CompletedPassengerView({ ride, currentPassenger }: Compl
                 </div>
 
                 <div className="p-8">
-                    <div className="flex flex-col items-center gap-4 mb-8">
-                        <div className="w-20 h-20 bg-[#006B8F] rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-md">
-                            {ride.driverName.charAt(0)}
+                    <Link
+                        href={`/users/${ride.driverId}`}
+                        className="flex flex-col items-center gap-4 mb-8 group"
+                    >
+                        {/* Driver Profile Picture */}
+                        <div className="w-20 h-20 rounded-full overflow-hidden bg-[#006B8F] shadow-md group-hover:ring-2 group-hover:ring-[#006B8F] transition-all">
+                            {ride.driverProfilePictureUrl ? (
+                                <Image
+                                    src={ride.driverProfilePictureUrl.replace("=s96-c", "=s200-c")}
+                                    alt={ride.driverName}
+                                    width={80}
+                                    height={80}
+                                    className="w-full h-full object-cover"
+                                />
+                            ) : (
+                                <div className="w-full h-full flex items-center justify-center text-white text-2xl font-bold">
+                                    {ride.driverName.charAt(0)}
+                                </div>
+                            )}
                         </div>
                         <div className="text-center">
-                            <h3 className="text-xl font-bold text-slate-900">{ride.driverName}</h3>
+                            <h3 className="text-xl font-bold text-slate-900 group-hover:text-[#006B8F] transition-colors">
+                                {ride.driverName}
+                            </h3>
                             <div className="flex items-center justify-center gap-1.5 text-emerald-600 mt-1">
                                 <ShieldCheck className="w-4 h-4" />
                                 <span className="text-xs font-semibold uppercase tracking-wide">Conducteur</span>
                             </div>
                         </div>
-                    </div>
+                    </Link>
 
-                    {isSubmitted ? (
+                    {reviewAlreadyDone ? (
                         <div className="text-center py-8 space-y-2 bg-emerald-50 rounded-xl border border-emerald-100">
                             <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 mb-2">
                                 <CheckCircle className="w-6 h-6" />
                             </div>
-                            <h3 className="text-lg font-bold text-emerald-900">Merci pour votre avis !</h3>
+                            <h3 className="text-lg font-bold text-emerald-900">
+                                {hasExistingReview ? "Avis déjà envoyé" : "Merci pour votre avis !"}
+                            </h3>
                             <p className="text-emerald-700 text-sm">Votre retour a bien été pris en compte.</p>
                         </div>
                     ) : (

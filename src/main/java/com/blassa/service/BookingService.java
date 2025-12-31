@@ -49,29 +49,29 @@ public class BookingService {
         Ride ride = rideRepository.findById(bookingRequest.rideId())
                 .orElseThrow(() -> new IllegalArgumentException("RIDE_NOT_FOUND"));
 
-        // Check for existing booking (active or cancelled)
+        // Shoufkene famma booking déjà mawjouda (active walla cancelled)
         Optional<Booking> existingBooking = bookingRepository.findByRideIdAndPassengerId(ride.getId(),
                 passenger.getId());
 
-        // Validate all business rules
+        // Verifi les règles métier lkol
         validateBookingRules(ride, passenger, bookingRequest.seatsRequested(), existingBooking);
 
-        // Update seats
+        // Beddel 3adad l blays
         int newAvailableSeats = ride.getAvailableSeats() - bookingRequest.seatsRequested();
         ride.setAvailableSeats(newAvailableSeats);
 
-        // Update status if full
+        // Beddel statu kene l ride t3abbat full
         if (newAvailableSeats == 0) {
             ride.setStatus(RideStatus.FULL);
         }
 
-        // Save Ride (triggers optimistic lock check)
+        // Sajjel l Ride (yb déclanchi optimistic lock check)
         rideRepository.save(ride);
 
-        // Calculate total price
+        // A7seb soum lkol
         BigDecimal totalPrice = ride.getPricePerSeat().multiply(BigDecimal.valueOf(bookingRequest.seatsRequested()));
 
-        // Create or Revive Booking
+        // Asna3 walla rajja3 booking
         Booking booking = existingBooking.orElse(new Booking());
         if (booking.getId() == null) {
             booking.setRide(ride);
@@ -80,12 +80,12 @@ public class BookingService {
 
         booking.setSeatsBooked(bookingRequest.seatsRequested());
         booking.setPriceTotal(totalPrice);
-        booking.setStatus(BookingStatus.PENDING); // Driver must accept
+        booking.setStatus(BookingStatus.PENDING); // L chauffeur lezm ya9bel
 
-        // Save Booking
+        // Sajjel l booking
         Booking savedBooking = bookingRepository.save(booking);
 
-        // Notify driver of new booking request
+        // A3lem l chauffeur bel demande jdida
         notificationService.sendNotification(ride.getDriver().getId(), NotificationType.NEW_BOOKING,
                 "Demande de réservation",
                 "Nouvelle demande de réservation de " + passenger.getFirstName() + " " + passenger.getLastName(),
@@ -98,7 +98,7 @@ public class BookingService {
     }
 
     /**
-     * Driver accepts a pending booking.
+     * L chauffeur ya9bel booking pending.
      */
     @Transactional
     public BookingResponse acceptBooking(UUID bookingId) {
@@ -106,7 +106,7 @@ public class BookingService {
                 .orElseThrow(() -> new IllegalArgumentException("BOOKING_NOT_FOUND"));
 
         User currentUser = getCurrentUser();
-        // Only the driver can accept
+        // Ken l chauffeur ynajjem ya9bel
         if (!booking.getRide().getDriver().getId().equals(currentUser.getId())) {
             throw new IllegalArgumentException("NOT_AUTHORIZED");
         }
@@ -118,6 +118,7 @@ public class BookingService {
         booking.setStatus(BookingStatus.CONFIRMED);
         Booking saved = bookingRepository.save(booking);
 
+        // Ab3ath notification
         notificationService.sendNotification(
                 booking.getPassenger().getId(),
                 NotificationType.BOOKING_ACCEPTED,
@@ -125,12 +126,19 @@ public class BookingService {
                 "Votre réservation pour " + saved.getRide().getOriginName() + "→" + saved.getRide().getDestinationName()
                         + " a été confirmée",
                 "/rides/" + booking.getRide().getId());
+
+        // Ab3ath email
+        emailService.sendBookingAcceptedEmail(
+                booking.getPassenger().getEmail(),
+                saved.getRide().getOriginName() + " → " + saved.getRide().getDestinationName(),
+                saved.getRide().getId().toString());
+
         return mapToResponse(saved);
     }
 
     /**
-     * Driver rejects a pending booking.
-     * Seats are restored to the ride.
+     * L chauffeur yrfodh booking pending.
+     * L blays yarj3u lel ride.
      */
     @Transactional
     public void rejectBooking(UUID bookingId) {
@@ -138,7 +146,7 @@ public class BookingService {
                 .orElseThrow(() -> new IllegalArgumentException("BOOKING_NOT_FOUND"));
 
         User currentUser = getCurrentUser();
-        // Only the driver can reject
+        // Ken l chauffeur ynajjem yrfodh
         if (!booking.getRide().getDriver().getId().equals(currentUser.getId())) {
             throw new IllegalArgumentException("NOT_AUTHORIZED");
         }
@@ -147,7 +155,7 @@ public class BookingService {
             throw new IllegalArgumentException("BOOKING_NOT_PENDING");
         }
 
-        // Restore seats to ride
+        // Rajja3 blays lel ride
         Ride ride = booking.getRide();
         ride.setAvailableSeats(ride.getAvailableSeats() + booking.getSeatsBooked());
         if (ride.getStatus() == RideStatus.FULL) {
@@ -157,6 +165,8 @@ public class BookingService {
 
         booking.setStatus(BookingStatus.REJECTED);
         bookingRepository.save(booking);
+
+        // Ab3ath notification
         notificationService.sendNotification(
                 booking.getPassenger().getId(),
                 NotificationType.BOOKING_REJECTED,
@@ -164,6 +174,10 @@ public class BookingService {
                 "Votre demande pour " + ride.getOriginName() + "→" + ride.getDestinationName() + " a été refusée",
                 null);
 
+        // Ab3ath email
+        emailService.sendBookingRejectedEmail(
+                booking.getPassenger().getEmail(),
+                ride.getOriginName() + " → " + ride.getDestinationName());
     }
 
     // Map l response, kont najm nhotha fi DTO dossier ama mch lezm
@@ -176,12 +190,12 @@ public class BookingService {
             carDescription = v.getMake() + " " + v.getModel() + " (" + v.getColor() + ")";
 
             boolean showFullPlate = false;
-            // Rule 1: Ride is active/completed
+            // Règle 1: Ride active walla completed
             if (booking.getRide().getStatus() == RideStatus.IN_PROGRESS
                     || booking.getRide().getStatus() == RideStatus.COMPLETED) {
                 showFullPlate = true;
             }
-            // Rule 2: T-60 Minutes
+            // Règle 2: 9bal b 60 d9i9a (T-60mn)
             else if (booking.getRide().getDepartureTime().minusMinutes(60).isBefore(java.time.OffsetDateTime.now())) {
                 showFullPlate = true;
             }
@@ -218,7 +232,7 @@ public class BookingService {
 
     /**
      * Get current user's booking for a specific ride.
-     * Used for the review page to find the bookingId.
+     * Mosta3mla lel review page bch nl9aw bookingId.
      */
     @Transactional(readOnly = true)
     public BookingResponse getMyBookingForRide(UUID rideId) {
@@ -231,7 +245,8 @@ public class BookingService {
     /**
      * Get all ride IDs that the current user has booked (excluding cancelled
      * bookings).
-     * Used by frontend to disable "Réserver" button for already-booked rides.
+     * Mosta3mla mel frontend bch ydésactivi button "Réserver" lel rides li deja
+     * booked.
      */
     @Transactional(readOnly = true)
     public java.util.List<UUID> getMyBookedRideIds() {
@@ -241,7 +256,7 @@ public class BookingService {
 
     /**
      * Get all pending and confirmed passengers for a specific ride.
-     * Only the driver of the ride can access this.
+     * Ken l chauffeur t3 l ride ynajjem ychouf hadha.
      */
     @Transactional(readOnly = true)
     public List<RidePassengerResponse> getPassengersForRide(UUID rideId) {
@@ -253,7 +268,7 @@ public class BookingService {
             throw new IllegalArgumentException("NOT_AUTHORIZED");
         }
 
-        // Return PENDING and CONFIRMED bookings for driver to manage
+        // Rajja3 l PENDING u l CONFIRMED bookings bch l chauffeur yetlahha bihom
         java.util.List<Booking> bookings = bookingRepository.findByRideId(rideId);
         return bookings.stream()
                 .filter(b -> b.getStatus() == BookingStatus.PENDING || b.getStatus() == BookingStatus.CONFIRMED)
@@ -277,36 +292,36 @@ public class BookingService {
                 .orElseThrow(() -> new IllegalArgumentException("BOOKING_NOT_FOUND"));
 
         User currentUser = getCurrentUser();
-        // only current usr can cancel el booking
+        // ken l current user ynajjem yannuli el booking
         if (!booking.getPassenger().getId().equals(currentUser.getId())) {
             throw new IllegalArgumentException("NOT_AUTHORIZED_TO_CANCEL");
         }
-        // checki ken cancelled wla le
+        // Verifi kene cancelled wla le
         if (booking.getStatus() == BookingStatus.CANCELLED) {
             throw new IllegalArgumentException("ALREADY_CANCELLED");
         }
 
-        // Cannot cancel if ride is already in progress or completed
+        // Maynjmch yannuli ken l ride bdet walla kmelet
         Ride ride = booking.getRide();
         if (ride.getStatus() == RideStatus.IN_PROGRESS || ride.getStatus() == RideStatus.COMPLETED) {
             throw new IllegalArgumentException("CANNOT_CANCEL_ACTIVE_RIDE");
         }
 
-        // number t3 blays lezm yarj3o kif makeno 9bal booking
+        // 3adad l blays lezm yarj3ou kima kenou 9bal l booking
         ride.setAvailableSeats(ride.getAvailableSeats() + booking.getSeatsBooked());
         // raj3ha l scheduled ken kent m3abya
-        // If ride was FULL, set back to SCHEDULED
+        // Kene l ride kent FULL, rajja3ha SCHEDULED
         if (ride.getStatus() == RideStatus.FULL) {
             ride.setStatus(RideStatus.SCHEDULED);
         }
 
         rideRepository.save(ride);
 
-        // Update booking status
+        // Beddel statu t3 booking
         booking.setStatus(BookingStatus.CANCELLED);
         bookingRepository.save(booking);
 
-        // Notify driver that passenger cancelled
+        // A3lem l chauffeur elli l passager annula
         notificationService.sendNotification(
                 ride.getDriver().getId(),
                 NotificationType.PASSENGER_CANCELLED,
@@ -314,17 +329,23 @@ public class BookingService {
                 currentUser.getFirstName() + " " + currentUser.getLastName() + " a annulé sa réservation pour "
                         + ride.getOriginName() + " → " + ride.getDestinationName(),
                 "/rides/" + ride.getId());
+
+        emailService.sendBookingCancelledByPassengerEmail(
+                ride.getDriver().getEmail(),
+                currentUser.getFirstName() + " " + currentUser.getLastName(),
+                ride.getOriginName() + " → " + ride.getDestinationName(),
+                ride.getId().toString());
     }
 
     /**
      * Cancel current user's booking for a specific ride.
-     * Used by passengers to cancel from ride details page.
+     * Mosta3mla mel passengers bch yannuliw men ride details page.
      */
     @Transactional
     public void cancelBookingByRide(UUID rideId) {
         User currentUser = getCurrentUser();
 
-        // Find the user's active booking for this ride
+        // Lawej 3ala booking active t3 l user fel ride hedhi
         Booking booking = bookingRepository.findByRideIdAndPassengerId(rideId, currentUser.getId())
                 .orElseThrow(() -> new IllegalArgumentException("BOOKING_NOT_FOUND"));
 
@@ -332,7 +353,7 @@ public class BookingService {
             throw new IllegalArgumentException("ALREADY_CANCELLED");
         }
 
-        // Restore available seats
+        // Rajja3 l blays l dispo
         Ride ride = booking.getRide();
         ride.setAvailableSeats(ride.getAvailableSeats() + booking.getSeatsBooked());
         if (ride.getStatus() == RideStatus.FULL) {
@@ -340,11 +361,11 @@ public class BookingService {
         }
         rideRepository.save(ride);
 
-        // Update booking status
+        // Beddel statu t3 booking
         booking.setStatus(BookingStatus.CANCELLED);
         bookingRepository.save(booking);
 
-        // Notify driver that passenger cancelled
+        // A3lem l chauffeur elli l passager annula
         notificationService.sendNotification(
                 ride.getDriver().getId(),
                 NotificationType.PASSENGER_CANCELLED,
@@ -352,50 +373,57 @@ public class BookingService {
                 currentUser.getFirstName() + " " + currentUser.getLastName() + " a annulé sa réservation pour "
                         + ride.getOriginName() + " → " + ride.getDestinationName(),
                 "/rides/" + ride.getId());
+
+        emailService.sendBookingCancelledByPassengerEmail(
+                ride.getDriver().getEmail(),
+                currentUser.getFirstName() + " " + currentUser.getLastName(),
+                ride.getOriginName() + " → " + ride.getDestinationName(),
+                ride.getId().toString());
     }
 
     private void validateBookingRules(Ride ride, User passenger, Integer requestedSeats,
             Optional<Booking> existingBooking) {
-        // Self-booking check
+        // Verifi kene l chauffeur 7ajez l rou7ou
         if (ride.getDriver().getId().equals(passenger.getId())) {
             throw new IllegalArgumentException("DRIVER_CANNOT_BOOK");
         }
 
-        // Ride Status check, reservi ken scheduled rides
+        // Verifi statu t3 ride, reservi ken rides scheduled
         if (ride.getStatus() != RideStatus.SCHEDULED) {
             throw new IllegalArgumentException("RIDE_NOT_BOOKABLE");
         }
 
-        // Departure Time check, reservi ken rides fi mosta9bl
+        // Verifi wa9t depart, reservi ken rides fl mosta9bel
         if (ride.getDepartureTime().isBefore(java.time.OffsetDateTime.now())) {
             throw new IllegalArgumentException("RIDE_ALREADY_DEPARTED");
         }
 
-        // Seat Availability check, verify number t3 seats
+        // Verifi dispo t3 blays, shouf 3adad l seats
         if (ride.getAvailableSeats() < requestedSeats) {
             throw new IllegalArgumentException("NOT_ENOUGH_SEATS");
         }
 
-        // Gender Preference check
-        // If ride is FEMALE_ONLY, passenger must be FEMALE, w 3aks bel 3aks
+        // Verifi preference t3 genre
+        // Kene l ride FEMALE_ONLY, l passager lezm tkoun mra (FEMALE), u l 3aks bel
+        // 3aks
         if (ride.getGenderPreference() == FEMALE_ONLY
                 && passenger.getGender() != FEMALE) {
             throw new IllegalArgumentException("GENDER_NOT_ALLOWED");
         }
-        // If ride is MALE_ONLY, passenger must be MALE
+        // Kene l ride MALE_ONLY, l passager lezm ykoun rajel (MALE)
         if (ride.getGenderPreference() == MALE_ONLY
                 && passenger.getGender() != MALE) {
             throw new IllegalArgumentException("GENDER_NOT_ALLOWED");
         }
 
-        // Duplicate Booking check // maynjmch ireservi nafs ride martin
-        // Only block if an active booking exists
+        // Verifi booking double // maynjmch ireservi nafs ride marrtin
+        // Bloki ken famma booking active
         if (existingBooking.isPresent() && existingBooking.get().getStatus() != BookingStatus.CANCELLED) {
             throw new IllegalStateException("PASSENGER_ALREADY_BOOKED");
         }
     }
 
-    // nraj3o fi current user
+    // njibu f current user
     private User getCurrentUser() {
         String email = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
                 .getUsername();

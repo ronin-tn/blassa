@@ -50,13 +50,11 @@ function ReviewCard({ review, type }: { review: Review; type: TabType }) {
     return (
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 hover:shadow-md transition-shadow">
             <div className="flex items-start gap-4">
-                {/* Avatar */}
                 <div className="w-12 h-12 bg-[#006B8F]/10 rounded-full flex items-center justify-center text-[#006B8F] font-bold text-lg">
                     {personName.charAt(0).toUpperCase()}
                 </div>
 
                 <div className="flex-1 min-w-0">
-                    {/* Header */}
                     <div className="flex items-center justify-between mb-2">
                         <div>
                             <p className="text-sm text-slate-500">{personLabel}</p>
@@ -82,7 +80,6 @@ function ReviewCard({ review, type }: { review: Review; type: TabType }) {
                         </div>
                     </div>
 
-                    {/* Comment */}
                     {review.comment ? (
                         <p className="text-slate-600 text-sm mt-3 bg-slate-50 rounded-lg p-3">
                             &quot;{review.comment}&quot;
@@ -109,7 +106,6 @@ export default function ReviewsPage() {
     const [error, setError] = useState("");
     const [stats, setStats] = useState({ averageRating: 0, totalReviews: 0 });
 
-    // Redirect if not authenticated
     useEffect(() => {
         if (!authLoading && !isAuthenticated) {
             router.replace("/login");
@@ -123,7 +119,6 @@ export default function ReviewsPage() {
         setError("");
 
         try {
-            // Fetch received reviews
             const receivedResponse = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/reviews/mine/received?page=0&size=50`,
                 {
@@ -138,7 +133,6 @@ export default function ReviewsPage() {
                 const data: PagedResponse<Review> = await receivedResponse.json();
                 setReceivedReviews(data.content);
 
-                // Calculate stats
                 if (data.content.length > 0) {
                     const avg = data.content.reduce((sum, r) => sum + r.rating, 0) / data.content.length;
                     setStats({
@@ -148,7 +142,6 @@ export default function ReviewsPage() {
                 }
             }
 
-            // Fetch sent reviews
             const sentResponse = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/reviews/mine/sent?page=0&size=50`,
                 {
@@ -178,7 +171,6 @@ export default function ReviewsPage() {
 
     const currentReviews = activeTab === "received" ? receivedReviews : sentReviews;
 
-    // Loading state
     if (authLoading || isLoading) {
         return (
             <div className="min-h-screen bg-[#F8FAFC]">
@@ -197,7 +189,6 @@ export default function ReviewsPage() {
             <div className="h-16"></div>
 
             <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                     <div className="flex items-center gap-3">
                         <Link
@@ -216,7 +207,6 @@ export default function ReviewsPage() {
                         </div>
                     </div>
 
-                    {/* Stats Card */}
                     {stats.totalReviews > 0 && (
                         <div className="flex items-center gap-3 bg-white border border-slate-100 rounded-xl px-4 py-3 shadow-sm">
                             <div className="flex items-center gap-1">
@@ -233,7 +223,6 @@ export default function ReviewsPage() {
                     )}
                 </div>
 
-                {/* Tabs */}
                 <div className="flex gap-2 mb-6">
                     <button
                         onClick={() => setActiveTab("received")}
@@ -261,7 +250,6 @@ export default function ReviewsPage() {
                     </button>
                 </div>
 
-                {/* Error State */}
                 {error && (
                     <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 flex items-center gap-3 mb-6">
                         <AlertCircle className="w-5 h-5 shrink-0" />
@@ -277,7 +265,6 @@ export default function ReviewsPage() {
                     </div>
                 )}
 
-                {/* Reviews List */}
                 {currentReviews.length > 0 ? (
                     <div className="space-y-4">
                         {currentReviews.map((review) => (
@@ -285,7 +272,6 @@ export default function ReviewsPage() {
                         ))}
                     </div>
                 ) : (
-                    // Empty State
                     <div className="bg-white rounded-2xl border border-slate-100 p-12 text-center">
                         <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
                             <Star className="w-8 h-8 text-slate-400" />

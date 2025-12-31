@@ -13,16 +13,14 @@ interface SearchPageProps {
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-/**
- * Generate dynamic metadata for search results SEO
- */
+
 export async function generateMetadata({ searchParams }: SearchPageProps): Promise<Metadata> {
     const params = await searchParams;
     const from = (params.from as string) || "";
     const to = (params.to as string) || "";
     const date = (params.date as string) || "";
 
-    // Build dynamic title and description
+
     if (from && to) {
         const formattedDate = date
             ? new Date(date).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })
@@ -55,18 +53,21 @@ async function SearchPageContent({ searchParams }: { searchParams: Promise<{ [ke
     const date = (params.date as string) || "";
     const passengers = (params.p as string) || "1";
     const genderFilter = (params.g as string) || "";
+    const sortBy = (params.sortBy as string) || "price_asc";
     const page = parseInt((params.page as string) || "0");
 
     const user = await getServerUser();
 
-    // Fetch rides
+
     let ridesData: PagedResponse<Ride> = {
         content: [],
-        totalPages: 0,
-        totalElements: 0,
+        page: {
+            totalPages: 0,
+            totalElements: 0,
+            size: 10,
+            number: 0,
+        },
         last: true,
-        size: 10,
-        number: 0,
         first: true,
         empty: true,
     };
@@ -84,6 +85,7 @@ async function SearchPageContent({ searchParams }: { searchParams: Promise<{ [ke
                 seats: parseInt(passengers),
                 page,
                 size: 10,
+                sortBy,
                 departureTime: date ? `${date}T00:00:00` : undefined,
                 genderFilter: genderFilter !== "ANY" ? genderFilter : undefined,
             });
@@ -92,7 +94,7 @@ async function SearchPageContent({ searchParams }: { searchParams: Promise<{ [ke
         }
     }
 
-    // Fetch booked ride IDs if user is logged in
+
     let bookedRideIds: string[] = [];
     if (user) {
         try {

@@ -45,14 +45,16 @@ public interface RideRepository extends JpaRepository<Ride, UUID> {
             @Param("endTime") OffsetDateTime endTime,
             @Param("requiredSeats") int requiredSeats,
             @Param("allowedPreferences") List<String> allowedPreferences,
-            Pageable pageable // <--- Spring automatically applies LIMIT, OFFSET, and SORT here
-    );
+            Pageable pageable);
 
-    // lawj 3la ride b driver id
     @EntityGraph(attributePaths = { "driver" })
     Page<Ride> findByDriverId(UUID id, Pageable pageable);
 
     List<Ride> findByIdAndStatus(UUID id, RideStatus status);
 
     int countByDriverIdAndStatus(UUID driverId, RideStatus status);
+
+    long countByDriverIdAndStatusIn(UUID driverId, List<RideStatus> statuses);
+
+    List<Ride> findByDriverId(UUID driverId);
 }

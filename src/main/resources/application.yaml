@@ -1,20 +1,21 @@
 
 app:
-  base-url: http://localhost:8088
-  frontend-url: http://localhost:3000
+  base-url: ${BACKEND_BASE_URL:http://localhost:8088}
+  frontend-url: ${FRONTEND_URL:http://localhost:3000}
   cookie:
-    secure: false  # Set to true in production (HTTPS)
-    max-age: 604800  # 7 days in seconds
+    secure: ${COOKIE_SECURE:false}
+    max-age: ${COOKIE_MAX_AGE:604800}
 server:
-  port: 8088
+  address: ${SERVER_ADDRESS:0.0.0.0}
+  port: ${SERVER_PORT:8088}
 spring:
   security:
     oauth2:
       client:
         registration:
           google:
-            client-id: 484738135148-ojm214hd016n0u91nuo6n72v5i5mf4en.apps.googleusercontent.com
-            client-secret: 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
+            client-id: ${GOOGLE_CLIENT_ID:484738135148-ojm214hd016n0u91nuo6n72v5i5mf4en.apps.googleusercontent.com}
+            client-secret: ${GOOGLE_CLIENT_SECRET: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}
             scope:
               - email
               - profile
@@ -22,25 +23,21 @@ spring:
   application:
     name: blassa-backend
   datasource:
-    url: jdbc:postgresql://localhost:5432/blassa_db?stringtype=unspecified
-    username: postgres
-    password: ronintn
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:blassa_db}?stringtype=unspecified
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:ronintn}
     driver-class-name: org.postgresql.Driver
 
     hikari:
-      # Maximum connections to keep in the pool
       maximum-pool-size: 20
-      # Minimum idle connections
       minimum-idle: 5
-      # How long to wait for a connection before throwing error (30s)
       connection-timeout: 30000
-      # Max lifetime of a connection (prevents memory leaks)
       max-lifetime: 1800000
   mail:
-    host: smtp.gmail.com
-    port: 587
-    username: alpicinorzlt@gmail.com
-    password: dfvs jwuo nnet qixi
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:alpicinorzlt@gmail.com}
+    password: ${MAIL_PASSWORD:}
     properties:
       mail:
         smtp:
@@ -55,44 +52,34 @@ spring:
     properties:
       hibernate:
         format_sql: true
-        # Optimizes DB connections (prevents hanging connections)
         jdbc:
           batch_size: 20
 
-    # Performance: Disables "Open Session In View" pattern to prevent DB connection hogging
     open-in-view: false
 
-  # 3. DATABASE MIGRATIONS (FLYWAY)
   flyway:
     enabled: true
-    # If you have existing tables, this lets Flyway start managing them without crashing
     baseline-on-migrate: true
 
-  # 4. FILE UPLOADS (For Profile Pictures & ID Cards)
   servlet:
     multipart:
       max-file-size: 5MB
       max-request-size: 5MB
 
-#JWT CONFIG
+# JWT CONFIG
 application:
   security:
     jwt:
-      # This is a 256-bit HEX key. In a real prod environment, inject this via Environment Variables.
-      secret-key: 8066FEE02AA39CD728CBBB12C06A5AF2EC88A515EF9CE9149F16564BEC3AFD33280053938AD15C3B2D81D81A4A6BAB06389371790EDC3F27F342FC3D628862D2E974AA36A1FE9540B299E74A402915D21E58071DD7AFFE69D039CE9C17B3597C0CF2DDE7FC95544CBD12229E7434C1E3385CC1EC888EC2AC859F88F7331FC628
-      expiration: 86400000 # 24 Hours (in milliseconds)
+      secret-key: ${JWT_SECRET_KEY:8066FEE02AA39CD728CBBB12C06A5AF2EC88A515EF9CE9149F16564BEC3AFD33280053938AD15C3B2D81D81A4A6BAB06389371790EDC3F27F342FC3D628862D2E974AA36A1FE9540B299E74A402915D21E58071DD7AFFE69D039CE9C17B3597C0CF2DDE7FC95544CBD12229E7434C1E3385CC1EC888EC2AC859F88F7331FC628}
+      expiration: ${JWT_EXPIRATION:86400000}
 
-# Sentry Configuration for error monitoring and tracing
+# Sentry Configuration
 sentry:
-  dsn: https://711c0287a9280f98a0ff3a0b61213e7c@o4510517961031680.ingest.de.sentry.io/4510517986000976
-  # Add data like request headers and IP for users
-  # See https://docs.sentry.io/platforms/java/guides/spring-boot/data-management/data-collected/ for more info
+  dsn: ${SENTRY_DSN:https://711c0287a9280f98a0ff3a0b61213e7c@o4510517961031680.ingest.de.sentry.io/4510517986000976}
   send-default-pii: true
-  # Set traces-sample-rate to 1.0 to capture 100% of transactions for tracing
-  # We recommend adjusting this value in production (e.g., 0.1 for 10%)
   traces-sample-rate: 1.0
 
-# Cloudinary Configuration for image uploads
+# Cloudinary Configuration
 cloudinary:
   cloud-name: ${CLOUDINARY_CLOUD_NAME:blassa}
   api-key: ${CLOUDINARY_API_KEY:242843735143177}

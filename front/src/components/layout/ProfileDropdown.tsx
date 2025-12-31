@@ -22,7 +22,6 @@ export default function ProfileDropdown({ user, onLogout }: ProfileDropdownProps
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
-    // Close dropdown on outside click
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (
@@ -47,7 +46,6 @@ export default function ProfileDropdown({ user, onLogout }: ProfileDropdownProps
                 onClick={() => setIsOpen(!isOpen)}
                 className="flex items-center gap-2 px-2 py-1.5 rounded-full hover:bg-slate-50 transition-colors"
             >
-                {/* Avatar */}
                 {user.profilePictureUrl ? (
                     <Image
                         src={user.profilePictureUrl}
@@ -69,10 +67,8 @@ export default function ProfileDropdown({ user, onLogout }: ProfileDropdownProps
                 />
             </button>
 
-            {/* Dropdown Menu */}
             {isOpen && (
                 <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-slate-100 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                    {/* User Info */}
                     <div className="px-4 py-3 border-b border-slate-100">
                         <p className="text-sm font-medium text-slate-900">
                             {user.firstName} {user.lastName}
@@ -82,7 +78,6 @@ export default function ProfileDropdown({ user, onLogout }: ProfileDropdownProps
                         </p>
                     </div>
 
-                    {/* Menu Items */}
                     <div className="py-1">
                         <Link
                             href="/dashboard/profile"
@@ -110,7 +105,6 @@ export default function ProfileDropdown({ user, onLogout }: ProfileDropdownProps
                         </Link>
                     </div>
 
-                    {/* Logout */}
                     <div className="border-t border-slate-100 pt-1">
                         <button
                             onClick={() => {

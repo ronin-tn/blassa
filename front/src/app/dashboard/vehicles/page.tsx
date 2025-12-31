@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Trash2, Car, Loader2 } from "lucide-react";
+import { Trash2, Car } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "react-hot-toast";
@@ -21,7 +21,6 @@ export default function VehiclesPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [isAdding, setIsAdding] = useState(false);
 
-    // Form state
     const [make, setMake] = useState("");
     const [model, setModel] = useState("");
     const [color, setColor] = useState("");
@@ -40,8 +39,8 @@ export default function VehiclesPage() {
                 const data = await res.json();
                 setVehicles(data);
             }
-        } catch (error) {
-            console.error("Failed to fetch vehicles", error);
+        } catch {
+            console.error("Failed to fetch vehicles");
         } finally {
             setIsLoading(false);
         }
@@ -61,7 +60,7 @@ export default function VehiclesPage() {
                 body: JSON.stringify({ make, model, color, licensePlate }),
             });
 
-            if (!res.ok) throw new Error("Erreur lors de l'ajout");
+            if (!res.ok) throw new Error("Erreur lors de l&apos;ajout");
 
             const newVehicle = await res.json();
             setVehicles([...vehicles, newVehicle]);
@@ -70,7 +69,7 @@ export default function VehiclesPage() {
             setColor("");
             setLicensePlate("");
             toast.success("Véhicule ajouté !");
-        } catch (error) {
+        } catch {
             toast.error("Impossible d'ajouter le véhicule");
         } finally {
             setIsAdding(false);
@@ -90,7 +89,7 @@ export default function VehiclesPage() {
 
             setVehicles(vehicles.filter(v => v.id !== id));
             toast.success("Véhicule supprimé");
-        } catch (error) {
+        } catch {
             toast.error("Impossible de supprimer le véhicule");
         }
     };
@@ -107,7 +106,6 @@ export default function VehiclesPage() {
                 <p className="text-slate-600 mb-8">Gérez vos véhicules pour les utiliser lors de vos trajets.</p>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    {/* List */}
                     <div className="space-y-4">
                         {vehicles.length === 0 ? (
                             <div className="p-8 bg-slate-50 border border-slate-200 rounded-xl text-center text-slate-500">
@@ -133,7 +131,6 @@ export default function VehiclesPage() {
                         )}
                     </div>
 
-                    {/* Add Form */}
                     <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm h-fit">
                         <h2 className="font-semibold text-lg mb-4">Ajouter un véhicule</h2>
                         <form onSubmit={handleAddVehicle} className="space-y-4">
@@ -175,7 +172,7 @@ export default function VehiclesPage() {
                                     required
                                 />
                                 <p className="text-xs text-slate-500 mt-1">
-                                    Votre plaque sera masquée pour protéger votre vie privée jusqu'au départ du trajet.
+                                    Votre plaque sera masquée pour protéger votre vie privée jusqu&apos;au départ du trajet.
                                 </p>
                             </div>
                             <Button type="submit" disabled={isAdding} className="w-full bg-[#006B8F] hover:bg-[#005673]">

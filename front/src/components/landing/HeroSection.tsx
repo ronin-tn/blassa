@@ -51,7 +51,6 @@ export default function HeroSection({ onTabChange }: HeroSectionProps) {
             return;
         }
 
-        // Save to recent searches
         addSearch({
             from: departure.name,
             to: destination.name,
@@ -59,7 +58,6 @@ export default function HeroSection({ onTabChange }: HeroSectionProps) {
             passengers: parseInt(passengers),
         });
 
-        // Build clean, user-friendly URL
         const params = new URLSearchParams();
         params.set("from", departure.name);
         params.set("to", destination.name);
@@ -72,7 +70,7 @@ export default function HeroSection({ onTabChange }: HeroSectionProps) {
 
     return (
         <section className="relative pt-12 pb-20 lg:pt-16 lg:pb-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
-            {/* Background Blobs */}
+
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-amber-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
                 <div className="absolute top-0 -right-4 w-[500px] h-[500px] bg-orange-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
@@ -80,7 +78,6 @@ export default function HeroSection({ onTabChange }: HeroSectionProps) {
             </div>
 
             <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-                {/* Left: Content & Search */}
                 <div className="relative z-10 space-y-8">
                     <div className="space-y-4">
                         <div className="inline-flex items-center rounded-full border border-orange-200 bg-orange-50 px-3 py-1 text-sm text-orange-600">
@@ -99,11 +96,9 @@ export default function HeroSection({ onTabChange }: HeroSectionProps) {
                         </p>
                     </div>
 
-                    {/* Glassmorphic Search/Publish Card */}
                     <div className="relative group" id="search">
                         <div className="absolute -inset-1 bg-gradient-to-r from-orange-500 to-amber-500 rounded-[1.5rem] blur opacity-20 group-hover:opacity-30 transition duration-1000"></div>
                         <div className="relative bg-white/90 backdrop-blur-xl border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-[1.25rem] overflow-hidden">
-                            {/* Tabs */}
                             <div className="flex border-b border-slate-100">
                                 <button
                                     onClick={() => handleTabChange("search")}
@@ -175,7 +170,6 @@ export default function HeroSection({ onTabChange }: HeroSectionProps) {
                                                 </div>
                                             </div>
 
-                                            {/* Ladies Only Toggle */}
                                             <div
                                                 role="checkbox"
                                                 aria-checked={ladiesOnly}
@@ -241,7 +235,6 @@ export default function HeroSection({ onTabChange }: HeroSectionProps) {
                         </div>
                     </div>
 
-                    {/* Popular Routes */}
                     <div className="pt-2">
                         <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">
                             Trajets populaires
@@ -260,9 +253,7 @@ export default function HeroSection({ onTabChange }: HeroSectionProps) {
                     </div>
                 </div>
 
-                {/* Right: Lifestyle Image */}
                 <div className="relative hidden lg:block h-full min-h-[600px]">
-                    {/* Background Shapes */}
                     <div className="absolute top-10 right-0 w-4/5 h-full bg-orange-50 rounded-[3rem] -rotate-3 z-0"></div>
                     <div className="absolute top-0 right-10 w-4/5 h-full rounded-[3rem] overflow-hidden shadow-2xl rotate-3 transition-transform duration-700 hover:rotate-2 z-10">
                         <Image
@@ -275,7 +266,6 @@ export default function HeroSection({ onTabChange }: HeroSectionProps) {
                         />
                     </div>
 
-                    {/* Floating Card: Economy */}
                     <div className="absolute bottom-20 -left-12 bg-white/95 backdrop-blur-sm p-4 rounded-2xl shadow-xl flex items-center gap-4 animate-bounce-slow z-20 border border-slate-50">
                         <div className="p-3 bg-green-100 rounded-xl text-green-600">
                             <Wallet className="w-6 h-6" />
@@ -288,7 +278,6 @@ export default function HeroSection({ onTabChange }: HeroSectionProps) {
                         </div>
                     </div>
 
-                    {/* Floating Card: Trust */}
                     <div className="absolute top-24 -left-8 bg-white/95 backdrop-blur-sm p-3 pr-6 rounded-full shadow-lg flex items-center gap-3 animate-bounce-slow animation-delay-2000 z-20 border border-slate-50">
                         <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center text-yellow-600">
                             <Star className="w-5 h-5 fill-current" />

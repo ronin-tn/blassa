@@ -42,11 +42,9 @@ export default function MyBookingsPage() {
     const [totalPages, setTotalPages] = useState(0);
     const [statusFilter, setStatusFilter] = useState<BookingStatus | "ALL">("ALL");
 
-    // Cancellation Modal State
     const [bookingToCancel, setBookingToCancel] = useState<string | null>(null);
     const [isCancelling, setIsCancelling] = useState(false);
 
-    // Redirect if not authenticated
     useEffect(() => {
         if (!authLoading && !isAuthenticated) {
             router.replace("/login");
@@ -76,7 +74,7 @@ export default function MyBookingsPage() {
 
             const data: PagedResponse<Booking> = await response.json();
             setBookings(data.content);
-            setTotalPages(data.totalPages);
+            setTotalPages(data.page.totalPages);
         } catch (err) {
             setError(
                 err instanceof Error ? err.message : "Erreur lors du chargement"
@@ -114,7 +112,6 @@ export default function MyBookingsPage() {
                 throw new Error(errorMessage);
             }
 
-            // Refresh bookings
             fetchBookings();
             setBookingToCancel(null);
         } catch (err) {
@@ -124,7 +121,6 @@ export default function MyBookingsPage() {
         }
     };
 
-    // Status priority order: PENDING → CONFIRMED → REJECTED → CANCELLED
     const statusPriority: Record<BookingStatus, number> = {
         PENDING: 1,
         CONFIRMED: 2,
@@ -137,11 +133,9 @@ export default function MyBookingsPage() {
             ? [...bookings]
             : bookings.filter((booking) => booking.status === statusFilter);
 
-        // Sort by status priority, then by departure time (soonest first)
         return result.sort((a, b) => {
             const priorityDiff = statusPriority[a.status] - statusPriority[b.status];
             if (priorityDiff !== 0) return priorityDiff;
-            // Same status: sort by departure time ascending (soonest first)
             return new Date(a.departureTime).getTime() - new Date(b.departureTime).getTime();
         });
     })();
@@ -173,7 +167,6 @@ export default function MyBookingsPage() {
         });
     };
 
-    // Loading state
     if (authLoading || (isLoading && bookings.length === 0)) {
         return (
             <div className="min-h-screen bg-[#F8FAFC]">
@@ -192,7 +185,6 @@ export default function MyBookingsPage() {
             <div className="h-16"></div>
 
             <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                     <div className="flex items-center gap-3">
                         <Link
@@ -221,7 +213,6 @@ export default function MyBookingsPage() {
                     </Link>
                 </div>
 
-                {/* Status Filter Tabs */}
                 <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
                     {(["ALL", "PENDING", "CONFIRMED", "REJECTED", "CANCELLED"] as const).map(
                         (status) => (
@@ -239,7 +230,6 @@ export default function MyBookingsPage() {
                     )}
                 </div>
 
-                {/* Error State */}
                 {error && (
                     <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 flex items-center gap-3 mb-6">
                         <AlertCircle className="w-5 h-5 shrink-0" />
@@ -255,7 +245,6 @@ export default function MyBookingsPage() {
                     </div>
                 )}
 
-                {/* Bookings List */}
                 {sortedAndFilteredBookings.length > 0 ? (
                     <div className="space-y-4">
                         {sortedAndFilteredBookings.map((booking) => (
@@ -265,21 +254,17 @@ export default function MyBookingsPage() {
                             >
                                 <div className="p-5">
                                     <div className="flex items-start justify-between gap-4">
-                                        {/* Booking Info */}
                                         <div className="flex-1 min-w-0">
-                                            {/* Route Summary */}
                                             <div className="flex items-center gap-2 text-lg font-medium text-slate-900 mb-2">
                                                 <MapPin className="w-4 h-4 text-[#FF9A3E] shrink-0" />
                                                 <span className="truncate">{booking.rideSummary}</span>
                                             </div>
 
-                                            {/* Driver */}
                                             <div className="flex items-center gap-2 text-sm text-slate-600 mb-3">
                                                 <User className="w-4 h-4 text-slate-400" />
                                                 <span>Conducteur: {booking.driverName}</span>
                                             </div>
 
-                                            {/* Date, Time & Seats */}
                                             <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500 mb-3">
                                                 <span className="flex items-center gap-1">
                                                     <Calendar className="w-4 h-4" />
@@ -295,7 +280,6 @@ export default function MyBookingsPage() {
                                                 </span>
                                             </div>
 
-                                            {/* Status & Price */}
                                             <div className="flex items-center gap-3">
                                                 <span
                                                     className={`px-3 py-1 rounded-full text-xs font-medium ${BookingStatusColors[booking.status]
@@ -312,7 +296,6 @@ export default function MyBookingsPage() {
                                             </div>
                                         </div>
 
-                                        {/* Actions */}
                                         <div className="flex flex-col gap-2">
                                             <Link href={`/rides/${booking.rideID}`}>
                                                 <Button
@@ -344,7 +327,6 @@ export default function MyBookingsPage() {
                         ))}
                     </div>
                 ) : (
-                    // Empty State
                     <div className="bg-white rounded-2xl border border-slate-100 p-12 text-center">
                         <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
                             <Ticket className="w-8 h-8 text-slate-400" />
@@ -366,7 +348,6 @@ export default function MyBookingsPage() {
                     </div>
                 )}
 
-                {/* Pagination */}
                 {totalPages > 1 && (
                     <div className="flex items-center justify-center gap-2 mt-8">
                         <Button

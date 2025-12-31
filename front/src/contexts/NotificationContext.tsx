@@ -26,7 +26,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     const [isConnected, setIsConnected] = useState(false);
     const stompClientRef = useRef<Client | null>(null);
 
-    // Fetch all notifications from API (both read and unread)
+
     const fetchNotifications = useCallback(async () => {
         if (!isAuthenticated) return;
 
@@ -41,7 +41,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
             if (response.ok) {
                 const data: Notification[] = await response.json();
                 setNotifications(data);
-                // Calculate unread count from fetched data
+
                 setUnreadCount(data.filter(n => !n.isRead).length);
             }
         } catch (error) {
@@ -51,7 +51,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
 
 
-    // Mark single notification as read
+
     const markAsRead = useCallback(
         async (id: string) => {
             if (!isAuthenticated) return;
@@ -76,7 +76,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         [isAuthenticated]
     );
 
-    // Mark all notifications as read
+
     const markAllAsRead = useCallback(async () => {
         if (!isAuthenticated) return;
 
@@ -96,7 +96,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         }
     }, [isAuthenticated]);
 
-    // Handle incoming WebSocket notification
+
     const handleNotification = useCallback((message: IMessage) => {
         try {
             const notification: Notification = JSON.parse(message.body);
@@ -107,26 +107,25 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         }
     }, []);
 
-    // Fetch initial notifications when authenticated
+
     useEffect(() => {
         if (isAuthenticated) {
-            // eslint-disable-next-line react-hooks/set-state-in-effect
             fetchNotifications();
         }
     }, [isAuthenticated, fetchNotifications]);
 
-    // Setup WebSocket connection
+
     useEffect(() => {
         if (!isAuthenticated || !user) {
             return;
         }
 
-        // Create STOMP client
+
         const client = new Client({
             webSocketFactory: () => new SockJS(WS_URL),
-            debug: (str) => {
+            debug: () => {
                 if (process.env.NODE_ENV === "development") {
-                    console.log("[STOMP]", str);
+
                 }
             },
             reconnectDelay: 5000,
@@ -137,7 +136,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         client.onConnect = () => {
             setIsConnected(true);
 
-            // Subscribe to user-specific notification queue
+
             client.subscribe("/user/queue/notification", handleNotification);
         };
 

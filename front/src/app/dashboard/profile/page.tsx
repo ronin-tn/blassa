@@ -50,14 +50,14 @@ export default function ProfilePage() {
         instagramUrl: "",
     });
 
-    // Redirect if not authenticated
+
     useEffect(() => {
         if (!authLoading && !isAuthenticated) {
             router.replace("/login");
         }
     }, [authLoading, isAuthenticated, router]);
 
-    // Populate form when user data is available
+
     useEffect(() => {
         if (user) {
             setFormData({
@@ -116,13 +116,13 @@ export default function ProfilePage() {
                 throw new Error(errorMessage);
             }
 
-            // Refresh user data in context
+
             await refreshUser();
 
             setSuccess("Profil mis à jour avec succès");
             setIsEditing(false);
 
-            // Clear success message after 3 seconds
+
             setTimeout(() => setSuccess(null), 3000);
         } catch (err) {
             setError(err instanceof Error ? err.message : "Erreur inconnue");
@@ -131,7 +131,7 @@ export default function ProfilePage() {
         }
     };
 
-    // Loading state
+
     if (authLoading || !user) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -167,7 +167,6 @@ export default function ProfilePage() {
     return (
         <div className="min-h-screen bg-gray-50 py-8 px-4">
             <div className="max-w-2xl mx-auto">
-                {/* Header */}
                 <div className="flex items-center justify-between mb-6">
                     <Link
                         href="/dashboard"
@@ -211,7 +210,6 @@ export default function ProfilePage() {
                     )}
                 </div>
 
-                {/* Error/Success Messages */}
                 {error && (
                     <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg">
                         {error}
@@ -225,7 +223,6 @@ export default function ProfilePage() {
 
                 {/* Main Card */}
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    {/* Avatar & Name Section */}
                     <div className="bg-gradient-to-r from-[#0A8F8F] to-[#0A7070] p-8 text-center">
                         <div className="flex justify-center mb-4">
                             <ProfilePictureUpload
@@ -264,16 +261,13 @@ export default function ProfilePage() {
                         )}
                     </div>
 
-                    {/* Info Sections */}
                     <div className="p-6 space-y-6">
-                        {/* Personal Info */}
                         <section>
                             <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-900 mb-4">
                                 <Phone className="w-5 h-5 text-[#0A8F8F]" />
                                 Informations personnelles
                             </h2>
                             <div className="space-y-4">
-                                {/* Phone */}
                                 <div className="flex items-center justify-between py-3 border-b border-gray-100">
                                     <span className="text-gray-600">Téléphone</span>
                                     {isEditing ? (
@@ -292,7 +286,6 @@ export default function ProfilePage() {
                                     )}
                                 </div>
 
-                                {/* Date of Birth (read-only) */}
                                 <div className="flex items-center justify-between py-3 border-b border-gray-100">
                                     <span className="text-gray-600 flex items-center gap-2">
                                         <Calendar className="w-4 h-4" />
@@ -303,7 +296,6 @@ export default function ProfilePage() {
                                     </span>
                                 </div>
 
-                                {/* Gender (read-only) */}
                                 <div className="flex items-center justify-between py-3 border-b border-gray-100">
                                     <span className="text-gray-600 flex items-center gap-2">
                                         <UserIcon className="w-4 h-4" />
@@ -316,7 +308,6 @@ export default function ProfilePage() {
                             </div>
                         </section>
 
-                        {/* Bio */}
                         <section>
                             <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-900 mb-4">
                                 <Edit3 className="w-5 h-5 text-[#0A8F8F]" />
@@ -345,7 +336,6 @@ export default function ProfilePage() {
                                 Réseaux sociaux
                             </h2>
                             <div className="space-y-4">
-                                {/* Facebook */}
                                 <div className="flex items-center justify-between py-3 border-b border-gray-100">
                                     <span className="text-gray-600 flex items-center gap-2">
                                         <Facebook className="w-4 h-4 text-blue-600" />
@@ -374,7 +364,6 @@ export default function ProfilePage() {
                                     )}
                                 </div>
 
-                                {/* Instagram */}
                                 <div className="flex items-center justify-between py-3 border-b border-gray-100">
                                     <span className="text-gray-600 flex items-center gap-2">
                                         <Instagram className="w-4 h-4 text-pink-600" />
@@ -406,10 +395,8 @@ export default function ProfilePage() {
                         </section>
                     </div>
 
-                    {/* Main Menu Section (Mobile / Hub style) */}
                     <div className="border-t border-gray-100 p-6 bg-gray-50/50 space-y-8">
 
-                        {/* Activités */}
                         <div>
                             <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-900 mb-4">
                                 <Star className="w-5 h-5 text-[#0A8F8F]" />
@@ -431,7 +418,6 @@ export default function ProfilePage() {
                             </div>
                         </div>
 
-                        {/* Settings */}
                         <div>
                             <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-900 mb-4">
                                 <Settings className="w-5 h-5 text-[#0A8F8F]" />

@@ -1,6 +1,7 @@
 package com.blassa.dto;
 
 import com.blassa.model.enums.Gender;
+import com.blassa.model.enums.UserRole;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -19,4 +20,5 @@ public class Profile {
     private String profilePictureUrl;
     private String facebookUrl;
     private String instagramUrl;
+    private UserRole role;
 }

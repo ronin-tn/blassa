@@ -1,8 +1,3 @@
-/**
- * API Client for server-side data fetching
- * This client forwards cookies for authentication and handles common error scenarios
- */
-
 import { cookies } from "next/headers";
 import { API_URL, AUTH_COOKIE_NAME } from "@/lib/config";
 
@@ -24,9 +19,6 @@ export class ApiClientError extends Error {
     }
 }
 
-/**
- * Server-side fetch wrapper that forwards authentication cookies
- */
 export async function apiClient<T>(
     endpoint: string,
     options: RequestInit = {}
@@ -39,7 +31,6 @@ export async function apiClient<T>(
         ...options.headers,
     };
 
-    // Forward the auth cookie as a header for server-side requests
     if (token) {
         (headers as Record<string, string>)["Authorization"] = `Bearer ${token}`;
     }
@@ -49,7 +40,6 @@ export async function apiClient<T>(
     const response = await fetch(url, {
         ...options,
         headers,
-        // Don't cache by default for dynamic data
         cache: options.cache || "no-store",
     });
 
@@ -69,12 +59,9 @@ export async function apiClient<T>(
         throw new ApiClientError(errorMessage, response.status, errorCode);
     }
 
-    // Handle empty responses (204 No Content)
     if (response.status === 204) {
         return undefined as T;
     }
-
-    // Handle responses with no content
     const contentLength = response.headers.get("content-length");
     if (contentLength === "0") {
         return undefined as T;
@@ -83,16 +70,10 @@ export async function apiClient<T>(
     return response.json();
 }
 
-/**
- * GET request helper
- */
 export async function apiGet<T>(endpoint: string, options?: RequestInit): Promise<T> {
     return apiClient<T>(endpoint, { ...options, method: "GET" });
 }
 
-/**
- * POST request helper
- */
 export async function apiPost<T>(
     endpoint: string,
     body?: unknown,
@@ -105,9 +86,6 @@ export async function apiPost<T>(
     });
 }
 
-/**
- * PUT request helper
- */
 export async function apiPut<T>(
     endpoint: string,
     body?: unknown,
@@ -120,9 +98,6 @@ export async function apiPut<T>(
     });
 }
 
-/**
- * DELETE request helper
- */
 export async function apiDelete<T>(endpoint: string, options?: RequestInit): Promise<T> {
     return apiClient<T>(endpoint, { ...options, method: "DELETE" });
 }

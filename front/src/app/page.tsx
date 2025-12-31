@@ -11,13 +11,13 @@ export default function Home() {
     <div id="main-content" className="min-h-screen flex flex-col font-sans bg-slate-50 relative overflow-x-hidden">
       <Navbar />
 
-      {/* Spacer for fixed navbar */}
+
       <div className="h-16"></div>
 
-      {/* Live Ticker */}
+
       <LiveTicker />
 
-      {/* Background Pattern */}
+
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <svg
           className="absolute w-full h-full opacity-[0.03]"
@@ -42,19 +42,19 @@ export default function Home() {
         </svg>
       </div>
 
-      {/* Hero Section */}
+
       <HeroSection />
 
-      {/* Vision Section */}
+
       <VisionSection />
 
-      {/* Services Grid */}
+
       <ServicesGrid />
 
-      {/* CTA Section */}
+
       <CTASection />
 
-      {/* Footer */}
+
       <Footer />
     </div>
   );

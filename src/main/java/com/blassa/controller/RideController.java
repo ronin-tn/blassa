@@ -28,29 +28,26 @@ public class RideController {
         return ResponseEntity.ok(rideService.createRide(request));
     }
 
-    // SEARCH FOR RIDE (PUBLIC - supports lazy registration)
+    // Recherche t3 trajet
     @GetMapping("/search")
     public ResponseEntity<Page<RideResponse>> searchRides(
             @RequestParam Double originLat,
             @RequestParam Double originLon,
             @RequestParam Double destLat,
             @RequestParam Double destLon,
-            // Use String and parse manually to avoid Spring conversion issues
             @RequestParam(required = false) String departureTime,
             @RequestParam(defaultValue = "1") Integer seats,
 
-            // Optional: For anonymous users to filter by gender preference
             @RequestParam(required = false) String genderFilter,
 
-            @RequestParam(defaultValue = "3.0") Double radius, // in Km
+            @RequestParam(defaultValue = "3.0") Double radius,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "price_asc") String sortBy) {
 
-        // Manual parsing is more robust against URL encoding/format issues
         OffsetDateTime offsetTime = null;
         if (departureTime != null && !departureTime.isBlank()) {
             java.time.LocalDateTime localTime = java.time.LocalDateTime.parse(departureTime);
-            // Convert LocalDateTime to OffsetDateTime with Tunisia timezone (+01:00)
             offsetTime = localTime.atOffset(java.time.ZoneOffset.of("+01:00"));
         }
 
@@ -62,7 +59,8 @@ public class RideController {
                 genderFilter,
                 radius,
                 page,
-                size));
+                size,
+                sortBy));
     }
 
     // VIEW RIDE BY ID
@@ -99,7 +97,6 @@ public class RideController {
         return ResponseEntity.ok(rideService.updateRideStatus(id, request));
     }
 
-    // Phase 7: Dedicated lifecycle endpoints
     @PutMapping("/{id}/start")
     public ResponseEntity<RideStatusResponse> startRide(@PathVariable UUID id) {
         return ResponseEntity.ok(rideService.startRide(id));

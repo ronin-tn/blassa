@@ -7,7 +7,6 @@ export default function Footer() {
         <footer className="bg-slate-900 text-slate-300">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-8">
                 <div className="grid md:grid-cols-4 gap-12 mb-12">
-                    {/* Brand */}
                     <div className="space-y-6">
                         <Link href="/" className="inline-block">
                             <Image
@@ -48,7 +47,6 @@ export default function Footer() {
                         </div>
                     </div>
 
-                    {/* Navigation */}
                     <div>
                         <h3 className="font-bold text-white mb-6 uppercase tracking-wider text-xs">
                             Navigation
@@ -67,7 +65,6 @@ export default function Footer() {
                         </ul>
                     </div>
 
-                    {/* Support */}
                     <div>
                         <h3 className="font-bold text-white mb-6 uppercase tracking-wider text-xs">
                             Support
@@ -91,7 +88,6 @@ export default function Footer() {
                         </ul>
                     </div>
 
-                    {/* Legal */}
                     <div>
                         <h3 className="font-bold text-white mb-6 uppercase tracking-wider text-xs">
                             Légal

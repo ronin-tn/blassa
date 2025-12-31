@@ -16,14 +16,13 @@ import java.util.function.Function;
 @Component
 public class JwtUtils {
 
-    // Inject from application.yml
     @Value("${application.security.jwt.secret-key}")
     private String secretKey;
 
     @Value("${application.security.jwt.expiration}")
     private long jwtExpiration;
 
-    // Refresh token expiration: 30 days in milliseconds
+    // chhar
     @Value("${application.security.jwt.refresh-expiration:2592000000}")
     private long refreshTokenExpiration;
 
@@ -45,9 +44,6 @@ public class JwtUtils {
                 .compact();
     }
 
-    /**
-     * Generate a refresh token with longer expiration for mobile clients.
-     */
     public String generateRefreshToken(UserDetails userDetails) {
         return Jwts.builder()
                 .setSubject(userDetails.getUsername())
@@ -58,17 +54,10 @@ public class JwtUtils {
                 .compact();
     }
 
-    /**
-     * Get access token expiration in seconds (for mobile clients to know when to
-     * refresh).
-     */
     public long getAccessTokenExpirationSeconds() {
         return jwtExpiration / 1000;
     }
 
-    /**
-     * Check if this is a refresh token.
-     */
     public boolean isRefreshToken(String token) {
         try {
             Claims claims = extractAllClaims(token);

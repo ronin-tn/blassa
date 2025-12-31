@@ -8,19 +8,22 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
 public record RideRequest(
-                @NotNull String originName,
-                @NotNull Double originLat,
-                @NotNull Double originLon,
+        @NotNull String originName,
+        @NotNull Double originLat,
+        @NotNull Double originLon,
 
-                @NotNull String destinationName,
-                @NotNull Double destinationLat,
-                @NotNull Double destinationLon,
+        @NotNull String destinationName,
+        @NotNull Double destinationLat,
+        @NotNull Double destinationLon,
 
-                @NotNull @Future OffsetDateTime departureTime,
-                @NotNull Integer totalSeats,
-                @NotNull BigDecimal pricePerSeat,
+        @NotNull @Future OffsetDateTime departureTime,
+        @NotNull Integer totalSeats,
+        @NotNull BigDecimal pricePerSeat,
 
-                Boolean allowsSmoking,
-                RideGenderPreference genderPreference,
-                java.util.UUID vehicleId) {
+        Boolean allowsSmoking,
+        Boolean allowsMusic,
+        Boolean allowsPets,
+        String luggageSize,
+        RideGenderPreference genderPreference,
+        java.util.UUID vehicleId) {
 }

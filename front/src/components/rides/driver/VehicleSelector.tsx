@@ -30,28 +30,29 @@ export function VehicleSelector({ value, onChange }: VehicleSelectorProps) {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetchVehicles();
-    }, []);
-
-    const fetchVehicles = async () => {
-        try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/vehicles`, {
-                credentials: 'include',
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setVehicles(data);
-                // Auto-select if only one vehicle and none selected
-                if (data.length === 1 && !value) {
-                    onChange(data[0].id);
+        const fetchVehicles = async () => {
+            try {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/vehicles`, {
+                    credentials: 'include',
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    setVehicles(data);
+                    // Auto-select if only one vehicle and none selected
+                    if (data.length === 1 && !value) {
+                        onChange(data[0].id);
+                    }
                 }
+            } catch (e) {
+                console.error(e);
+            } finally {
+                setLoading(false);
             }
-        } catch (e) {
-            console.error(e);
-        } finally {
-            setLoading(false);
-        }
-    };
+        };
+
+        fetchVehicles();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     if (loading) return <div className="h-10 w-full animate-pulse bg-slate-100 rounded-lg"></div>;
 
@@ -59,14 +60,14 @@ export function VehicleSelector({ value, onChange }: VehicleSelectorProps) {
         return (
             <div className="p-4 border border-dashed border-slate-300 rounded-xl bg-slate-50 text-center">
                 <Car className="w-8 h-8 text-slate-400 mx-auto mb-2" />
-                <p className="text-sm text-slate-600 mb-3">Vous n'avez pas encore de véhicule.</p>
+                <p className="text-sm text-slate-600 mb-3">Vous n&apos;avez pas encore de véhicule.</p>
                 <Link href="/dashboard/vehicles" target="_blank">
                     <Button type="button" variant="outline" size="sm" className="gap-2">
                         <Plus className="w-4 h-4" />
                         Ajouter un véhicule
                     </Button>
                 </Link>
-                <p className="text-xs text-slate-400 mt-2">Rechargez cette page après l'ajout.</p>
+                <p className="text-xs text-slate-400 mt-2">Rechargez cette page après l&apos;ajout.</p>
             </div>
         );
     }

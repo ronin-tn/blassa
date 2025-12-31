@@ -64,20 +64,11 @@ public class VehicleService {
         return vehicleRepository.findById(id).orElseThrow(() -> new RuntimeException("Vehicle not found"));
     }
 
-    // Masking logic: returns "*** 123"
+    // lahne nkhabiw fi matricule lel securtiy: returns "*** 123"
     public String getMaskedPlate(String plate) {
         if (plate == null || plate.length() < 3)
             return "***";
         return "*** " + plate.substring(Math.max(0, plate.length() - 3));
-        // Example: "145 TN 2222" -> "*** 222" (Naive)
-        // Better for Tunisian plates: "123 TN 4567"
-        // Let's implement the specific logic requested: "*** 456"
-        // If we want to mask the START:
-        // Input: "123 TN 4567"
-        // Output: "*** 4567" or "*** 123" (User asked for "*** 482" where 482 is the
-        // END)
-        // User requested: "*** 482" (Reduces offline misuse).
-        // So we take the LAST few characters.
     }
 
     private VehicleDTO mapToDTO(Vehicle vehicle) {
@@ -86,7 +77,7 @@ public class VehicleService {
                 vehicle.getMake(),
                 vehicle.getModel(),
                 vehicle.getColor(),
-                vehicle.getLicensePlate(), // Full plate in DTO (for owner)
+                vehicle.getLicensePlate(), // driver ichof matricule kol
                 vehicle.getProductionYear());
     }
 

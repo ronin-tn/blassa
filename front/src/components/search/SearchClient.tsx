@@ -45,7 +45,7 @@ export default function SearchClient({
     const router = useRouter();
     const { from, to, date, passengers } = searchParams;
     const rides = initialRides.content;
-    const { totalPages, number: currentPage, totalElements } = initialRides;
+    const { totalPages, number: currentPage, totalElements } = initialRides.page;
 
     const [bookingRideId, setBookingRideId] = useState<string | null>(null);
     const [bookingSeats, setBookingSeats] = useState<number>(1);
@@ -53,8 +53,49 @@ export default function SearchClient({
     const [bookingError, setBookingError] = useState<string | null>(null);
     const [bookingSuccess, setBookingSuccess] = useState<string | null>(null);
     const [myBookedRideIds, setMyBookedRideIds] = useState<string[]>(initialBookedRideIds);
-    const [filters, setFilters] = useState<SearchFilters>(DEFAULT_FILTERS);
+
+    // Initialize filters from URL search params
+    const [filters, setFilters] = useState<SearchFilters>(() => {
+        if (typeof window === "undefined") return DEFAULT_FILTERS;
+        const params = new URLSearchParams(window.location.search);
+        return {
+            ...DEFAULT_FILTERS,
+            timeOfDay: (params.get("timeOfDay")?.split(",") as SearchFilters["timeOfDay"]) || [],
+            maxPrice: params.get("maxPrice") ? parseInt(params.get("maxPrice")!) : null,
+            ladiesOnly: params.get("ladiesOnly") === "true",
+            noSmoking: params.get("noSmoking") === "true",
+            sortBy: (params.get("sortBy") as SearchFilters["sortBy"]) || "price_asc",
+        };
+    });
+
     const [showMobileFilters, setShowMobileFilters] = useState(false);
+
+    // Sync filters to URL when they change
+    const updateFilters = (newFilters: SearchFilters) => {
+        setFilters(newFilters);
+
+        const params = new URLSearchParams(searchParams);
+
+        if (newFilters.timeOfDay.length > 0) params.set("timeOfDay", newFilters.timeOfDay.join(","));
+        else params.delete("timeOfDay");
+
+        if (newFilters.maxPrice) params.set("maxPrice", newFilters.maxPrice.toString());
+        else params.delete("maxPrice");
+
+        if (newFilters.ladiesOnly) params.set("ladiesOnly", "true");
+        else params.delete("ladiesOnly");
+
+        if (newFilters.noSmoking) params.set("noSmoking", "true");
+        else params.delete("noSmoking");
+
+        if (newFilters.sortBy) params.set("sortBy", newFilters.sortBy);
+        else params.delete("sortBy");
+
+        // Reset to page 0 on filter change
+        params.delete("page");
+
+        router.replace(`/search?${params.toString()}`, { scroll: false });
+    };
 
     // Calculate max price from rides for filter
     const maxPriceInResults = useMemo(() => {
@@ -168,6 +209,14 @@ export default function SearchClient({
     const getPageLink = (page: number) => {
         const params = new URLSearchParams(searchParams);
         params.set("page", page.toString());
+
+        // Add current filters to pagination link
+        if (filters.timeOfDay.length > 0) params.set("timeOfDay", filters.timeOfDay.join(","));
+        if (filters.maxPrice) params.set("maxPrice", filters.maxPrice.toString());
+        if (filters.ladiesOnly) params.set("ladiesOnly", "true");
+        if (filters.noSmoking) params.set("noSmoking", "true");
+        if (filters.sortBy) params.set("sortBy", filters.sortBy);
+
         return `/search?${params.toString()}`;
     };
 
@@ -207,7 +256,7 @@ export default function SearchClient({
             {showMobileFilters && (
                 <SearchFiltersComponent
                     filters={filters}
-                    onFiltersChange={setFilters}
+                    onFiltersChange={updateFilters}
                     maxPriceInResults={maxPriceInResults}
                     onClose={() => setShowMobileFilters(false)}
                     isMobile
@@ -228,7 +277,7 @@ export default function SearchClient({
                     <div className="hidden lg:block w-72 flex-shrink-0">
                         <SearchFiltersComponent
                             filters={filters}
-                            onFiltersChange={setFilters}
+                            onFiltersChange={updateFilters}
                             maxPriceInResults={maxPriceInResults}
                         />
                     </div>
@@ -261,7 +310,7 @@ export default function SearchClient({
                                     Essayez de modifier vos critères de recherche.
                                 </p>
                                 <button
-                                    onClick={() => setFilters(DEFAULT_FILTERS)}
+                                    onClick={() => updateFilters(DEFAULT_FILTERS)}
                                     className="inline-flex items-center gap-2 px-6 py-3 bg-slate-100 text-slate-700 font-medium rounded-xl hover:bg-slate-200"
                                 >
                                     Réinitialiser les filtres
@@ -271,7 +320,7 @@ export default function SearchClient({
                             <>
                                 <p className="text-sm text-slate-500 mb-4">
                                     {filteredRides.length} trajet{filteredRides.length > 1 ? "s" : ""}
-                                    {filteredRides.length !== totalElements && ` (sur ${totalElements})`}
+                                    {typeof totalElements === "number" && filteredRides.length !== totalElements && ` (sur ${totalElements})`}
                                 </p>
 
                                 <div className="space-y-4">
@@ -379,11 +428,14 @@ export default function SearchClient({
                                                                     <div className="relative">
                                                                         <div className="w-12 h-12 rounded-full overflow-hidden bg-gradient-to-br from-[#0A8F8F]/20 to-[#0A8F8F]/10 flex items-center justify-center">
                                                                             {ride.driverProfilePictureUrl ? (
-                                                                                <img
-                                                                                    src={ride.driverProfilePictureUrl.replace("=s96-c", "=s400-c")}
-                                                                                    alt={ride.driverName}
-                                                                                    className="w-full h-full object-cover"
-                                                                                />
+                                                                                <>
+                                                                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                                                    <img
+                                                                                        src={ride.driverProfilePictureUrl.replace("=s96-c", "=s400-c")}
+                                                                                        alt={ride.driverName}
+                                                                                        className="w-full h-full object-cover"
+                                                                                    />
+                                                                                </>
                                                                             ) : (
                                                                                 <User className="w-6 h-6 text-[#0A8F8F]" />
                                                                             )}

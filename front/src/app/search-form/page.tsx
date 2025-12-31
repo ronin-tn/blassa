@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -35,6 +35,13 @@ export default function SearchFormPage() {
     const { searches, isLoaded, addSearch, removeSearch, clearSearches } =
         useRecentSearches();
 
+    const [now, setNow] = useState(0);
+
+    useEffect(() => {
+        const timer = setTimeout(() => setNow(Date.now()), 0);
+        return () => clearTimeout(timer);
+    }, []);
+
     const [departure, setDeparture] = useState<City | null>(null);
     const [destination, setDestination] = useState<City | null>(null);
     const [date, setDate] = useState("");
@@ -47,7 +54,6 @@ export default function SearchFormPage() {
             return;
         }
 
-        // Save to recent searches
         addSearch({
             from: departure.name,
             to: destination.name,
@@ -55,7 +61,6 @@ export default function SearchFormPage() {
             passengers: parseInt(passengers),
         });
 
-        // Navigate to search results
         const params = new URLSearchParams();
         params.set("from", departure.name);
         params.set("to", destination.name);
@@ -74,7 +79,6 @@ export default function SearchFormPage() {
         );
 
         if (fromCity && toCity) {
-            // Save to recent searches
             addSearch({
                 from: fromCity.name,
                 to: toCity.name,
@@ -93,7 +97,7 @@ export default function SearchFormPage() {
     };
 
     const formatRelativeTime = (timestamp: number) => {
-        const diff = Date.now() - timestamp;
+        const diff = now - timestamp;
         const minutes = Math.floor(diff / 60000);
         const hours = Math.floor(minutes / 60);
         const days = Math.floor(hours / 24);
@@ -101,14 +105,13 @@ export default function SearchFormPage() {
         if (days > 0) return `Il y a ${days}j`;
         if (hours > 0) return `Il y a ${hours}h`;
         if (minutes > 0) return `Il y a ${minutes}min`;
-        return "À l'instant";
+        return "À l&apos;instant";
     };
 
     return (
         <>
             <Navbar />
             <div className="min-h-screen bg-slate-50 pt-16">
-                {/* Header */}
                 <div className="bg-white border-b border-slate-200">
                     <div className="max-w-2xl mx-auto px-4 py-6">
                         <div className="flex items-center gap-4 mb-4">
@@ -117,7 +120,7 @@ export default function SearchFormPage() {
                                 className="flex items-center gap-2 text-slate-600 hover:text-[#0A8F8F] transition-colors"
                             >
                                 <ArrowLeft className="w-5 h-5" />
-                                <span>Retour à l'accueil</span>
+                                <span>Retour à l&apos;accueil</span>
                             </Link>
                             <h1 className="text-2xl font-bold text-slate-900">
                                 Rechercher un trajet
@@ -126,7 +129,6 @@ export default function SearchFormPage() {
                     </div>
                 </div>
 
-                {/* Search Form */}
                 <div className="max-w-2xl mx-auto px-4 py-6">
                     <form
                         onSubmit={handleSearch}
@@ -189,7 +191,6 @@ export default function SearchFormPage() {
                         </Button>
                     </form>
 
-                    {/* Recent Searches */}
                     {isLoaded && searches.length > 0 && (
                         <div className="mt-8">
                             <div className="flex items-center justify-between mb-4">
@@ -258,7 +259,6 @@ export default function SearchFormPage() {
                         </div>
                     )}
 
-                    {/* Popular Routes */}
                     <div className="mt-8">
                         <h2 className="text-sm font-semibold text-slate-900 mb-4">
                             Trajets populaires
@@ -278,7 +278,6 @@ export default function SearchFormPage() {
                         </div>
                     </div>
 
-                    {/* Back to Home */}
                     <div className="mt-8 text-center">
                         <Link
                             href="/"

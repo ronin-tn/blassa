@@ -7,7 +7,7 @@ import { useNotifications } from "@/contexts/NotificationContext";
 import { Notification, NotificationType } from "@/types/notification";
 import { cn } from "@/lib/utils";
 
-// Get icon based on notification type
+
 function getNotificationIcon(type: NotificationType) {
     switch (type) {
         case "NEW_BOOKING":
@@ -26,7 +26,6 @@ function getNotificationIcon(type: NotificationType) {
     }
 }
 
-// Get icon background color based on notification type
 function getIconBgColor(type: NotificationType) {
     switch (type) {
         case "NEW_BOOKING":
@@ -47,7 +46,6 @@ function getIconBgColor(type: NotificationType) {
     }
 }
 
-// Format relative time
 function formatRelativeTime(dateString: string): string {
     const date = new Date(dateString);
     const now = new Date();
@@ -85,15 +83,12 @@ function NotificationItem({
         <div
             className={cn(
                 "flex items-start gap-3 p-3 transition-colors cursor-pointer relative",
-                // Unread: Blue tint background with left border accent
                 !notification.isRead
                     ? "bg-[#006B8F]/5 hover:bg-[#006B8F]/10 border-l-3 border-l-[#006B8F]"
-                    // Read: Subtle gray styling
                     : "bg-white hover:bg-slate-50 opacity-75"
             )}
             onClick={handleClick}
         >
-            {/* Icon */}
             <div
                 className={cn(
                     "shrink-0 w-8 h-8 rounded-full flex items-center justify-center",
@@ -109,7 +104,6 @@ function NotificationItem({
                 )}
             </div>
 
-            {/* Content */}
             <div className="flex-1 min-w-0">
                 <p
                     className={cn(
@@ -135,7 +129,6 @@ function NotificationItem({
                 </p>
             </div>
 
-            {/* Unread indicator dot */}
             {!notification.isRead && (
                 <div className="shrink-0 w-2.5 h-2.5 bg-[#006B8F] rounded-full mt-2 animate-pulse" />
             )}
@@ -156,7 +149,6 @@ export default function NotificationDropdown() {
     const [isMarkingAll, setIsMarkingAll] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
-    // Close dropdown on outside click
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (
@@ -179,7 +171,6 @@ export default function NotificationDropdown() {
 
     return (
         <div className="relative" ref={dropdownRef}>
-            {/* Bell Button */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 className={cn(
@@ -192,23 +183,19 @@ export default function NotificationDropdown() {
             >
                 <Bell className="w-5 h-5" />
 
-                {/* Unread Badge */}
                 {unreadCount > 0 && (
                     <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-[#FF9A3E] text-white text-[10px] font-bold rounded-full flex items-center justify-center">
                         {unreadCount > 99 ? "99+" : unreadCount}
                     </span>
                 )}
 
-                {/* Connection indicator */}
                 {isConnected && (
                     <span className="absolute bottom-0.5 right-0.5 w-2 h-2 bg-green-500 rounded-full border border-white" />
                 )}
             </button>
 
-            {/* Dropdown */}
             {isOpen && (
                 <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-xl shadow-lg border border-slate-100 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                    {/* Header */}
                     <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
                         <h3 className="font-semibold text-slate-900">Notifications</h3>
                         <div className="flex items-center gap-2">
@@ -235,7 +222,6 @@ export default function NotificationDropdown() {
                         </div>
                     </div>
 
-                    {/* Notifications List */}
                     <div className="max-h-[400px] overflow-y-auto">
                         {notifications.length === 0 ? (
                             <div className="py-12 text-center">
@@ -258,7 +244,6 @@ export default function NotificationDropdown() {
                         )}
                     </div>
 
-                    {/* Footer */}
                     {notifications.length > 0 && (
                         <div className="border-t border-slate-100 p-2">
                             <Link

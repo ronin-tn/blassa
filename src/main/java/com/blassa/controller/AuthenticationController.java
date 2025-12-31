@@ -23,7 +23,7 @@ public class AuthenticationController {
     @Value("${app.cookie.secure:true}")
     private boolean secureCookie;
 
-    @Value("${app.cookie.max-age:604800}") // 7 days in seconds
+    @Value("${app.cookie.max-age:604800}") // jem3a kemla b seconds
     private int cookieMaxAge;
 
     private static final String COOKIE_NAME = "blassa_token";
@@ -40,10 +40,10 @@ public class AuthenticationController {
             HttpServletResponse response) {
         AuthenticationResponse authResponse = authenticationService.authenticate(request);
 
-        // Check if this is a special response (email not verified, etc.)
+        // mat5lich wehd mch mverifi email yodkhel
         String token = authResponse.getToken();
         if (token.equals("EMAIL_NOT_VERIFIED")) {
-            // Don't set cookie for unverified users
+            // keno unverified maghir mt3ml cookie
             return ResponseEntity.ok(Map.of(
                     "status", "EMAIL_NOT_VERIFIED",
                     "email", authResponse.getEmail(),
@@ -52,7 +52,7 @@ public class AuthenticationController {
                             : ""));
         }
 
-        // Set httpOnly cookie with JWT token
+        // asm3 lahne ani zedt httpOnly cookie m3a JWT token
         Cookie cookie = new Cookie(COOKIE_NAME, token);
         cookie.setHttpOnly(true);
         cookie.setSecure(secureCookie);
@@ -60,8 +60,6 @@ public class AuthenticationController {
         cookie.setMaxAge(cookieMaxAge);
         cookie.setAttribute("SameSite", "Lax");
         response.addCookie(cookie);
-
-        // Return success without exposing token
         return ResponseEntity.ok(Map.of(
                 "status", "SUCCESS",
                 "email", authResponse.getEmail() != null ? authResponse.getEmail() : ""));
@@ -69,7 +67,7 @@ public class AuthenticationController {
 
     @PostMapping("/logout")
     public ResponseEntity<Map<String, String>> logout(HttpServletResponse response) {
-        // Clear the cookie by setting maxAge to 0
+        // Todo: edhy fi logout 7ot maxAge 0 mrigl!??
         Cookie cookie = new Cookie(COOKIE_NAME, null);
         cookie.setHttpOnly(true);
         cookie.setSecure(secureCookie);

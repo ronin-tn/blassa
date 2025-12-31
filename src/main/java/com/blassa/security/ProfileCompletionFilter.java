@@ -19,10 +19,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Filter that blocks API access for users with incomplete profiles.
- * Users must have phone number, date of birth, and gender set.
- */
+// class edhha lel filter (bch nes lezm tkaml profile 9bal matet3ada)
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -30,19 +27,16 @@ public class ProfileCompletionFilter extends OncePerRequestFilter {
 
     private final UserRepository userRepository;
 
-    // Paths that require complete profile (POST/PUT/DELETE actions)
     private static final List<String> PROTECTED_PATHS = List.of(
             "/api/v1/rides",
             "/api/v1/bookings",
             "/api/v1/reviews");
 
-    // Paths that are always allowed (for profile completion and public access)
     private static final List<String> ALLOWED_PATHS = List.of(
             "/api/v1/user/me",
             "/api/v1/auth",
-            "/api/v1/rides/search", // Public search
-            "/api/v1/notifications" // Allow notifications
-    );
+            "/api/v1/rides/search",
+            "/api/v1/notifications");
 
     @Override
     protected void doFilterInternal(
@@ -52,20 +46,16 @@ public class ProfileCompletionFilter extends OncePerRequestFilter {
 
         String path = request.getRequestURI();
 
-        // Skip filter for non-protected paths or allowed paths
         if (!isProtectedPath(path) || isAllowedPath(path)) {
             filterChain.doFilter(request, response);
             return;
         }
-
-        // Check if user is authenticated
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // Get user email from authentication
         Object principal = authentication.getPrincipal();
         if (!(principal instanceof UserDetails userDetails)) {
             filterChain.doFilter(request, response);
@@ -82,7 +72,6 @@ public class ProfileCompletionFilter extends OncePerRequestFilter {
 
         User user = userOpt.get();
 
-        // Check if profile is complete
         if (!isProfileComplete(user)) {
             log.warn("Blocking API access for user {} - profile incomplete", email);
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);

@@ -45,7 +45,6 @@ export default function MyRidesPage() {
     const [statusFilter, setStatusFilter] = useState<RideStatus | "ALL">("ALL");
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
-    // Redirect if not authenticated
     useEffect(() => {
         if (!authLoading && !isAuthenticated) {
             router.replace("/login");
@@ -75,7 +74,7 @@ export default function MyRidesPage() {
 
             const data: PagedResponse<Ride> = await response.json();
             setRides(data.content);
-            setTotalPages(data.totalPages);
+            setTotalPages(data.page.totalPages);
         } catch (err) {
             setError(
                 err instanceof Error ? err.message : "Erreur lors du chargement"
@@ -108,7 +107,6 @@ export default function MyRidesPage() {
                 throw new Error(errorMessage);
             }
 
-            // Refresh rides
             fetchRides();
             setOpenMenuId(null);
         } catch (err) {
@@ -182,7 +180,6 @@ export default function MyRidesPage() {
         });
     };
 
-    // Loading state
     if (authLoading || (isLoading && rides.length === 0)) {
         return (
             <div className="min-h-screen bg-[#F8FAFC]">
@@ -201,7 +198,6 @@ export default function MyRidesPage() {
             <div className="h-16"></div>
 
             <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                     <div className="flex items-center gap-3">
                         <Link
@@ -227,7 +223,6 @@ export default function MyRidesPage() {
                     </Link>
                 </div>
 
-                {/* Status Filter Tabs */}
                 <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
                     {(
                         [
@@ -252,7 +247,6 @@ export default function MyRidesPage() {
                     ))}
                 </div>
 
-                {/* Error State */}
                 {error && (
                     <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 flex items-center gap-3 mb-6">
                         <AlertCircle className="w-5 h-5 shrink-0" />
@@ -268,7 +262,6 @@ export default function MyRidesPage() {
                     </div>
                 )}
 
-                {/* Rides List */}
                 {filteredRides.length > 0 ? (
                     <div className="space-y-4">
                         {filteredRides.map((ride) => (
@@ -278,9 +271,7 @@ export default function MyRidesPage() {
                             >
                                 <div className="p-5">
                                     <div className="flex items-start justify-between gap-4">
-                                        {/* Ride Info */}
                                         <div className="flex-1 min-w-0">
-                                            {/* Route */}
                                             <div className="flex items-center gap-2 text-lg font-medium text-slate-900 mb-2">
                                                 <MapPin className="w-4 h-4 text-[#006B8F] shrink-0" />
                                                 <span className="truncate">{ride.originName}</span>
@@ -288,7 +279,6 @@ export default function MyRidesPage() {
                                                 <span className="truncate">{ride.destinationName}</span>
                                             </div>
 
-                                            {/* Date & Time */}
                                             <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500 mb-3">
                                                 <span className="flex items-center gap-1">
                                                     <Calendar className="w-4 h-4" />
@@ -304,7 +294,6 @@ export default function MyRidesPage() {
                                                 </span>
                                             </div>
 
-                                            {/* Status & Price */}
                                             <div className="flex items-center gap-3">
                                                 <span
                                                     className={`px-3 py-1 rounded-full text-xs font-medium ${RideStatusColors[ride.status]
@@ -318,7 +307,6 @@ export default function MyRidesPage() {
                                             </div>
                                         </div>
 
-                                        {/* Actions Menu */}
                                         <div className="relative">
                                             <button
                                                 onClick={() =>
@@ -342,7 +330,6 @@ export default function MyRidesPage() {
                                                         Voir détails
                                                     </Link>
 
-                                                    {/* Edit only for SCHEDULED (before anyone books) */}
                                                     {ride.status === "SCHEDULED" && (
                                                         <Link
                                                             href={`/rides/${ride.id}/edit`}
@@ -354,7 +341,6 @@ export default function MyRidesPage() {
                                                         </Link>
                                                     )}
 
-                                                    {/* Start for SCHEDULED or FULL */}
                                                     {(ride.status === "SCHEDULED" || ride.status === "FULL") && (
                                                         <button
                                                             onClick={() => handleStartRide(ride.id)}
@@ -365,7 +351,6 @@ export default function MyRidesPage() {
                                                         </button>
                                                     )}
 
-                                                    {/* Cancel for SCHEDULED or FULL */}
                                                     {(ride.status === "SCHEDULED" || ride.status === "FULL") && (
                                                         <button
                                                             onClick={() => handleCancelRide(ride.id)}
@@ -394,7 +379,6 @@ export default function MyRidesPage() {
                         ))}
                     </div>
                 ) : (
-                    // Empty State
                     <div className="bg-white rounded-2xl border border-slate-100 p-12 text-center">
                         <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
                             <Car className="w-8 h-8 text-slate-400" />
@@ -416,7 +400,6 @@ export default function MyRidesPage() {
                     </div>
                 )}
 
-                {/* Pagination */}
                 {totalPages > 1 && (
                     <div className="flex items-center justify-center gap-2 mt-8">
                         <Button
@@ -446,7 +429,6 @@ export default function MyRidesPage() {
                 )}
             </main>
 
-            {/* Click outside to close menu */}
             {openMenuId && (
                 <div
                     className="fixed inset-0 z-0"

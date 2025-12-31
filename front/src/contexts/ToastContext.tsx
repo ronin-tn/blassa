@@ -8,9 +8,6 @@ import {
     ReactNode,
 } from "react";
 
-// ============================================================================
-// Types
-// ============================================================================
 
 export type ToastType = "success" | "error" | "info" | "warning";
 
@@ -28,15 +25,7 @@ interface ToastContextType {
     dismissToast: (id: string) => void;
 }
 
-// ============================================================================
-// Context
-// ============================================================================
-
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
-
-// ============================================================================
-// Provider
-// ============================================================================
 
 export function ToastProvider({ children }: { children: ReactNode }) {
     const [toasts, setToasts] = useState<Toast[]>([]);
@@ -47,7 +36,6 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
         setToasts((prev) => [...prev, newToast]);
 
-        // Auto-dismiss after 5 seconds
         setTimeout(() => {
             setToasts((prev) => prev.filter((t) => t.id !== id));
         }, 5000);
@@ -73,10 +61,6 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     );
 }
 
-// ============================================================================
-// Hook
-// ============================================================================
-
 export function useToast() {
     const context = useContext(ToastContext);
     if (context === undefined) {
@@ -84,10 +68,6 @@ export function useToast() {
     }
     return context;
 }
-
-// ============================================================================
-// Toast Container Component
-// ============================================================================
 
 const toastStyles: Record<ToastType, string> = {
     success: "bg-emerald-600 text-white",

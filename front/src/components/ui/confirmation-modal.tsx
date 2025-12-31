@@ -31,9 +31,10 @@ export default function ConfirmationModal({
 
     useEffect(() => {
         if (isOpen) {
-            setIsVisible(true);
+            const timer = setTimeout(() => setIsVisible(true), 10);
             // Prevent scrolling when modal is open
             document.body.style.overflow = "hidden";
+            return () => clearTimeout(timer);
         } else {
             const timer = setTimeout(() => setIsVisible(false), 300); // Wait for animation
             document.body.style.overflow = "unset";

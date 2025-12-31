@@ -1,0 +1,49 @@
+﻿.\gradlew : WARNING: A restricted 
+method in java.lang.System has been 
+called
+At line:1 char:1
++ .\gradlew compileDebugKotlin 2>&1 | 
+Out-File -FilePath build_check.tx ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecif 
+   ied: (WARNING: A rest...has been ca  
+  lled:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCom 
+   mandError
+ 
+WARNING: java.lang.System::load has 
+been called by net.rubygrapefruit.platfo
+rm.internal.NativeLibraryLoader in an 
+unnamed module (file:/C:/Users/rayen/.gr
+adle/wrapper/dists/gradle-8.13-bin/5xuhj
+0ry160q40clulazy9h7d/gradle-8.13/lib/nat
+ive-platform-0.22-milestone-28.jar)
+WARNING: Use 
+--enable-native-access=ALL-UNNAMED to 
+avoid a warning for callers in this 
+module
+WARNING: Restricted methods will be 
+blocked in a future release unless 
+native access is enabled
+
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:generateDebugBuildConfig UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :app:compileDebugKotlin UP-TO-DATE
+
+BUILD SUCCESSFUL in 1s
+15 actionable tasks: 15 up-to-date

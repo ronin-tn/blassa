@@ -10,15 +10,10 @@ import UpcomingRidesList from "@/components/dashboard/UpcomingRidesList";
 import QuickActions from "@/components/dashboard/QuickActions";
 import { useDashboardData } from "@/hooks/useDashboardData";
 
-/**
- * Dashboard content component - uses custom hook for data fetching
- * Note: Authentication is handled server-side in dashboard/page.tsx
- */
 export default function DashboardClientContent() {
     const { isAuthenticated, isLoading: authLoading } = useAuth();
     const { stats, upcomingRides, isLoading, error, refetch } = useDashboardData(isAuthenticated);
 
-    // Loading state
     if (authLoading || isLoading) {
         return (
             <div className="min-h-screen bg-[#F8FAFC]">
@@ -32,7 +27,6 @@ export default function DashboardClientContent() {
         );
     }
 
-    // Error state
     if (error) {
         return (
             <div className="min-h-screen bg-[#F8FAFC]">
@@ -62,7 +56,6 @@ export default function DashboardClientContent() {
             <div className="h-16"></div>
 
             <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
                     <div>
                         <h1 className="text-2xl font-bold text-slate-900 font-[family-name:var(--font-poppins)]">
@@ -91,13 +84,10 @@ export default function DashboardClientContent() {
                     </div>
                 </div>
 
-                {/* Stats Grid */}
                 <DashboardStats stats={stats} />
 
-                {/* Upcoming Rides Section */}
                 <UpcomingRidesList rides={upcomingRides} />
 
-                {/* Quick Actions */}
                 <QuickActions />
             </main>
         </div>

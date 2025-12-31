@@ -27,10 +27,15 @@ public class AuthenticationService {
     @Transactional
     public AuthenticationResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email already exists");
+            throw new RuntimeException("Cet email existe déjà");
         }
         if (userRepository.existsByPhoneNumber(request.getPhoneNumber())) {
-            throw new RuntimeException("Phone number already exists");
+            throw new RuntimeException("Ce numéro de téléphone existe déjà");
+        }
+        if (request.getBirthDate() != null) {
+            if (java.time.Period.between(request.getBirthDate(), java.time.LocalDate.now()).getYears() < 18) {
+                throw new RuntimeException("Vous devez avoir au moins 18 ans pour vous inscrire");
+            }
         }
 
         var user = User.builder()
@@ -75,7 +80,7 @@ public class AuthenticationService {
 
     @Transactional
     public AuthenticationResponse authenticate(AuthenticationRequest authenticationRequest) {
-        // Validate credentials FIRST (security: don't leak email existence)
+        // Verifi l password LOWEL (security: mateftha7sh kene l email mawjoud walla lé)
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(authenticationRequest.getEmail(),
                         authenticationRequest.getPassword()));
@@ -83,9 +88,9 @@ public class AuthenticationService {
         User user = userRepository.findByEmail(authenticationRequest.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        // Check verification status after password validation
+        // Verifi kene l compte mfa3el mb3d ma verifiit l password
         if (!user.isVerified()) {
-            // Return special response indicating email verification needed
+            // Rajja3 response speciale t9oul elli verify email lezem
             AuthenticationResponse response = new AuthenticationResponse("EMAIL_NOT_VERIFIED");
             response.setEmail(user.getEmail());
             response.setVerificationSentAt(user.getVerificationSentAt());
@@ -106,7 +111,7 @@ public class AuthenticationService {
             throw new IllegalArgumentException("Email is already verified");
         }
 
-        // Check if we sent an email recently (rate limiting-60 seconds)
+        // Verifi kene b3athna mail fi 60 secondes lekhra (rate limiting)
         if (user.getVerificationSentAt() != null &&
                 user.getVerificationSentAt().plusSeconds(60).isAfter(LocalDateTime.now())) {
             long secondsRemaining = java.time.Duration.between(
@@ -134,7 +139,7 @@ public class AuthenticationService {
         User user = userRepository.findByResetToken(token)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid or expired reset token"));
 
-        // Update password and clear reset token
+        // Beddel password u fassa5 reset token
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         user.setResetToken(null);
         userRepository.save(user);
@@ -142,7 +147,7 @@ public class AuthenticationService {
 
     @Transactional
     public AuthenticationResponse changeEmailForUnverifiedUser(String currentEmail, String newEmail, String password) {
-        // Validate credentials first
+        // Verifi credentials lowel
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(currentEmail, password));
@@ -157,12 +162,12 @@ public class AuthenticationService {
             throw new IllegalArgumentException("Cannot change email for verified accounts");
         }
 
-        // Check if new email is already taken
+        // Shouf kene mail jdid deja mawjoud
         if (userRepository.existsByEmail(newEmail)) {
             throw new IllegalArgumentException("Cette adresse email est déjà utilisée");
         }
 
-        // Update email and send new verification
+        // Beddel email u ab3ath verification jdida
         user.setEmail(newEmail);
         var newToken = jwtUtils.generateToken(
                 org.springframework.security.core.userdetails.User.builder()

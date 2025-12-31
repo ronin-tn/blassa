@@ -19,7 +19,7 @@ function VerifyEmailContent() {
     const [error, setError] = useState("");
     const [countdown, setCountdown] = useState(0);
 
-    // Change email modal state
+
     const [showChangeEmail, setShowChangeEmail] = useState(false);
     const [newEmail, setNewEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -27,7 +27,7 @@ function VerifyEmailContent() {
     const [isChangingEmail, setIsChangingEmail] = useState(false);
     const [changeEmailError, setChangeEmailError] = useState("");
 
-    // Calculate initial countdown from sentAt parameter
+
     useEffect(() => {
         if (sentAtParam) {
             const sentAt = new Date(sentAtParam);
@@ -38,7 +38,7 @@ function VerifyEmailContent() {
         }
     }, [sentAtParam]);
 
-    // Countdown timer
+
     useEffect(() => {
         if (countdown > 0) {
             const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
@@ -73,8 +73,6 @@ function VerifyEmailContent() {
             setResendSuccess(true);
             setCountdown(60);
 
-            // Hide success message after 5 seconds
-            setTimeout(() => setResendSuccess(false), 5000);
         } catch (err) {
             setError(err instanceof Error ? err.message : "Erreur inconnue");
         } finally {
@@ -116,7 +114,7 @@ function VerifyEmailContent() {
 
             const data = await response.json();
 
-            // Update email and reset state
+
             setEmail(data.email);
             setShowChangeEmail(false);
             setNewEmail("");
@@ -125,7 +123,7 @@ function VerifyEmailContent() {
             setResendSuccess(true);
             setError("");
 
-            // Update URL without reload
+            setError("");
             const params = new URLSearchParams({
                 email: data.email,
                 ...(data.verificationSentAt && { sentAt: data.verificationSentAt }),
@@ -156,17 +154,14 @@ function VerifyEmailContent() {
 
     return (
         <div className="text-center">
-            {/* Email Icon */}
             <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-[#0A8F8F]/20 to-[#006B8F]/10 flex items-center justify-center">
                 <Mail className="w-10 h-10 text-[#0A8F8F]" />
             </div>
 
-            {/* Title */}
             <h1 className="text-2xl font-bold text-slate-900 mb-3">
                 Vérifiez votre email
             </h1>
 
-            {/* Description */}
             <p className="text-slate-600 mb-2">
                 Nous avons envoyé un lien de vérification à :
             </p>
@@ -183,7 +178,6 @@ function VerifyEmailContent() {
                 </button>
             </div>
 
-            {/* Success Message */}
             {resendSuccess && (
                 <div className="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm flex items-center justify-center gap-2">
                     <CheckCircle2 className="w-5 h-5" />
@@ -191,14 +185,12 @@ function VerifyEmailContent() {
                 </div>
             )}
 
-            {/* Error Message */}
             {error && (
                 <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
                     {error}
                 </div>
             )}
 
-            {/* Countdown or Resend Button */}
             <div className="space-y-4">
                 <Button
                     onClick={handleResend}
@@ -231,7 +223,6 @@ function VerifyEmailContent() {
                 </Link>
             </div>
 
-            {/* Help text */}
             <div className="mt-8 p-4 bg-slate-50 rounded-xl">
                 <p className="text-sm text-slate-500">
                     Vous n&apos;avez pas reçu l&apos;email ? Vérifiez votre dossier spam ou{" "}
@@ -252,7 +243,6 @@ function VerifyEmailContent() {
                 </p>
             </div>
 
-            {/* Change Email Modal */}
             {showChangeEmail && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl text-left">
@@ -372,13 +362,11 @@ function VerifyEmailContent() {
 export default function VerifyEmailPage() {
     return (
         <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC] p-4">
-            {/* Background Gradient Blobs */}
             <div className="fixed inset-0 pointer-events-none overflow-hidden">
                 <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-[#006B8F] rounded-full mix-blend-multiply filter blur-[120px] opacity-[0.08]"></div>
                 <div className="absolute -bottom-40 -right-40 w-[600px] h-[600px] bg-[#FF9A3E] rounded-full mix-blend-multiply filter blur-[120px] opacity-[0.08]"></div>
             </div>
 
-            {/* Card */}
             <div className="relative w-full max-w-[440px] bg-white rounded-[20px] p-8 shadow-[0_8px_20px_rgba(0,0,0,0.06)]">
                 {/* Logo */}
                 <div className="flex justify-center mb-6">
@@ -393,7 +381,6 @@ export default function VerifyEmailPage() {
                     </Link>
                 </div>
 
-                {/* Content */}
                 <Suspense
                     fallback={
                         <div className="h-48 flex items-center justify-center">
