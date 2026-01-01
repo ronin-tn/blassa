@@ -156,17 +156,12 @@ Ce rapport s'articule autour de trois parties majeures :
     \item \textbf{Ergonomie :} Interface intuitive (Design System Material 3 pour Android).
 \end{itemize}
 
-\section{Diagramme de Cas d'Utilisation}
+\subsection{Diagramme de Cas d'Utilisation}
 \begin{figure}[H]
     \centering
-    % Placeholder pour l'image
-    \fbox{\begin{minipage}{0.8\textwidth}
-        \centering
-        \vspace{2cm}
-        \textit{[Insérer ici le Diagramme de Cas d'Utilisation Global]}
-        \vspace{2cm}
-    \end{minipage}}
+    \includegraphics[width=0.8\textwidth]{use_case.png}
     \caption{Diagramme de Cas d'Utilisation Global}
+    \label{fig:use_case_global}
 \end{figure}
 
 % --- CHAPITRE 3 : CONCEPTION ET ARCHITECTURE ---
@@ -227,18 +222,21 @@ Modélisation des entités principales : \texttt{User}, \texttt{Ride} (Trajet), 
     \caption{Diagramme de Classes Simplifié}
 \end{figure}
 
-\subsection{Diagramme de Séquence : Publication d'un Trajet}
-Ce scénario illustre l'interaction entre le conducteur, l'application mobile et le backend lors de la création d'une annonce.
+\subsection{Diagrammes de Séquence}
+Ces diagrammes illustrent le déroulement complet d'un covoiturage dans le système Blassa.
 
 \begin{figure}[H]
     \centering
-    \fbox{\begin{minipage}{0.8\textwidth}
-        \centering
-        \vspace{3cm}
-        \textit{[Insérer Diagramme de Séquence]}
-        \vspace{3cm}
-    \end{minipage}}
-    \caption{Séquence : Publication d'un trajet}
+    \includegraphics[width=0.85\textwidth]{sequence_reservation.png}
+    \caption{Scénario 1 : Recherche et réservation d'un trajet}
+    \label{fig:seq_reservation}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{sequence_deroulement.png}
+    \caption{Scénario 2 : Confirmation et déroulement du trajet}
+    \label{fig:seq_deroulement}
 \end{figure}
 
 % --- CHAPITRE 4 : DÉVELOPPEMENT ET RÉALISATION ---

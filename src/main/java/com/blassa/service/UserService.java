@@ -1,5 +1,7 @@
 package com.blassa.service;
 
+import com.blassa.dto.ChangeEmailRequest;
+import com.blassa.dto.ChangeEmailResponse;
 import com.blassa.dto.ChangePasswordRequest;
 import com.blassa.dto.Profile;
 import com.blassa.dto.ProfileUpdateRequest;
@@ -34,6 +36,8 @@ public class UserService {
     private final com.blassa.repository.BookingRepository bookingRepository;
     private final PasswordEncoder passwordEncoder;
     private final CloudinaryService cloudinaryService;
+    private final EmailService emailService;
+    private final com.blassa.security.JwtUtils jwtUtils;
 
     public Profile getProfile() {
         User user = getCurrentUser();
@@ -107,6 +111,49 @@ public class UserService {
 
         user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
+    }
+
+    @Transactional
+    public ChangeEmailResponse changeEmail(ChangeEmailRequest request) {
+        User user = getCurrentUser();
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
+            throw new IllegalArgumentException("Le mot de passe est incorrect");
+        }
+
+        if (user.getEmail().equalsIgnoreCase(request.getNewEmail())) {
+            throw new IllegalArgumentException("Le nouvel email doit être différent de l'email actuel");
+        }
+
+        if (userRepository.existsByEmail(request.getNewEmail())) {
+            throw new IllegalArgumentException("Cette adresse email est déjà utilisée");
+        }
+
+        user.setEmail(request.getNewEmail());
+        user.setVerified(false);
+
+        // Generate verification token for email verification
+        var verificationToken = jwtUtils.generateToken(
+                org.springframework.security.core.userdetails.User.builder()
+                        .username(request.getNewEmail())
+                        .password(user.getPasswordHash())
+                        .authorities("USER")
+                        .build());
+        user.setVerificationToken(verificationToken);
+        user.setVerificationSentAt(java.time.LocalDateTime.now());
+
+        User savedUser = userRepository.save(user);
+        emailService.sendVerificationEmail(request.getNewEmail(), verificationToken);
+
+        // Generate NEW access token with the new email for the client
+        var newAccessToken = jwtUtils.generateToken(
+                org.springframework.security.core.userdetails.User.builder()
+                        .username(request.getNewEmail())
+                        .password(user.getPasswordHash())
+                        .authorities("USER")
+                        .build());
+
+        return new ChangeEmailResponse(mapToProfile(savedUser), newAccessToken);
     }
 
     @Transactional

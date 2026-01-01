@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="maven-antrun-" default="main">
+  <target name="main">
+    <exec output="C:\Users\rayen\AppData\Local\Temp\maven17153117815605041205cli" failOnError="false" executable="cmd.exe">
+      <arg value="/c" />
+      <arg value="&quot;C:\Users\rayen\AppData\Local\Temp\.sentry-cli12618472683754985516.exe --log-level=error --version&quot;" />
+    </exec>
+  </target>
+</project>

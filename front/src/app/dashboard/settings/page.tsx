@@ -5,17 +5,12 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
     ArrowLeft,
-    Bell,
     Shield,
-    Globe,
-    Moon,
     LogOut,
-    Trash2,
     ChevronRight,
     Loader2,
     Lock,
     Mail,
-    Smartphone,
     Eye,
     EyeOff,
     X,
@@ -23,44 +18,22 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { parseApiError } from "@/lib/api-utils";
 
-interface SettingToggle {
-    id: string;
-    label: string;
-    description: string;
-    enabled: boolean;
-}
-
 export default function SettingsPage() {
     const router = useRouter();
     const { isAuthenticated, isLoading: authLoading, logout } = useAuth();
 
+    // Email change state
+    const [showEmailModal, setShowEmailModal] = useState(false);
+    const [isChangingEmail, setIsChangingEmail] = useState(false);
+    const [emailError, setEmailError] = useState<string | null>(null);
+    const [emailSuccess, setEmailSuccess] = useState<string | null>(null);
+    const [showEmailPassword, setShowEmailPassword] = useState(false);
+    const [emailForm, setEmailForm] = useState({
+        newEmail: "",
+        password: "",
+    });
 
-    const [notifications, setNotifications] = useState<SettingToggle[]>([
-        {
-            id: "email_bookings",
-            label: "Réservations par email",
-            description: "Recevoir les confirmations de réservation par email",
-            enabled: true,
-        },
-        {
-            id: "email_reminders",
-            label: "Rappels de trajet",
-            description: "Recevoir un rappel avant le départ",
-            enabled: true,
-        },
-        {
-            id: "email_promotions",
-            label: "Actualités et promotions",
-            description: "Recevoir des offres et nouveautés Blassa",
-            enabled: false,
-        },
-    ]);
-
-    const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const [isDeleting, setIsDeleting] = useState(false);
-    const [deleteError, setDeleteError] = useState<string | null>(null);
-
-
+    // Password change state
     const [showPasswordModal, setShowPasswordModal] = useState(false);
     const [isChangingPassword, setIsChangingPassword] = useState(false);
     const [passwordError, setPasswordError] = useState<string | null>(null);
@@ -74,19 +47,11 @@ export default function SettingsPage() {
         confirmPassword: "",
     });
 
-
     useEffect(() => {
         if (!authLoading && !isAuthenticated) {
             router.replace("/login");
         }
     }, [authLoading, isAuthenticated, router]);
-
-    const handleToggle = (id: string) => {
-        setNotifications((prev) =>
-            prev.map((n) => (n.id === id ? { ...n, enabled: !n.enabled } : n))
-        );
-
-    };
 
     const handleLogout = () => {
         logout();
@@ -97,6 +62,68 @@ export default function SettingsPage() {
         const { name, value } = e.target;
         setPasswordForm((prev) => ({ ...prev, [name]: value }));
         setPasswordError(null);
+    };
+
+    const handleEmailFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setEmailForm((prev) => ({ ...prev, [name]: value }));
+        setEmailError(null);
+    };
+
+    const handleChangeEmail = async () => {
+        setEmailError(null);
+        setEmailSuccess(null);
+
+        if (!emailForm.newEmail || !emailForm.password) {
+            setEmailError("Tous les champs sont requis");
+            return;
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(emailForm.newEmail)) {
+            setEmailError("Format d'email invalide");
+            return;
+        }
+
+        setIsChangingEmail(true);
+
+        try {
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL}/user/me/email`,
+                {
+                    method: "PUT",
+                    credentials: "include",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(emailForm),
+                }
+            );
+
+            if (!response.ok) {
+                const errorMessage = await parseApiError(response, "Erreur lors du changement d'email");
+                throw new Error(errorMessage);
+            }
+
+            setEmailSuccess("Email modifié avec succès. Veuillez vérifier votre nouvelle adresse email.");
+            setEmailForm({ newEmail: "", password: "" });
+
+            setTimeout(() => {
+                setShowEmailModal(false);
+                setEmailSuccess(null);
+            }, 3000);
+        } catch (err) {
+            setEmailError(err instanceof Error ? err.message : "Erreur inconnue");
+        } finally {
+            setIsChangingEmail(false);
+        }
+    };
+
+    const resetEmailModal = () => {
+        setShowEmailModal(false);
+        setEmailForm({ newEmail: "", password: "" });
+        setEmailError(null);
+        setEmailSuccess(null);
     };
 
     const handleChangePassword = async () => {
@@ -154,33 +181,6 @@ export default function SettingsPage() {
         }
     };
 
-    const handleDeleteAccount = async () => {
-        setIsDeleting(true);
-        setDeleteError(null);
-
-        try {
-            const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/user/me`,
-                {
-                    method: "DELETE",
-                    credentials: "include",
-                }
-            );
-
-            if (!response.ok) {
-                const errorMessage = await parseApiError(response, "Erreur lors de la suppression du compte");
-                throw new Error(errorMessage);
-            }
-
-
-            logout();
-            router.replace("/");
-        } catch (err) {
-            setDeleteError(err instanceof Error ? err.message : "Erreur inconnue");
-            setIsDeleting(false);
-        }
-    };
-
     const resetPasswordModal = () => {
         setShowPasswordModal(false);
         setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
@@ -217,43 +217,7 @@ export default function SettingsPage() {
 
                 <div className="space-y-6">
 
-                    <section className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                        <div className="px-6 py-4 border-b border-gray-100">
-                            <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-900">
-                                <Bell className="w-5 h-5 text-[#0A8F8F]" />
-                                Notifications
-                            </h2>
-                        </div>
-                        <div className="divide-y divide-gray-100">
-                            {notifications.map((notification) => (
-                                <div
-                                    key={notification.id}
-                                    className="flex items-center justify-between px-6 py-4"
-                                >
-                                    <div className="flex-1 pr-4">
-                                        <p className="font-medium text-gray-900">
-                                            {notification.label}
-                                        </p>
-                                        <p className="text-sm text-gray-500">
-                                            {notification.description}
-                                        </p>
-                                    </div>
-                                    <button
-                                        onClick={() => handleToggle(notification.id)}
-                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${notification.enabled ? "bg-[#0A8F8F]" : "bg-gray-200"
-                                            }`}
-                                    >
-                                        <span
-                                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${notification.enabled ? "translate-x-6" : "translate-x-1"
-                                                }`}
-                                        />
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
-                    </section>
-
-
+                    {/* Security Section */}
                     <section className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                         <div className="px-6 py-4 border-b border-gray-100">
                             <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-900">
@@ -280,78 +244,23 @@ export default function SettingsPage() {
                                 <ChevronRight className="w-5 h-5 text-gray-400" />
                             </button>
 
-                            <div className="flex items-center justify-between px-6 py-4">
+                            <button
+                                onClick={() => setShowEmailModal(true)}
+                                className="w-full flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors text-left"
+                            >
                                 <div className="flex items-center gap-3">
                                     <Mail className="w-5 h-5 text-gray-400" />
                                     <div>
                                         <p className="font-medium text-gray-900">
-                                            Vérification email
+                                            Changer l&apos;adresse email
                                         </p>
                                         <p className="text-sm text-gray-500">
-                                            Votre email est vérifié
+                                            Modifier votre adresse email
                                         </p>
                                     </div>
                                 </div>
-                                <span className="px-2.5 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-full">
-                                    Vérifié
-                                </span>
-                            </div>
-
-                            <div className="flex items-center justify-between px-6 py-4">
-                                <div className="flex items-center gap-3">
-                                    <Smartphone className="w-5 h-5 text-gray-400" />
-                                    <div>
-                                        <p className="font-medium text-gray-900">
-                                            Vérification téléphone
-                                        </p>
-                                        <p className="text-sm text-gray-500">
-                                            Ajoutez une vérification supplémentaire
-                                        </p>
-                                    </div>
-                                </div>
-                                <span className="px-2.5 py-1 text-xs font-medium text-amber-700 bg-amber-100 rounded-full">
-                                    Non vérifié
-                                </span>
-                            </div>
-                        </div>
-                    </section>
-
-
-                    <section className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                        <div className="px-6 py-4 border-b border-gray-100">
-                            <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-900">
-                                <Globe className="w-5 h-5 text-[#0A8F8F]" />
-                                Préférences
-                            </h2>
-                        </div>
-                        <div className="divide-y divide-gray-100">
-                            <div className="flex items-center justify-between px-6 py-4">
-                                <div className="flex items-center gap-3">
-                                    <Globe className="w-5 h-5 text-gray-400" />
-                                    <div>
-                                        <p className="font-medium text-gray-900">Langue</p>
-                                        <p className="text-sm text-gray-500">
-                                            Choisir la langue de l&apos;application
-                                        </p>
-                                    </div>
-                                </div>
-                                <span className="text-gray-600 font-medium">Français</span>
-                            </div>
-
-                            <div className="flex items-center justify-between px-6 py-4">
-                                <div className="flex items-center gap-3">
-                                    <Moon className="w-5 h-5 text-gray-400" />
-                                    <div>
-                                        <p className="font-medium text-gray-900">Mode sombre</p>
-                                        <p className="text-sm text-gray-500">
-                                            Bientôt disponible
-                                        </p>
-                                    </div>
-                                </div>
-                                <span className="px-2.5 py-1 text-xs font-medium text-gray-500 bg-gray-100 rounded-full">
-                                    Bientôt
-                                </span>
-                            </div>
+                                <ChevronRight className="w-5 h-5 text-gray-400" />
+                            </button>
                         </div>
                     </section>
 
@@ -366,15 +275,7 @@ export default function SettingsPage() {
                                 <span className="font-medium text-gray-900">Se déconnecter</span>
                             </button>
 
-                            <button
-                                onClick={() => setShowDeleteModal(true)}
-                                className="w-full flex items-center gap-3 px-6 py-4 hover:bg-red-50 transition-colors text-left"
-                            >
-                                <Trash2 className="w-5 h-5 text-red-500" />
-                                <span className="font-medium text-red-600">
-                                    Supprimer mon compte
-                                </span>
-                            </button>
+
                         </div>
                     </section>
 
@@ -517,57 +418,104 @@ export default function SettingsPage() {
             )}
 
 
-            {showDeleteModal && (
+            {showEmailModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl">
-                        <div className="text-center mb-6">
-                            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center">
-                                <Trash2 className="w-8 h-8 text-red-600" />
-                            </div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-2">
-                                Supprimer votre compte ?
+                        <div className="flex items-center justify-between mb-6">
+                            <h3 className="text-xl font-bold text-gray-900">
+                                Changer l&apos;adresse email
                             </h3>
-                            <p className="text-gray-600">
-                                Cette action est irréversible. Toutes vos données seront
-                                définitivement supprimées.
-                            </p>
+                            <button
+                                onClick={resetEmailModal}
+                                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                            >
+                                <X className="w-5 h-5 text-gray-500" />
+                            </button>
                         </div>
 
-                        {deleteError && (
+                        {emailError && (
                             <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
-                                {deleteError}
+                                {emailError}
                             </div>
                         )}
 
-                        <div className="flex gap-3">
+                        {emailSuccess && (
+                            <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-lg text-sm">
+                                {emailSuccess}
+                            </div>
+                        )}
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Nouvel email
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        type="email"
+                                        name="newEmail"
+                                        value={emailForm.newEmail}
+                                        onChange={handleEmailFormChange}
+                                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0A8F8F]/20 focus:border-[#0A8F8F]"
+                                        placeholder="nouveau@email.com"
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Mot de passe actuel
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        type={showEmailPassword ? "text" : "password"}
+                                        name="password"
+                                        value={emailForm.password}
+                                        onChange={handleEmailFormChange}
+                                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0A8F8F]/20 focus:border-[#0A8F8F] pr-12"
+                                        placeholder="••••••••"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowEmailPassword(!showEmailPassword)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                    >
+                                        {showEmailPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                    </button>
+                                </div>
+                                <p className="text-xs text-gray-500 mt-1">Confirmez votre identité avec votre mot de passe</p>
+                            </div>
+                        </div>
+
+                        <div className="flex gap-3 mt-6">
                             <button
-                                onClick={() => {
-                                    setShowDeleteModal(false);
-                                    setDeleteError(null);
-                                }}
-                                disabled={isDeleting}
+                                onClick={resetEmailModal}
+                                disabled={isChangingEmail}
                                 className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-colors disabled:opacity-50"
                             >
                                 Annuler
                             </button>
                             <button
-                                onClick={handleDeleteAccount}
-                                disabled={isDeleting}
-                                className="flex-1 px-4 py-3 bg-red-600 text-white font-medium rounded-xl hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                                onClick={handleChangeEmail}
+                                disabled={isChangingEmail}
+                                className="flex-1 px-4 py-3 bg-[#0A8F8F] text-white font-medium rounded-xl hover:bg-[#0A8F8F]/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                             >
-                                {isDeleting ? (
+                                {isChangingEmail ? (
                                     <>
                                         <Loader2 className="w-4 h-4 animate-spin" />
-                                        Suppression...
+                                        Modification...
                                     </>
                                 ) : (
-                                    "Supprimer"
+                                    "Modifier"
                                 )}
                             </button>
                         </div>
                     </div>
                 </div>
             )}
+
+
+
         </div>
     );
 }

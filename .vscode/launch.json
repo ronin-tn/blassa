@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-BlassaApplication<blassa>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.blassa.BlassaApplication",
+            "projectName": "blassa",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}

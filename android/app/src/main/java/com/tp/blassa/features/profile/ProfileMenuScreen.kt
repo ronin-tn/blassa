@@ -5,9 +5,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Notifications
@@ -17,10 +17,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,14 +29,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
-import com.tp.blassa.core.network.RetrofitClient
-import com.tp.blassa.core.network.parseErrorMessage
 import com.tp.blassa.features.profile.viewmodel.ProfileMenuViewModel
 import com.tp.blassa.ui.theme.BlassaRed
 import com.tp.blassa.ui.theme.BlassaTeal
 import com.tp.blassa.ui.theme.TextPrimary
 import com.tp.blassa.ui.theme.TextSecondary
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,6 +41,7 @@ fun ProfileMenuScreen(
         onBack: () -> Unit,
         onNavigateToEditProfile: () -> Unit,
         onNavigateToChangePassword: () -> Unit,
+        onNavigateToChangeEmail: () -> Unit,
         onNavigateToMyVehicles: () -> Unit,
         onNavigateToReviews: () -> Unit,
         onNavigateToNotifications: () -> Unit,
@@ -54,11 +49,7 @@ fun ProfileMenuScreen(
         viewModel: ProfileMenuViewModel = viewModel()
 ) {
         val uiState by viewModel.uiState.collectAsState()
-        val scope = rememberCoroutineScope()
         val snackbarHostState = remember { SnackbarHostState() }
-
-        var showDeleteDialog by remember { mutableStateOf(false) }
-        var isDeleting by remember { mutableStateOf(false) }
 
         Scaffold(
                 topBar = {
@@ -190,6 +181,11 @@ fun ProfileMenuScreen(
                                         onClick = onNavigateToChangePassword
                                 )
                                 MenuItem(
+                                        icon = Icons.Default.Email,
+                                        label = "Modifier l'email",
+                                        onClick = onNavigateToChangeEmail
+                                )
+                                MenuItem(
                                         icon = Icons.Default.DirectionsCar,
                                         label = "Mes Véhicules",
                                         onClick = onNavigateToMyVehicles
@@ -206,31 +202,6 @@ fun ProfileMenuScreen(
                                 )
 
                                 Spacer(modifier = Modifier.weight(1f))
-
-                                Surface(
-                                        onClick = { showDeleteDialog = true },
-                                        color = Color.White,
-                                        shape = MaterialTheme.shapes.medium,
-                                        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
-                                ) {
-                                        Row(
-                                                modifier = Modifier.padding(16.dp),
-                                                verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                                Icon(
-                                                        Icons.Default.Delete,
-                                                        contentDescription = null,
-                                                        tint = BlassaRed.copy(alpha = 0.7f)
-                                                )
-                                                Spacer(modifier = Modifier.width(16.dp))
-                                                Text(
-                                                        text = "Supprimer mon compte",
-                                                        fontSize = 16.sp,
-                                                        fontWeight = FontWeight.Medium,
-                                                        color = BlassaRed.copy(alpha = 0.7f)
-                                                )
-                                        }
-                                }
 
                                 Surface(
                                         onClick = onLogout,
@@ -258,100 +229,6 @@ fun ProfileMenuScreen(
                                 }
                         }
                 }
-        }
-
-        if (showDeleteDialog) {
-                AlertDialog(
-                        onDismissRequest = { if (!isDeleting) showDeleteDialog = false },
-                        title = {
-                                Text(
-                                        text = "Supprimer le compte",
-                                        fontWeight = FontWeight.Bold,
-                                        color = BlassaRed
-                                )
-                        },
-                        text = {
-                                Column {
-                                        Text(
-                                                text =
-                                                        "Êtes-vous sûr de vouloir supprimer votre compte ?",
-                                                style = MaterialTheme.typography.bodyLarge,
-                                                color = TextPrimary
-                                        )
-                                        Spacer(modifier = Modifier.height(8.dp))
-                                        Text(
-                                                text =
-                                                        "Cette action est irréversible. Toutes vos données, trajets et avis seront définitivement supprimés.",
-                                                style = MaterialTheme.typography.bodyMedium,
-                                                color = TextSecondary
-                                        )
-                                }
-                        },
-                        confirmButton = {
-                                Button(
-                                        onClick = {
-                                                isDeleting = true
-                                                scope.launch {
-                                                        try {
-                                                                val response =
-                                                                        RetrofitClient
-                                                                                .dashboardApiService
-                                                                                .deleteAccount()
-                                                                if (response.isSuccessful) {
-                                                                        showDeleteDialog = false
-                                                                        isDeleting = false
-                                                                        onLogout()
-                                                                } else {
-                                                                        isDeleting = false
-                                                                        showDeleteDialog = false
-                                                                        snackbarHostState
-                                                                                .showSnackbar(
-                                                                                        message =
-                                                                                                "Erreur lors de la suppression du compte"
-                                                                                )
-                                                                }
-                                                        } catch (e: retrofit2.HttpException) {
-                                                                isDeleting = false
-                                                                showDeleteDialog = false
-                                                                snackbarHostState.showSnackbar(
-                                                                        message =
-                                                                                e.parseErrorMessage()
-                                                                )
-                                                        } catch (e: Exception) {
-                                                                isDeleting = false
-                                                                showDeleteDialog = false
-                                                                snackbarHostState.showSnackbar(
-                                                                        message =
-                                                                                "Erreur de connexion"
-                                                                )
-                                                        }
-                                                }
-                                        },
-                                        colors =
-                                                ButtonDefaults.buttonColors(
-                                                        containerColor = BlassaRed
-                                                ),
-                                        enabled = !isDeleting
-                                ) {
-                                        if (isDeleting) {
-                                                CircularProgressIndicator(
-                                                        modifier = Modifier.size(20.dp),
-                                                        color = Color.White,
-                                                        strokeWidth = 2.dp
-                                                )
-                                                Spacer(modifier = Modifier.width(8.dp))
-                                        }
-                                        Text("Supprimer", color = Color.White)
-                                }
-                        },
-                        dismissButton = {
-                                TextButton(
-                                        onClick = { showDeleteDialog = false },
-                                        enabled = !isDeleting
-                                ) { Text("Annuler", color = TextSecondary) }
-                        },
-                        containerColor = Color.White
-                )
         }
 }
 

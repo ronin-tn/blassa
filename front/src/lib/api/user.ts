@@ -1,4 +1,4 @@
-import { apiGet, apiPut, apiDelete } from "./client";
+import { apiGet, apiPut } from "./client";
 import { UserProfile, UserStats } from "@/types/models";
 
 export type { UserProfile, UserStats };
@@ -44,9 +44,7 @@ export async function changePassword(data: ChangePasswordRequest): Promise<void>
 }
 
 
-export async function deleteAccount(): Promise<void> {
-    return apiDelete<void>("/user/me");
-}
+
 
 export async function getUserStats(): Promise<UserStats> {
     return apiGet<UserStats>("/user/me/stats");

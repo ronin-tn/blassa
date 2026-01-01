@@ -203,6 +203,9 @@ fun BlassaNavHost(navController: NavHostController = rememberNavController()) {
                     onNavigateToChangePassword = {
                         navController.navigate(BlassaRoute.ChangePassword.route)
                     },
+                    onNavigateToChangeEmail = {
+                        navController.navigate(BlassaRoute.ChangeEmail.route)
+                    },
                     onNavigateToMyVehicles = {
                         navController.navigate(BlassaRoute.MyVehicles.route)
                     },
@@ -257,6 +260,12 @@ fun BlassaNavHost(navController: NavHostController = rememberNavController()) {
 
         composable(BlassaRoute.ChangePassword.route) {
             com.tp.blassa.features.profile.ChangePasswordScreen(
+                    onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(BlassaRoute.ChangeEmail.route) {
+            com.tp.blassa.features.profile.ChangeEmailScreen(
                     onBack = { navController.popBackStack() }
             )
         }

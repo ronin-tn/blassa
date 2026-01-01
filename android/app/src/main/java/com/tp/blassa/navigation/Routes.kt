@@ -23,6 +23,7 @@ sealed class BlassaRoute(val route: String) {
     data object RideHistory : BlassaRoute("ride_history")
     data object EditProfile : BlassaRoute("edit_profile")
     data object ChangePassword : BlassaRoute("change_password")
+    data object ChangeEmail : BlassaRoute("change_email")
 
     data object RideDetails : BlassaRoute("ride_details/{rideId}") {
         fun createRoute(rideId: String) = "ride_details/$rideId"

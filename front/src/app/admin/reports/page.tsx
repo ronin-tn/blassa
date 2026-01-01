@@ -217,7 +217,7 @@ export default function ReportsPage() {
                                         )}
                                     </div>
 
-                                    {/* Ride Info if applicable */}
+
                                     {report.ride && (
                                         <div className="mt-4 bg-white rounded-lg p-4 ring-1 ring-gray-200">
                                             <div className="flex items-center justify-between">

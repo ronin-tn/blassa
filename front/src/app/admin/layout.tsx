@@ -27,7 +27,6 @@ export default function AdminLayout({
     return (
         <AdminGuard>
             <div className="flex min-h-screen bg-gray-50 font-sans">
-                {/* Brand Sidebar */}
                 <div className="hidden w-64 flex-col bg-[#0e7490] text-white md:flex shadow-xl">
                     <div className="flex h-20 items-center px-6 border-b border-white/10">
                         <div className="flex items-center gap-3">
@@ -49,8 +48,8 @@ export default function AdminLayout({
                                     key={item.name}
                                     href={item.href}
                                     className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 ${isActive
-                                            ? "bg-white text-[#0e7490] shadow-md translate-x-1"
-                                            : "text-white/80 hover:bg-white/10 hover:text-white hover:translate-x-1"
+                                        ? "bg-white text-[#0e7490] shadow-md translate-x-1"
+                                        : "text-white/80 hover:bg-white/10 hover:text-white hover:translate-x-1"
                                         }`}
                                 >
                                     <item.icon className={`h-5 w-5 ${isActive ? "text-[#0e7490]" : "text-[#f59e0b]"}`} />
@@ -71,9 +70,7 @@ export default function AdminLayout({
                     </div>
                 </div>
 
-                {/* Main Content */}
                 <main className="flex-1 overflow-y-auto">
-                    {/* Mobile Header */}
                     <div className="flex h-16 items-center justify-between border-b border-gray-200 bg-white px-6 shadow-sm md:hidden">
                         <span className="font-bold text-[#0e7490] text-lg">Blassa Admin</span>
                     </div>

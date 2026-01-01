@@ -292,7 +292,8 @@ interface DashboardApiService {
         @PUT("user/me/password")
         suspend fun changePassword(@Body request: ChangePasswordRequest): retrofit2.Response<Unit>
 
-        @DELETE("user/me") suspend fun deleteAccount(): retrofit2.Response<Unit>
+        @PUT("user/me/email")
+        suspend fun changeEmail(@Body request: ChangeEmailRequest): ChangeEmailResponse
 
         @POST("reports")
         suspend fun createReport(@Body request: ReportRequest): retrofit2.Response<Unit>
@@ -342,3 +343,7 @@ data class UserUpdateRequest(
 )
 
 data class ChangePasswordRequest(val currentPassword: String, val newPassword: String)
+
+data class ChangeEmailRequest(val newEmail: String, val password: String)
+
+data class ChangeEmailResponse(val profile: UserProfile, val accessToken: String)
