@@ -34,7 +34,6 @@
 ### For Passengers
 - 🔍 Search rides by origin, destination, and date
 - 🎫 Book seats on available rides
-- 💬 Real-time chat with drivers
 - ⭐ Rate and review drivers
 - 🔔 Push notifications for booking updates
 
