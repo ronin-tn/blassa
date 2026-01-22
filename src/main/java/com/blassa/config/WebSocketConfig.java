@@ -26,7 +26,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 .setAllowedOriginPatterns("*")
                 .withSockJS();
 
-        // Raw WebSocket endpoint lel mobile
+        //endpoint lel mobile
         registry.addEndpoint("/ws")
                 .setAllowedOriginPatterns("*");
     }

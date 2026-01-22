@@ -28,11 +28,9 @@ object WebSocketManager {
     private var webSocket: WebSocket? = null
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
-    // Notification flow for all notifications
     private val _notificationFlow = MutableSharedFlow<Notification>()
     val notificationFlow: SharedFlow<Notification> = _notificationFlow.asSharedFlow()
 
-    // Dashboard refresh event flow - emits when dashboard data should be refreshed
     private val _dashboardRefreshFlow = MutableSharedFlow<RealTimeEvent>()
     val dashboardRefreshFlow: SharedFlow<RealTimeEvent> = _dashboardRefreshFlow.asSharedFlow()
 
@@ -40,16 +38,15 @@ object WebSocketManager {
 
     private var appContext: Context? = null
 
-    // Event types that trigger different UI updates
     enum class RealTimeEvent {
-        BOOKING_RECEIVED, // Driver received a new booking request
-        BOOKING_ACCEPTED, // Passenger's booking was accepted
-        BOOKING_REJECTED, // Passenger's booking was rejected
-        BOOKING_CANCELLED, // A booking was cancelled
-        RIDE_UPDATED, // Ride status changed (started, completed, etc.)
-        RIDE_CANCELLED, // A ride was cancelled
-        NEW_REVIEW, // New review received
-        GENERAL_UPDATE // Catch-all for other updates
+        BOOKING_RECEIVED,
+        BOOKING_ACCEPTED,
+        BOOKING_REJECTED,
+        BOOKING_CANCELLED,
+        RIDE_UPDATED,
+        RIDE_CANCELLED,
+        NEW_REVIEW,
+        GENERAL_UPDATE
     }
 
     fun init(context: Context) {

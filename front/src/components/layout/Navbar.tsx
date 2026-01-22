@@ -68,16 +68,23 @@ export default function Navbar() {
             >
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between h-16 relative">
-                        <Link href="/" className="absolute left-1/2 -translate-x-1/2 md:static md:translate-x-0 flex items-center gap-2 shrink-0">
+                        <Link href="/" className="absolute left-1/2 -translate-x-1/2 md:static md:translate-x-0 flex items-center gap-3 shrink-0">
                             <Image
                                 src="/LOGO.png"
                                 alt="Blassa"
-                                width={36}
-                                height={36}
-                                className="w-9 h-9"
+                                width={100}
+                                height={100}
+                                className="w-24 h-24"
                             />
-                            <span className="text-xl font-bold text-slate-800 font-[family-name:var(--font-poppins)]">
-                                Blassa
+                            <span
+                                className={cn(
+                                    "hidden md:block text-sm font-medium text-slate-600 transition-all duration-300 whitespace-nowrap",
+                                    isScrolled
+                                        ? "opacity-0 w-0 overflow-hidden"
+                                        : "opacity-100"
+                                )}
+                            >
+
                             </span>
                         </Link>
 

@@ -43,15 +43,12 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String firstName = (String) attributes.get("given_name");
         String lastName = (String) attributes.get("family_name");
         String pictureUrl = (String) attributes.get("picture");
-        // Check if user exists by OAuth ID first
         Optional<User> existingUserByOAuth = userRepository.findByOauthProviderAndOauthId(registrationId, googleId);
 
         if (existingUserByOAuth.isPresent()) {
             return oauth2User;
         }
 
-        // Check if user exists by email (might have registered with email/password
-        // first)
         Optional<User> existingUserByEmail = userRepository.findByEmail(email);
 
         if (existingUserByEmail.isPresent()) {

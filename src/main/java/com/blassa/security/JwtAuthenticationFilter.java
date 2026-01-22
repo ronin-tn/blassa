@@ -49,12 +49,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
             } catch (org.springframework.security.authentication.LockedException e) {
-                // User is banned
                 response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                 response.getWriter().write("{\"error\": \"Account banned\", \"message\": \"" + e.getMessage() + "\"}");
-                return; // Stop filter chain
+                return;
             } catch (Exception e) {
-                // Other authentication errors (ignore or log)
+
             }
         }
         filterChain.doFilter(request, response);

@@ -21,5 +21,5 @@ public class UserSummaryDTO {
     private UserRole role;
     private boolean isVerified;
     private Boolean emailVerified;
-    private String deletedAt; // String for simplicity in frontend ISO parsing
+    private String deletedAt;
 }
