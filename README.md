@@ -1,6 +1,6 @@
-# 🚗 Blassa - Carpooling Platform
+# Blassa - Carpooling Platform
 
-**Blassa** is a modern carpooling platform designed for Tunisia, connecting drivers with passengers for shared rides. It features a Spring Boot backend, Next.js web frontend, and native Android application.
+**Blassa** is a modern carpooling platform designed for Tunisia, connecting drivers with passengers for shared rides. Built with a Spring Boot backend, Next.js web frontend, and native Android application.
 
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-green?logo=springboot)
 ![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=nextdotjs)
@@ -9,55 +9,50 @@
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 
-- [Features](#-features)
-- [Architecture](#-architecture)
-- [Tech Stack](#-tech-stack)
-- [Prerequisites](#-prerequisites)
-- [Getting Started](#-getting-started)
-  - [1. Clone the Repository](#1-clone-the-repository)
-  - [2. Database Setup](#2-database-setup)
-  - [3. Backend Setup](#3-backend-setup)
-  - [4. Frontend Setup](#4-frontend-setup)
-  - [5. Android Setup](#5-android-setup)
-- [Environment Variables](#-environment-variables)
-- [Project Structure](#-project-structure)
-- [API Documentation](#-api-documentation)
-- [Contributing](#-contributing)
-- [License](#-license)
+- [Features](#features)
+- [Architecture](#architecture)
+- [Tech Stack](#tech-stack)
+- [Prerequisites](#prerequisites)
+- [Getting Started](#getting-started)
+- [Environment Variables](#environment-variables)
+- [Project Structure](#project-structure)
+- [API Documentation](#api-documentation)
+- [Contributing](#contributing)
+- [License](#license)
 
 ---
 
-## ✨ Features
+## Features
 
-### For Passengers
-- 🔍 Search rides by origin, destination, and date
-- 🎫 Book seats on available rides
-- ⭐ Rate and review drivers
-- 🔔 Push notifications for booking updates
+### Passenger Features
+- Search rides by origin, destination, and date
+- Book seats on available rides
+- Rate and review drivers
+- Receive push notifications for booking updates
 
-### For Drivers
-- 🚙 Publish rides with customizable preferences
-- 👥 Manage passenger requests (accept/reject)
-- 🛣️ Track ride lifecycle (scheduled → in progress → completed)
-- 📊 Dashboard with ride statistics
+### Driver Features
+- Publish rides with customizable preferences
+- Manage passenger requests (accept/reject)
+- Track ride lifecycle (scheduled, in progress, completed)
+- Access dashboard with ride statistics
 
 ### Admin Features
-- 📈 Platform statistics dashboard
-- 👤 User management (view, ban/unban)
-- 🚨 Report management system
-- 🔍 Detailed user and ride information
+- Platform statistics dashboard
+- User management (view, ban/unban)
+- Report management system
+- Detailed user and ride information
 
 ### Security & Authentication
-- 🔐 JWT-based authentication
-- 🌐 Google OAuth2 integration
-- ✉️ Email verification
-- 🔒 Role-based access control (USER, ADMIN)
+- JWT-based authentication
+- Google OAuth2 integration
+- Email verification
+- Role-based access control (USER, ADMIN)
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -85,7 +80,7 @@
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Layer | Technology |
 |-------|------------|
@@ -93,25 +88,25 @@
 | **Frontend** | Next.js 15, React 19, TypeScript, Tailwind CSS |
 | **Android** | Kotlin, Jetpack Compose, Retrofit, Hilt |
 | **Database** | PostgreSQL 15 with PostGIS (geospatial) |
-| **Auth** | JWT, Google OAuth2 |
-| **Real-time** | WebSocket (STOMP) |
+| **Authentication** | JWT, Google OAuth2 |
+| **Real-time Communication** | WebSocket (STOMP) |
 | **Storage** | Cloudinary (images) |
 
 ---
 
-## 📦 Prerequisites
+## Prerequisites
 
-Before running the project, ensure you have:
+Before running the project, ensure you have the following installed:
 
 - **Java 21+** (for Spring Boot)
-- **Node.js 18+** & **npm** (for Next.js)
+- **Node.js 18+** and **npm** (for Next.js)
 - **PostgreSQL 15+** with PostGIS extension
 - **Android Studio** (for Android development)
 - **Git**
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### 1. Clone the Repository
 
@@ -122,7 +117,7 @@ cd blassa
 
 ### 2. Database Setup
 
-Create a PostgreSQL database with PostGIS:
+Create a PostgreSQL database with PostGIS extension:
 
 ```sql
 CREATE DATABASE blassa_db;
@@ -133,29 +128,33 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 ### 3. Backend Setup
 
-The backend requires environment variables for secrets. Create a script or set them in your IDE:
+The backend requires environment variables for configuration. Set them in your environment or IDE:
 
 ```bash
-# Required Environment Variables for Backend
+# Database Configuration
 export DB_HOST=localhost
 export DB_PORT=5432
 export DB_NAME=blassa_db
 export DB_USERNAME=postgres
 export DB_PASSWORD=your_password
 
+# OAuth Configuration
 export GOOGLE_CLIENT_ID=your_google_client_id
 export GOOGLE_CLIENT_SECRET=your_google_client_secret
 
+# JWT Configuration
 export JWT_SECRET_KEY=your_256_bit_secret_key
 
+# Email Configuration
 export MAIL_USERNAME=your_email@gmail.com
 export MAIL_PASSWORD=your_app_password
 
+# Cloudinary Configuration
 export CLOUDINARY_CLOUD_NAME=your_cloud_name
 export CLOUDINARY_API_KEY=your_api_key
 export CLOUDINARY_API_SECRET=your_api_secret
 
-
+# Application URLs
 export FRONTEND_URL=http://localhost:3000
 export BACKEND_BASE_URL=http://localhost:8088
 ```
@@ -166,7 +165,7 @@ Run the backend:
 ./mvnw spring-boot:run
 ```
 
-Or from your IDE, run `BlassaApplication.java`.
+Alternatively, run `BlassaApplication.java` from your IDE.
 
 The backend will start on **http://localhost:8088**.
 
@@ -175,7 +174,7 @@ The backend will start on **http://localhost:8088**.
 ```bash
 cd front
 
-# Copy environment example
+# Copy environment template
 cp .env.example .env.local
 
 # Edit .env.local if needed (defaults work for local development)
@@ -189,7 +188,9 @@ npm run dev
 
 The frontend will start on **http://localhost:3000**.
 
-#### Frontend Environment Variables (`front/.env.local`)
+#### Frontend Environment Variables
+
+Create `front/.env.local`:
 
 ```env
 # API URL (backend)
@@ -207,39 +208,39 @@ NEXT_PUBLIC_WS_URL=http://localhost:8088/ws
 4. Configure the API base URL in `RetrofitClient.kt`:
    ```kotlin
    private const val BASE_URL = "http://10.0.2.2:8088/api/v1/" // For emulator
-   // Or your machine's IP for physical device
+   // Or use your machine's IP for physical device
    ```
 5. Run on emulator or device
 
 ---
 
-## 🔐 Environment Variables
+## Environment Variables
 
 ### Backend (Spring Boot)
 
-All sensitive values **must** be provided via environment variables.
+All sensitive configuration values must be provided via environment variables.
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `DB_HOST` | ❌ | Database host (default: `localhost`) |
-| `DB_PORT` | ❌ | Database port (default: `5432`) |
-| `DB_NAME` | ❌ | Database name (default: `blassa_db`) |
-| `DB_USERNAME` | ❌ | Database user (default: `postgres`) |
-| `DB_PASSWORD` | ✅ | Database password |
-| `GOOGLE_CLIENT_ID` | ✅ | Google OAuth client ID |
-| `GOOGLE_CLIENT_SECRET` | ✅ | Google OAuth client secret |
-| `JWT_SECRET_KEY` | ✅ | 256-bit secret key for JWT signing |
-| `JWT_EXPIRATION` | ❌ | Token expiration in ms (default: 86400000) |
-| `MAIL_USERNAME` | ✅ | SMTP email address |
-| `MAIL_PASSWORD` | ✅ | SMTP app password |
-| `MAIL_HOST` | ❌ | SMTP host (default: `smtp.gmail.com`) |
-| `MAIL_PORT` | ❌ | SMTP port (default: `587`) |
-| `CLOUDINARY_CLOUD_NAME` | ✅ | Cloudinary cloud name |
-| `CLOUDINARY_API_KEY` | ✅ | Cloudinary API key |
-| `CLOUDINARY_API_SECRET` | ✅ | Cloudinary API secret |
-| `FRONTEND_URL` | ❌ | Frontend URL (default: `http://localhost:3000`) |
-| `BACKEND_BASE_URL` | ❌ | Backend URL (default: `http://localhost:8088`) |
-| `SERVER_PORT` | ❌ | Server port (default: `8088`) |
+| Variable | Required | Description | Default |
+|----------|----------|-------------|---------|
+| `DB_HOST` | No | Database host | `localhost` |
+| `DB_PORT` | No | Database port | `5432` |
+| `DB_NAME` | No | Database name | `blassa_db` |
+| `DB_USERNAME` | No | Database user | `postgres` |
+| `DB_PASSWORD` | **Yes** | Database password | - |
+| `GOOGLE_CLIENT_ID` | **Yes** | Google OAuth client ID | - |
+| `GOOGLE_CLIENT_SECRET` | **Yes** | Google OAuth client secret | - |
+| `JWT_SECRET_KEY` | **Yes** | 256-bit secret key for JWT signing | - |
+| `JWT_EXPIRATION` | No | Token expiration in milliseconds | `86400000` |
+| `MAIL_USERNAME` | **Yes** | SMTP email address | - |
+| `MAIL_PASSWORD` | **Yes** | SMTP app password | - |
+| `MAIL_HOST` | No | SMTP host | `smtp.gmail.com` |
+| `MAIL_PORT` | No | SMTP port | `587` |
+| `CLOUDINARY_CLOUD_NAME` | **Yes** | Cloudinary cloud name | - |
+| `CLOUDINARY_API_KEY` | **Yes** | Cloudinary API key | - |
+| `CLOUDINARY_API_SECRET` | **Yes** | Cloudinary API secret | - |
+| `FRONTEND_URL` | No | Frontend URL | `http://localhost:3000` |
+| `BACKEND_BASE_URL` | No | Backend URL | `http://localhost:8088` |
+| `SERVER_PORT` | No | Server port | `8088` |
 
 ### Frontend (Next.js)
 
@@ -252,7 +253,7 @@ Create `front/.env.local` from `front/.env.example`:
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 blassa/
@@ -264,10 +265,10 @@ blassa/
 │   │   │   ├── repository/       # Data Access
 │   │   │   ├── model/            # Entities & Enums
 │   │   │   ├── dto/              # Data Transfer Objects
-│   │   │   ├── security/         # Auth & JWT
+│   │   │   ├── security/         # Authentication & JWT
 │   │   │   └── config/           # Configuration
 │   │   └── resources/
-│   │       ├── application.yaml  # App Configuration
+│   │       ├── application.yaml  # Application Configuration
 │   │       └── db/migration/     # Flyway Migrations
 │   └── test/                     # Unit Tests
 │
@@ -281,7 +282,7 @@ blassa/
 │   ├── .env.example              # Environment Template
 │   └── package.json
 │
-├── android/                      # Android App
+├── android/                      # Android Application
 │   └── app/src/main/java/com/tp/blassa/
 │       ├── features/             # Feature Modules
 │       ├── core/                 # Network, DI, Utils
@@ -293,7 +294,7 @@ blassa/
 
 ---
 
-## 📚 API Documentation
+## API Documentation
 
 The backend exposes RESTful APIs at `http://localhost:8088/api/v1/`:
 
@@ -308,10 +309,30 @@ The backend exposes RESTful APIs at `http://localhost:8088/api/v1/`:
 | `/users/me` | GET | Current user profile |
 | `/admin/*` | * | Admin endpoints |
 
+For detailed API specifications, refer to the API documentation or OpenAPI schema (if available).
+
 ---
 
-## 📄 License
+## Contributing
+
+Contributions are welcome! Please follow these steps:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/your-feature`)
+3. Commit your changes (`git commit -m 'Add some feature'`)
+4. Push to the branch (`git push origin feature/your-feature`)
+5. Open a Pull Request
+
+Please ensure your code follows the project's coding standards and includes appropriate tests.
+
+---
+
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
+---
 
+## Support
+
+For issues, questions, or contributions, please open an issue on the [GitHub repository](https://github.com/ronin-tn/blassa).
