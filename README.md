@@ -18,7 +18,6 @@
 - [Getting Started](#getting-started)
 - [Environment Variables](#environment-variables)
 - [Project Structure](#project-structure)
-- [API Documentation](#api-documentation)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -294,24 +293,6 @@ blassa/
 
 ---
 
-## API Documentation
-
-The backend exposes RESTful APIs at `http://localhost:8088/api/v1/`:
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/auth/register` | POST | User registration |
-| `/auth/login` | POST | User login |
-| `/rides` | GET | Search rides |
-| `/rides` | POST | Create ride |
-| `/rides/{id}` | GET | Get ride details |
-| `/bookings` | POST | Book a ride |
-| `/users/me` | GET | Current user profile |
-| `/admin/*` | * | Admin endpoints |
-
-For detailed API specifications, refer to the API documentation or OpenAPI schema (if available).
-
----
 
 ## Contributing
 
