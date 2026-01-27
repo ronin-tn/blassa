@@ -59,7 +59,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 user.setProfilePictureUrl(pictureUrl);
             }
             userRepository.save(user);
-            log.info("Linked OAuth to existing user: {}", email);
             return oauth2User;
         }
 

@@ -80,7 +80,7 @@ public class AuthenticationService {
 
     @Transactional
     public AuthenticationResponse authenticate(AuthenticationRequest authenticationRequest) {
-        // Verifi l password LOWEL (security: mateftha7sh kene l email mawjoud walla lé)
+
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(authenticationRequest.getEmail(),
                         authenticationRequest.getPassword()));
