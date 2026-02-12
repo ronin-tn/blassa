@@ -1,11 +1,11 @@
 package com.blassa.config;
 
 import com.blassa.security.CustomOAuth2UserService;
-import com.blassa.security.HttpCookieOAuth2AuthorizationRequestRepository;
 import com.blassa.security.JwtAuthenticationFilter;
 import com.blassa.security.OAuth2SuccessHandler;
 import com.blassa.security.ProfileCompletionFilter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,6 +30,7 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
+@Slf4j
 public class SecurityConfig {
 
         private final JwtAuthenticationFilter jwtAuthFilter;
@@ -37,7 +38,6 @@ public class SecurityConfig {
         private final AuthenticationProvider authenticationProvider;
         private final CustomOAuth2UserService customOAuth2UserService;
         private final OAuth2SuccessHandler oAuth2SuccessHandler;
-        private final HttpCookieOAuth2AuthorizationRequestRepository cookieAuthorizationRequestRepository;
 
         @Value("${app.frontend-url}")
         private String frontendUrl;
@@ -64,15 +64,15 @@ public class SecurityConfig {
                                                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                                                 .requestMatchers("/verify/email/**", "/reset/email", "/forgot")
                                                 .permitAll()
+                                                .requestMatchers("/actuator/health").permitAll()
                                                 .anyRequest().authenticated())
                                 .oauth2Login(oauth2 -> oauth2
-                                                .authorizationEndpoint(auth -> auth
-                                                                .authorizationRequestRepository(
-                                                                                cookieAuthorizationRequestRepository))
                                                 .userInfoEndpoint(userInfo -> userInfo
                                                                 .userService(customOAuth2UserService))
                                                 .successHandler(oAuth2SuccessHandler)
                                                 .failureHandler((request, response, exception) -> {
+                                                        log.error("OAuth2 login failed: {}", exception.getMessage(),
+                                                                        exception);
                                                         response.sendRedirect(
                                                                         frontendUrl + "/login?error=oauth_failed");
                                                 }))
@@ -81,7 +81,7 @@ public class SecurityConfig {
                                                                 new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
                                                                 request -> request.getRequestURI().startsWith("/api/")))
                                 .sessionManagement(session -> session
-                                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                                                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                                 .authenticationProvider(authenticationProvider)
                                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                                 .addFilterAfter(profileCompletionFilter, JwtAuthenticationFilter.class);
