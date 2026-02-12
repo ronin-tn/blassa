@@ -15,7 +15,6 @@ import {
 import { Gender, GenderLabels } from "@/lib/constants";
 import { useAuth } from "@/contexts/AuthContext";
 import { Mail, Eye, EyeOff, Loader2, User, Phone, Lock } from "lucide-react";
-import { getGoogleOAuthUrl } from "@/lib/config";
 
 interface FormData {
     email: string;
@@ -259,7 +258,7 @@ export default function RegisterPage() {
                     type="button"
                     onClick={() => {
                         setIsGoogleLoading(true);
-                        window.location.href = getGoogleOAuthUrl();
+                        window.location.href = `${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '')}/oauth2/authorization/google`;
                     }}
                     variant="outline"
                     className="w-full h-12 flex items-center justify-center gap-3 border-slate-200 hover:bg-slate-50 text-slate-700 font-medium rounded-xl transition-all duration-200 mb-5"
