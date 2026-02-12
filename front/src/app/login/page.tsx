@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { Mail, Eye, EyeOff, Loader2, CheckCircle2, Lock } from "lucide-react";
+import { getGoogleOAuthUrl } from "@/lib/config";
 
 interface FormData {
     email: string;
@@ -296,7 +297,7 @@ function LoginForm() {
                 type="button"
                 onClick={() => {
                     setIsGoogleLoading(true);
-                    window.location.href = `${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '')}/oauth2/authorization/google`;
+                    window.location.href = getGoogleOAuthUrl();
                 }}
                 variant="outline"
                 className="w-full h-12 flex items-center justify-center gap-3 border-slate-200 hover:bg-slate-50 text-slate-700 font-medium rounded-xl transition-all duration-200"

@@ -4,10 +4,12 @@ import com.blassa.dto.AuthenticationRequest;
 import com.blassa.dto.AuthenticationResponse;
 import com.blassa.dto.RegisterRequest;
 import com.blassa.service.AuthenticationService;
+import com.blassa.service.GoogleOAuthService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,8 +19,10 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
+@Slf4j
 public class AuthenticationController {
     private final AuthenticationService authenticationService;
+    private final GoogleOAuthService googleOAuthService;
 
     @Value("${app.cookie.secure:true}")
     private boolean secureCookie;
@@ -56,21 +60,49 @@ public class AuthenticationController {
         }
 
         // asm3 lahne ani zedt httpOnly cookie m3a JWT token
-        Cookie cookie = new Cookie(COOKIE_NAME, token);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(secureCookie);
-        cookie.setPath("/");
-        cookie.setMaxAge(cookieMaxAge);
-        cookie.setAttribute("SameSite", cookieSameSite);
-        response.addCookie(cookie);
+        setTokenCookie(response, token);
         return ResponseEntity.ok(Map.of(
                 "status", "SUCCESS",
                 "email", authResponse.getEmail() != null ? authResponse.getEmail() : ""));
     }
 
+    /**
+     * Google OAuth code exchange endpoint.
+     * Frontend gets auth code from Google directly, sends it here.
+     * No sessions needed - fully stateless.
+     */
+    @PostMapping("/google")
+    public ResponseEntity<Map<String, Object>> googleOAuthLogin(
+            @RequestBody Map<String, String> request,
+            HttpServletResponse response) {
+        String code = request.get("code");
+        String redirectUri = request.get("redirectUri");
+
+        if (code == null || code.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "status", "ERROR",
+                    "message", "Authorization code is required"));
+        }
+        if (redirectUri == null || redirectUri.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "status", "ERROR",
+                    "message", "Redirect URI is required"));
+        }
+
+        try {
+            String token = googleOAuthService.exchangeCodeForToken(code, redirectUri);
+            setTokenCookie(response, token);
+            return ResponseEntity.ok(Map.of("status", "SUCCESS"));
+        } catch (Exception e) {
+            log.error("Google OAuth login failed", e);
+            return ResponseEntity.badRequest().body(Map.of(
+                    "status", "ERROR",
+                    "message", "Google authentication failed"));
+        }
+    }
+
     @PostMapping("/logout")
     public ResponseEntity<Map<String, String>> logout(HttpServletResponse response) {
-        // Todo: edhy fi logout 7ot maxAge 0 mrigl!??
         Cookie cookie = new Cookie(COOKIE_NAME, null);
         cookie.setHttpOnly(true);
         cookie.setSecure(secureCookie);
@@ -111,5 +143,15 @@ public class AuthenticationController {
 
         return ResponseEntity.ok(
                 authenticationService.changeEmailForUnverifiedUser(currentEmail, newEmail, password));
+    }
+
+    private void setTokenCookie(HttpServletResponse response, String token) {
+        Cookie cookie = new Cookie(COOKIE_NAME, token);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(secureCookie);
+        cookie.setPath("/");
+        cookie.setMaxAge(cookieMaxAge);
+        cookie.setAttribute("SameSite", cookieSameSite);
+        response.addCookie(cookie);
     }
 }
