@@ -24,8 +24,6 @@ import org.springframework.http.HttpStatus;
 
 import java.util.List;
 
-import static org.springframework.security.config.Customizer.withDefaults;
-
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -46,7 +44,6 @@ public class SecurityConfig {
                 http
 
                                 .csrf(AbstractHttpConfigurer::disable)
-                                .redirectToHttps(withDefaults())
                                 .headers(headers -> headers
                                                 .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
                                 .cors(cors -> cors.configurationSource(corsConfigurationSource))
