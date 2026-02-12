@@ -1,6 +1,7 @@
 package com.blassa.config;
 
 import com.blassa.security.CustomOAuth2UserService;
+import com.blassa.security.HttpCookieOAuth2AuthorizationRequestRepository;
 import com.blassa.security.JwtAuthenticationFilter;
 import com.blassa.security.OAuth2SuccessHandler;
 import com.blassa.security.ProfileCompletionFilter;
@@ -38,6 +39,7 @@ public class SecurityConfig {
         private final AuthenticationProvider authenticationProvider;
         private final CustomOAuth2UserService customOAuth2UserService;
         private final OAuth2SuccessHandler oAuth2SuccessHandler;
+        private final HttpCookieOAuth2AuthorizationRequestRepository cookieAuthorizationRequestRepository;
 
         @Value("${app.frontend-url}")
         private String frontendUrl;
@@ -67,6 +69,9 @@ public class SecurityConfig {
                                                 .requestMatchers("/actuator/health").permitAll()
                                                 .anyRequest().authenticated())
                                 .oauth2Login(oauth2 -> oauth2
+                                                .authorizationEndpoint(auth -> auth
+                                                                .authorizationRequestRepository(
+                                                                                cookieAuthorizationRequestRepository))
                                                 .userInfoEndpoint(userInfo -> userInfo
                                                                 .userService(customOAuth2UserService))
                                                 .successHandler(oAuth2SuccessHandler)
@@ -81,7 +86,7 @@ public class SecurityConfig {
                                                                 new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
                                                                 request -> request.getRequestURI().startsWith("/api/")))
                                 .sessionManagement(session -> session
-                                                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+                                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .authenticationProvider(authenticationProvider)
                                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                                 .addFilterAfter(profileCompletionFilter, JwtAuthenticationFilter.class);
