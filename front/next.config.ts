@@ -1,5 +1,7 @@
 import type { NextConfig } from "next";
 
+const backendUrl = process.env.BACKEND_URL || "http://localhost:8088";
+
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
@@ -19,6 +21,26 @@ const nextConfig: NextConfig = {
         pathname: "/**",
       },
     ],
+  },
+  async rewrites() {
+    return [
+      {
+        source: "/api/:path*",
+        destination: `${backendUrl}/api/:path*`,
+      },
+      {
+        source: "/ws/:path*",
+        destination: `${backendUrl}/ws/:path*`,
+      },
+      {
+        source: "/oauth2/:path*",
+        destination: `${backendUrl}/oauth2/:path*`,
+      },
+      {
+        source: "/login/oauth2/:path*",
+        destination: `${backendUrl}/login/oauth2/:path*`,
+      },
+    ];
   },
 };
 

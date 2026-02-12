@@ -30,7 +30,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     @Value("${app.cookie.max-age:604800}") // jem3a kemla
     private int cookieMaxAge;
 
-    @Value("${app.cookie.same-site:None}")
+    @Value("${app.cookie.same-site:Lax}")
     private String cookieSameSite;
 
     private static final String COOKIE_NAME = "blassa_token";
