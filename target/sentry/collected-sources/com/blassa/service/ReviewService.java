@@ -115,8 +115,13 @@ public class ReviewService {
         if (booking.getStatus() != BookingStatus.CONFIRMED) {
             throw new IllegalArgumentException("BOOKING_NOT_CONFIRMED");
         }
-
+        //for tests:
+    //Booking status(CONFIRMED) ==>Booking id,booking ride, booking status,
+        // /Ride Status(COMPLETED)==>ride id, ride status,driver
+        //Driver==> driver id
+        //Passenger==>passenger id,
         // Ride lezm tkoun COMPLETED
+        //user reviewer==>reviewer ID
         if (booking.getRide().getStatus() != RideStatus.COMPLETED) {
             throw new IllegalArgumentException("RIDE_NOT_COMPLETED");
         }

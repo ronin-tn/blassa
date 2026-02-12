@@ -1,6 +1,7 @@
 package com.blassa.controller;
 
 import com.blassa.dto.ChangeEmailRequest;
+import com.blassa.dto.ChangeEmailResponse;
 import com.blassa.dto.ChangePasswordRequest;
 import com.blassa.dto.Profile;
 import com.blassa.dto.ProfileUpdateRequest;
@@ -49,7 +50,7 @@ public class UserController {
     }
 
     @PutMapping("/me/email")
-    public ResponseEntity<Profile> changeEmail(@Valid @RequestBody ChangeEmailRequest request) {
+    public ResponseEntity<ChangeEmailResponse> changeEmail(@Valid @RequestBody ChangeEmailRequest request) {
         return ResponseEntity.ok(userService.changeEmail(request));
     }
 

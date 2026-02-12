@@ -26,7 +26,6 @@ public class VehicleService {
     @Transactional
     public VehicleDTO createVehicle(VehicleDTO request) {
         User user = getCurrentUser();
-
         Vehicle vehicle = new Vehicle();
         vehicle.setOwner(user);
         vehicle.setMake(request.make());

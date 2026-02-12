@@ -26,6 +26,9 @@ public class AuthenticationController {
     @Value("${app.cookie.max-age:604800}") // jem3a kemla b seconds
     private int cookieMaxAge;
 
+    @Value("${app.cookie.same-site:None}")
+    private String cookieSameSite;
+
     private static final String COOKIE_NAME = "blassa_token";
 
     @PostMapping("/register")
@@ -58,7 +61,7 @@ public class AuthenticationController {
         cookie.setSecure(secureCookie);
         cookie.setPath("/");
         cookie.setMaxAge(cookieMaxAge);
-        cookie.setAttribute("SameSite", "Lax");
+        cookie.setAttribute("SameSite", cookieSameSite);
         response.addCookie(cookie);
         return ResponseEntity.ok(Map.of(
                 "status", "SUCCESS",
@@ -73,7 +76,7 @@ public class AuthenticationController {
         cookie.setSecure(secureCookie);
         cookie.setPath("/");
         cookie.setMaxAge(0);
-        cookie.setAttribute("SameSite", "Lax");
+        cookie.setAttribute("SameSite", cookieSameSite);
         response.addCookie(cookie);
 
         return ResponseEntity.ok(Map.of("status", "LOGGED_OUT"));

@@ -30,6 +30,9 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     @Value("${app.cookie.max-age:604800}") // jem3a kemla
     private int cookieMaxAge;
 
+    @Value("${app.cookie.same-site:None}")
+    private String cookieSameSite;
+
     private static final String COOKIE_NAME = "blassa_token";
 
     @Override
@@ -47,7 +50,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             cookie.setSecure(secureCookie);
             cookie.setPath("/");
             cookie.setMaxAge(cookieMaxAge);
-            cookie.setAttribute("SameSite", "Lax");
+            cookie.setAttribute("SameSite", cookieSameSite);
             response.addCookie(cookie);
             String redirectUrl = frontendUrl + "/oauth-callback";
 

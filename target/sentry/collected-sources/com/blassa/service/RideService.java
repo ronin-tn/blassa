@@ -44,7 +44,7 @@ public class RideService {
     private final NotificationService notificationService;
     private final EmailService emailService;
 
-    private final com.blassa.service.VehicleService vehicleService; // Inject VehicleService
+    private final com.blassa.service.VehicleService vehicleService;
 
     private final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
 
@@ -52,10 +52,8 @@ public class RideService {
     public RideResponse createRide(RideRequest rideRequest) {
         User driver = getCurrentUser();
 
-        // Verifi consistency t3 preference de genre (Fix #6)
         validateGenderPreference(driver, rideRequest.genderPreference());
 
-        // Verifi u jib l vehicle
         if (rideRequest.vehicleId() == null) {
             throw new IllegalArgumentException("A vehicle must be selected for the ride");
         }
@@ -97,7 +95,7 @@ public class RideService {
         String carLicensePlate = null;
         User currentUser = getCurrentUserOrNull();
 
-        // Show license plate only to the driver
+        // plate tetchef ken l driver
         if (currentUser != null && ride.getDriver().getId().equals(currentUser.getId())) {
             carLicensePlate = ride.getVehicle() != null ? ride.getVehicle().getLicensePlate() : null;
         }
@@ -135,14 +133,7 @@ public class RideService {
     }
 
     /**
-     * Endpoint search publique - yemchi lel authenticated u l anonymous users.
-     * 
-     * Lel anonymous users: Ywarri rides LKOL par défaut, walla mfiltria b
-     * genderFilter...
-     * Lel authenticated users: Ywarri rides li ymwaf9ou l genre te3hom.
-     * 
-     * @param genderFilter Filter optionnel lel genre (\"FEMALE_ONLY\" to show
-     *                     women-only rides)
+     * Endpoint search publique - yemchi lel authenticated u l anonymous users
      */
     public Page<RideResponse> searchRides(
             Double originLat, Double originLon,
@@ -154,13 +145,12 @@ public class RideService {
             int page,
             int size,
             String sortBy) {
-        // 7added preferences masmou7a 7asb auth status u filter
         List<String> allowedPreferences;
 
         User currentUser = getCurrentUserOrNull();
         if (currentUser != null) {
             // Authenticated: Filtri b genre t3 user
-            allowedPreferences = (currentUser.getGender() == Gender.MALE)
+            allowedPreferences = (currentUser.getGender() ==Gender.MALE)
                     ? List.of("ANY", "MALE_ONLY")
                     : List.of("ANY", "FEMALE_ONLY");
         } else if (genderFilter != null && !genderFilter.isEmpty() && !genderFilter.equals("ANY")) {
@@ -173,15 +163,11 @@ public class RideService {
                 allowedPreferences = List.of("ANY", "MALE_ONLY", "FEMALE_ONLY");
             }
         } else {
-            // Anonymous blech filter: Warri rides LKOL
             allowedPreferences = List.of("ANY", "MALE_ONLY", "FEMALE_ONLY");
         }
 
-        // 2. Geometry
         Point origin = geometryFactory.createPoint(new Coordinate(originLon, originLat));
         Point destination = geometryFactory.createPoint(new Coordinate(destLon, destLat));
-
-        // 3. Time Window
         OffsetDateTime start;
         OffsetDateTime end;
 
@@ -189,17 +175,13 @@ public class RideService {
             start = departureTime.minusHours(2);
             end = departureTime.plusHours(2);
         } else {
-            // Date Optionnelle: Lawej 3ala rides jayin lkol (men Taw 7atta l 3am jey)
             start = OffsetDateTime.now();
             end = OffsetDateTime.now().plusYears(1);
         }
 
-        // 4. Logique rayon (Converti Km l Meters)
         double pickupRadiusMeters = (radiusKm != null) ? radiusKm * 1000 : 3000.0;
         double dropoffRadiusMeters = 5000.0;
-
-        // 5. Pagination & Sorting Setup
-        // Mappi frontend sort keys l colonnes DB (native query t7eb snake_case)
+        // hedhy pagination w filter
         Sort sort;
         if (sortBy == null)
             sortBy = "time_asc";
@@ -222,7 +204,6 @@ public class RideService {
 
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        // 6. Executi
         Page<Ride> ridePage = rideRepository.searchRides(
                 origin, pickupRadiusMeters,
                 destination, dropoffRadiusMeters,
@@ -231,12 +212,11 @@ public class RideService {
                 allowedPreferences,
                 pageable);
 
-        // 7. Mappi Entity Page -> DTO Page
         return ridePage.map(this::mapToResponse);
     }
 
     /**
-     * Jib user l 7ali walla null kene mch authenticated (lel public endpoints)
+     * Jib user walla null kene mch authenticated (lel public endpoints)
      */
     private User getCurrentUserOrNull() {
         try {
@@ -259,7 +239,7 @@ public class RideService {
 
     private void validateGenderPreference(User driver, RideGenderPreference preference) {
         if (preference == null)
-            return; // Par défaut ANY cv
+            return;
 
         if (driver.getGender() == Gender.MALE && preference == RideGenderPreference.FEMALE_ONLY) {
             throw new IllegalArgumentException("Vous ne pouvez pas créer un trajet réservé aux femmes");
@@ -378,13 +358,6 @@ public class RideService {
     }
 
     private void validateStatusTransition(RideStatus currentStatus, RideStatus newStatus) {
-        // Transitions valides:
-        // SCHEDULED -> IN_PROGRESS, CANCELLED
-        // IN_PROGRESS -> COMPLETED, CANCELLED
-        // FULL -> IN_PROGRESS, CANCELLED
-        // COMPLETED -> (none, terminal)
-        // CANCELLED -> (none, terminal)
-
         if (currentStatus == COMPLETED || currentStatus == RideStatus.CANCELLED) {
             throw new IllegalArgumentException("Cannot change status of a completed or cancelled ride");
         }
@@ -492,12 +465,9 @@ public class RideService {
         if (!ride.getDriver().getId().equals(currentUser.getId())) {
             throw new RuntimeException("You are not authorized to update this ride");
         }
-
-        // Logic Check
         if (ride.getStatus() != RideStatus.SCHEDULED) {
             throw new RuntimeException("Only scheduled rides can be edited");
         }
-
         // Verifi bookings mawjoudin - emna3 l update kene famma passengers booked
         boolean hasBookings = !bookingRepository.findByRideIdAndStatus(rideId, CONFIRMED).isEmpty();
         if (hasBookings) {
@@ -505,8 +475,7 @@ public class RideService {
                     "Cannot modify a ride that already has passengers booked. Please cancel the ride instead.");
         }
 
-        // Beddel champs (Esma7 ken b tabdil champs li maykassrouch logic s7i7a)
-        // Note: Tabdil Origin/Dest ynajjem yest7aq 7sebet point jdida, aka 3lech
+        // Note: Tabdil Origin/Dest ynajjem yest7a9 7sebet point jdida, aka 3lech
         // nbedlouhom zeda.
         Point origin = geometryFactory.createPoint(new Coordinate(request.originLon(), request.originLat()));
         Point destination = geometryFactory
@@ -523,14 +492,7 @@ public class RideService {
         ride.setAllowsPets(request.allowsPets());
         ride.setLuggageSize(request.luggageSize());
         ride.setGenderPreference(request.genderPreference());
-
-        // Gerr l blays: Matn7ich blays a9al mli deja mawjoudin
-        // (Logic avancée l Phase 5)
-        // Tawwa, nbedlou total seats kahaw.
         ride.setTotalSeats(request.totalSeats());
-        // Logic simple: Reset available seats 7asb total jdid (naseb 0 bookings taw)
-        // Fi Phase 5, ligne hedhi lezm tkoun:
-        // ride.setAvailableSeats(request.totalSeats() - currentBookingsCount);
         ride.setAvailableSeats(request.totalSeats());
 
         return mapToResponse(rideRepository.save(ride));

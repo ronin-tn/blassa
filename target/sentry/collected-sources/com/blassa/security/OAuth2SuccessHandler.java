@@ -37,9 +37,6 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             Authentication authentication) throws IOException {
         OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
         String email = oauth2User.getAttribute("email");
-
-        log.info("OAuth2 authentication successful for: {}", email);
-
         try {
             var userDetails = userDetailsService.loadUserByUsername(email);
             String token = jwtUtils.generateToken(userDetails);
@@ -53,12 +50,10 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             cookie.setAttribute("SameSite", "Lax");
             response.addCookie(cookie);
             String redirectUrl = frontendUrl + "/oauth-callback";
-            log.info("Redirecting OAuth2 user to: {}", redirectUrl);
 
             getRedirectStrategy().sendRedirect(request, response, redirectUrl);
 
         } catch (org.springframework.security.authentication.LockedException e) {
-            log.warn("Banned user tried to login via OAuth: {}", email);
             String redirectUrl = frontendUrl + "/login?error=banned";
             getRedirectStrategy().sendRedirect(request, response, redirectUrl);
         }

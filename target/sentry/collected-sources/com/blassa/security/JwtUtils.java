@@ -35,6 +35,7 @@ public class JwtUtils {
         return claimsResolver.apply(claims);
     }
 
+
     public String generateToken(UserDetails userDetails) {
         return Jwts.builder()
                 .setSubject(userDetails.getUsername())
@@ -66,6 +67,7 @@ public class JwtUtils {
             return false;
         }
     }
+
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = extractUsername(token);

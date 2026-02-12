@@ -5,8 +5,7 @@ import com.blassa.model.enums.RideStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.locationtech.jts.geom.Point;
 
@@ -20,6 +19,9 @@ import java.util.UUID;
 @Setter
 @Entity
 @Table(name = "rides")
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Ride {
     @Id
     @ColumnDefault("uuid_generate_v4()")

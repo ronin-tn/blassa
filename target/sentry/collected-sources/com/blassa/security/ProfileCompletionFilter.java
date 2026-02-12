@@ -73,7 +73,6 @@ public class ProfileCompletionFilter extends OncePerRequestFilter {
         User user = userOpt.get();
 
         if (!isProfileComplete(user)) {
-            log.warn("Blocking API access for user {} - profile incomplete", email);
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             response.setContentType("application/json");
             response.getWriter().write(

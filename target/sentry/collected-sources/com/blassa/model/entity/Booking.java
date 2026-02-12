@@ -3,8 +3,7 @@ package com.blassa.model.entity;
 import com.blassa.model.enums.BookingStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.math.BigDecimal;
@@ -17,6 +16,9 @@ import java.util.UUID;
 @Setter
 @Entity
 @Table(name = "bookings")
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Booking {
     @Id
     @ColumnDefault("uuid_generate_v4()")
@@ -54,6 +56,7 @@ public class Booking {
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private BookingStatus status;
+
 
     @PrePersist
     protected void onCreate() {

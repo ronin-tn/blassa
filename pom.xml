@@ -193,11 +193,6 @@
 				<groupId>org.flywaydb</groupId>
 				<artifactId>flyway-maven-plugin</artifactId>
 				<version>11.14.1</version>
-				<configuration>
-					<url>jdbc:postgresql://ep-ancient-recipe-agbvqxdn-pooler.c-2.eu-central-1.aws.neon.tech:5432/neondb?sslmode=require</url>
-					<user>neondb_owner</user>
-					<password>npg_uH9OUp1zrXVo</password>
-				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

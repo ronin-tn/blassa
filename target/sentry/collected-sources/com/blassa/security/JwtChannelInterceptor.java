@@ -16,9 +16,9 @@ import org.springframework.stereotype.Component;
 /**
  * Interceptor hedha yauthentifi WebSocket connections b JWT.
  * Ki client yconnecti b STOMP, yb3ath token fi header “Authorization” .
- * Interceptor yakhou token, yverifyh, w ken sahih y3ayen user principal lel
+ * Interceptor yakhou token, yverifyh, w ken shih y3ayen user principal lel
  * connection.
- * Ba3d, kol message 3la nafs connection yet3add authenticated b nafs user.
+ * Ba3d, kol message 3la nafs connection yet3ada authenticated b nafs user.
  */
 @Component
 @RequiredArgsConstructor
@@ -41,13 +41,10 @@ public class JwtChannelInterceptor implements ChannelInterceptor {
                 String jwt = authHeader.substring(7);
 
                 try {
-                    // Extract username (email) from JWT
                     String userEmail = jwtUtils.extractUsername(jwt);
 
                     if (userEmail != null) {
-                        // Load user details from database
                         UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
-                        // Validati token
                         if (jwtUtils.isTokenValid(jwt, userDetails)) {
                             UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                                     userDetails,

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="maven-antrun-" default="main">
   <target name="main">
-    <exec output="C:\Users\rayen\AppData\Local\Temp\maven17153117815605041205cli" failOnError="false" executable="cmd.exe">
+    <exec output="C:\Users\rayen\AppData\Local\Temp\maven224561528104541454cli" failOnError="true" executable="cmd.exe">
       <arg value="/c" />
-      <arg value="&quot;C:\Users\rayen\AppData\Local\Temp\.sentry-cli12618472683754985516.exe --log-level=error --version&quot;" />
+      <arg value="&quot;C:\Users\rayen\AppData\Local\Temp\.sentry-cli12993490542961309961.exe --log-level=debug --header sentry-trace:c5969fce2a804c6eacb1220db296a6a2-07db9b01ad584bad-1 --header baggage:sentry-environment=JVM,sentry-public_key=000e5dea9770b4537055f8a6d28c021e,sentry-release=0.10.0,sentry-sample_rand=0.9737854597407049,sentry-sample_rate=1,sentry-sampled=true,sentry-trace_id=c5969fce2a804c6eacb1220db296a6a2,sentry-transaction=maven%20build debug-files upload --type=jvm --org=blassa --project=java-spring-boot C:\Users\rayen\Documents\Github\blassaa\target\sentry\source-bundle&quot;" />
     </exec>
   </target>
 </project>
