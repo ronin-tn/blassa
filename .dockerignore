@@ -1,0 +1,23 @@
+# IDE and OS files
+.idea/
+*.iml
+.vscode/
+.DS_Store
+
+# Build output (rebuilt inside Docker)
+target/
+
+# Git
+.git/
+.gitattributes
+
+# Frontend and Android (not needed for backend)
+front/
+android/
+
+# Environment files (secrets injected via fly.io)
+.env
+.env.*
+
+# Migration scripts (managed by Flyway from classpath)
+migration/
